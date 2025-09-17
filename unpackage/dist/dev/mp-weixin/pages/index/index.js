@@ -28,45 +28,45 @@ const _sfc_main = {
       },
       {
         image: "https://via.placeholder.com/750x300/f093fb/FFFFFF?text=技能提升",
-        title: "业主共享技能",
+        title: "技能提升",
         content: "学习新技能，提升自己"
       }
     ]);
     const menuList = common_vendor.reactive([
       {
         name: "每日热榜",
-        icon: "cloud",
+        icon: "star",
         color: "#667eea",
         type: "news"
       },
       {
-        name: "技能台",
-        icon: "gear",
+        name: "天气",
+        icon: "cloud",
         color: "#764ba2",
         type: "weather"
       },
       {
-        name: "技能台",
-        icon: "gear",
-        color: "#764ba2",
-        type: "skills"
+        name: "随手拍",
+        icon: "camera",
+        color: "#4facfe",
+        type: "tools"
       },
       {
-        name: "随手拍",
-        icon: "settings",
-        color: "#f093fb",
-        type: "cars"
+        name: "技能台",
+        icon: "gear",
+        color: "#43e97b",
+        type: "skills"
       },
       {
         name: "健康",
         icon: "heart",
-        color: "#43e97b",
+        color: "#fa709a",
         type: "health"
       },
       {
         name: "购物",
         icon: "cart",
-        color: "#fa709a",
+        color: "#ffeaa7",
         type: "shopping"
       },
       {
@@ -90,10 +90,21 @@ const _sfc_main = {
     const clickMenuItem = (item) => {
       common_vendor.index.__f__("log", "at pages/index/index.vue:177", "点击菜单:", item);
       switch (item.type) {
+        case "news":
+          common_vendor.index.showToast({
+            title: "每日热榜功能开发中",
+            icon: "none"
+          });
+          break;
         case "weather":
           common_vendor.index.showToast({
             title: "天气功能开发中",
             icon: "none"
+          });
+          break;
+        case "tools":
+          common_vendor.index.navigateTo({
+            url: "/pages/camera/camera"
           });
           break;
         case "skills":
@@ -101,9 +112,22 @@ const _sfc_main = {
             url: "/pages/skills/skills"
           });
           break;
-        case "tools":
-          common_vendor.index.navigateTo({
-            url: "/pages/camera/camera"
+        case "health":
+          common_vendor.index.showToast({
+            title: "健康功能开发中",
+            icon: "none"
+          });
+          break;
+        case "shopping":
+          common_vendor.index.showToast({
+            title: "购物功能开发中",
+            icon: "none"
+          });
+          break;
+        case "study":
+          common_vendor.index.showToast({
+            title: "学习功能开发中",
+            icon: "none"
           });
           break;
         default:
@@ -114,7 +138,7 @@ const _sfc_main = {
       }
     };
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:204", "首页加载完成");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:228", "首页加载完成");
     });
     return (_ctx, _cache) => {
       return {

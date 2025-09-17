@@ -17,27 +17,27 @@
 		<!-- 个性化菜单区域 -->
 		<view class="creative-menu-section">
 			<view class="menu-grid">
-				<!-- 大卡片 - 天气 -->
-				<view class="menu-card large-card weather-card" @tap="clickMenuItem(menuList[0])">
+				<!-- 大卡片 - 每日热榜 -->
+				<view class="menu-card large-card news-card" @tap="clickMenuItem(menuList[0])">
 					<view class="card-content">
 						<view class="card-icon">
 							<uni-icons :type="menuList[0].icon" :size="40" color="white"></uni-icons>
 						</view>
 						<view class="card-info">
 							<text class="card-title">{{ menuList[0].name }}</text>
-							<text class="card-desc">今日晴朗 25°C</text>
+							<text class="card-desc">今日热门资讯</text>
 						</view>
 					</view>
 				</view>
 
-				<!-- 中等卡片 - 技能台 -->
-				<view class="menu-card medium-card skills-card" @tap="clickMenuItem(menuList[1])">
+				<!-- 中等卡片 - 天气 -->
+				<view class="menu-card medium-card weather-card" @tap="clickMenuItem(menuList[1])">
 					<view class="card-content">
 						<view class="card-icon">
 							<uni-icons :type="menuList[1].icon" :size="32" color="white"></uni-icons>
 						</view>
 						<text class="card-title">{{ menuList[1].name }}</text>
-						<text class="card-subtitle">提升技能</text>
+						<text class="card-subtitle">今日晴朗 25°C</text>
 					</view>
 				</view>
 
@@ -106,47 +106,47 @@
 		},
 		{
 			image: 'https://via.placeholder.com/750x300/f093fb/FFFFFF?text=技能提升',
-			title: '业主共享技能',
+			title: '技能提升',
 			content: '学习新技能，提升自己'
 		}
 	]);
 
-	// 菜单数据（去掉更多选项）
+	// 菜单数据
 	const menuList = reactive([
 		{
 			name: '每日热榜',
-			icon: 'cloud',
+			icon: 'star',
 			color: '#667eea',
 			type: 'news'
 		},
 		{
-			name: '技能台',
-			icon: 'gear',
+			name: '天气',
+			icon: 'cloud',
 			color: '#764ba2',
 			type: 'weather'
 		},
 		{
-			name: '技能台',
-			icon: 'gear',
-			color: '#764ba2',
-			type: 'skills'
+			name: '随手拍',
+			icon: 'camera',
+			color: '#4facfe',
+			type: 'tools'
 		},
 		{
-			name: '随手拍',
-			icon: 'settings',
-			color: '#f093fb',
-			type: 'cars'
+			name: '技能台',
+			icon: 'gear',
+			color: '#43e97b',
+			type: 'skills'
 		},
 		{
 			name: '健康',
 			icon: 'heart',
-			color: '#43e97b',
+			color: '#fa709a',
 			type: 'health'
 		},
 		{
 			name: '购物',
 			icon: 'cart',
-			color: '#fa709a',
+			color: '#ffeaa7',
 			type: 'shopping'
 		},
 		{
@@ -176,10 +176,21 @@
 	const clickMenuItem = (item) => {
 		console.log('点击菜单:', item);
 		switch (item.type) {
+			case 'news':
+				uni.showToast({
+					title: '每日热榜功能开发中',
+					icon: 'none'
+				});
+				break;
 			case 'weather':
 				uni.showToast({
 					title: '天气功能开发中',
 					icon: 'none'
+				});
+				break;
+			case 'tools':
+				uni.navigateTo({
+					url: '/pages/camera/camera'
 				});
 				break;
 			case 'skills':
@@ -187,9 +198,22 @@
 					url: '/pages/skills/skills'
 				});
 				break;
-			case 'tools':
-				uni.navigateTo({
-					url: '/pages/camera/camera'
+			case 'health':
+				uni.showToast({
+					title: '健康功能开发中',
+					icon: 'none'
+				});
+				break;
+			case 'shopping':
+				uni.showToast({
+					title: '购物功能开发中',
+					icon: 'none'
+				});
+				break;
+			case 'study':
+				uni.showToast({
+					title: '学习功能开发中',
+					icon: 'none'
 				});
 				break;
 			default:
@@ -294,8 +318,8 @@
 		z-index: 1;
 	}
 
-	/* 大卡片 - 天气 */
-	.large-card {
+	/* 大卡片 - 每日热榜 */
+	.large-card, .news-card {
 		grid-column: 1 / 2;
 		grid-row: 1 / 2;
 		height: 180rpx;
@@ -333,8 +357,8 @@
 		font-weight: 500;
 	}
 
-	/* 中等卡片 - 技能台 */
-	.medium-card {
+	/* 中等卡片 - 天气 */
+	.medium-card, .weather-card {
 		grid-column: 2 / 3;
 		grid-row: 1 / 2;
 		height: 180rpx;
@@ -407,7 +431,7 @@
 	}
 
 	.small-card.card-4 {
-		background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+		background: linear-gradient(135deg, #ffeaa7 0%, #fcb69f 100%);
 	}
 
 	.small-card.card-4 .card-title {

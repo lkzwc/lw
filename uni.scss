@@ -14,63 +14,171 @@
 
 /* 颜色变量 */
 
-/* 行为相关颜色 */
-$uni-color-primary: #007aff;
-$uni-color-success: #4cd964;
-$uni-color-warning: #f0ad4e;
-$uni-color-error: #dd524d;
+/* 全局主题色彩变量 */
+$primary-color: #007aff;
+$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$secondary-color: #50c878;
+$accent-color: #ff4757;
+$warning-color: #ffa502;
+$info-color: #3742fa;
 
-/* 文字基本颜色 */
-$uni-text-color:#333;//基本色
-$uni-text-color-inverse:#fff;//反色
-$uni-text-color-grey:#999;//辅助灰色，如加载更多的提示信息
-$uni-text-color-placeholder: #808080;
-$uni-text-color-disable:#c0c0c0;
+/* 中性色 */
+$text-primary: #333333;
+$text-secondary: #666666;
+$text-placeholder: #999999;
+$text-disabled: #cccccc;
 
-/* 背景颜色 */
-$uni-bg-color:#ffffff;
-$uni-bg-color-grey:#f8f8f8;
-$uni-bg-color-hover:#f1f1f1;//点击状态颜色
-$uni-bg-color-mask:rgba(0, 0, 0, 0.4);//遮罩颜色
+/* 背景色 */
+$bg-primary: #ffffff;
+$bg-secondary: #f8f8f8;
+$bg-tertiary: #f0f0f0;
 
-/* 边框颜色 */
-$uni-border-color:#c8c7cc;
+/* 边框色 */
+$border-light: #e8e8e8;
+$border-medium: #d0d0d0;
+$border-dark: #b0b0b0;
 
-/* 尺寸变量 */
+/* 阴影 */
+$shadow-light: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+$shadow-medium: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+$shadow-heavy: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
 
-/* 文字尺寸 */
-$uni-font-size-sm:12px;
-$uni-font-size-base:14px;
-$uni-font-size-lg:16px;
+/* 圆角 */
+$radius-small: 8rpx;
+$radius-medium: 12rpx;
+$radius-large: 16rpx;
+$radius-xl: 20rpx;
 
-/* 图片尺寸 */
-$uni-img-size-sm:20px;
-$uni-img-size-base:26px;
-$uni-img-size-lg:40px;
+/* 间距 */
+$spacing-xs: 8rpx;
+$spacing-sm: 12rpx;
+$spacing-md: 16rpx;
+$spacing-lg: 24rpx;
+$spacing-xl: 32rpx;
+$spacing-xxl: 40rpx;
 
-/* Border Radius */
-$uni-border-radius-sm: 2px;
-$uni-border-radius-base: 3px;
-$uni-border-radius-lg: 6px;
-$uni-border-radius-circle: 50%;
+/* 字体大小 */
+$font-size-xs: 20rpx;
+$font-size-sm: 22rpx;
+$font-size-base: 24rpx;
+$font-size-md: 26rpx;
+$font-size-lg: 28rpx;
+$font-size-xl: 30rpx;
+$font-size-xxl: 32rpx;
+$font-size-title: 36rpx;
 
-/* 水平间距 */
-$uni-spacing-row-sm: 5px;
-$uni-spacing-row-base: 10px;
-$uni-spacing-row-lg: 15px;
+/* 渐变色组合 */
+$gradient-blue: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+$gradient-green: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+$gradient-orange: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+$gradient-purple: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$gradient-pink: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+$gradient-yellow: linear-gradient(135deg, #ffeaa7 0%, #fcb69f 100%);
 
-/* 垂直间距 */
-$uni-spacing-col-sm: 4px;
-$uni-spacing-col-base: 8px;
-$uni-spacing-col-lg: 12px;
+/* 通用样式类 */
+.flex-center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
 
-/* 透明度 */
-$uni-opacity-disabled: 0.3; // 组件禁用态的透明度
+.flex-between {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
 
-/* 文章场景相关 */
-$uni-color-title: #2C405A; // 文章标题颜色
-$uni-font-size-title:20px;
-$uni-color-subtitle: #555555; // 二级标题颜色
-$uni-font-size-subtitle:26px;
-$uni-color-paragraph: #3F536E; // 文章段落颜色
-$uni-font-size-paragraph:15px;
+.flex-start {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+.text-ellipsis {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.text-right {
+	text-align: right;
+}
+
+/* 按钮样式 */
+.btn-primary {
+	background-color: $primary-color;
+	color: white;
+	border: none;
+	border-radius: $radius-large;
+	padding: $spacing-md $spacing-xl;
+	font-size: $font-size-lg;
+	font-weight: 600;
+}
+
+.btn-secondary {
+	background-color: transparent;
+	color: $primary-color;
+	border: 2rpx solid $primary-color;
+	border-radius: $radius-large;
+	padding: $spacing-md $spacing-xl;
+	font-size: $font-size-lg;
+}
+
+/* 卡片样式 */
+.card {
+	background-color: $bg-primary;
+	border-radius: $radius-large;
+	box-shadow: $shadow-medium;
+	overflow: hidden;
+}
+
+.card-padding {
+	padding: $spacing-lg;
+}
+
+/* 输入框样式 */
+.input-base {
+	padding: $spacing-md $spacing-lg;
+	border: 2rpx solid $border-light;
+	border-radius: $radius-medium;
+	font-size: $font-size-lg;
+	color: $text-primary;
+	background-color: #fafafa;
+}
+
+.input-base:focus {
+	border-color: $primary-color;
+	background-color: $bg-primary;
+}
+
+/* 标签样式 */
+.tag {
+	background-color: rgba($primary-color, 0.1);
+	color: $primary-color;
+	padding: $spacing-xs $spacing-md;
+	border-radius: $radius-xl;
+	font-size: $font-size-sm;
+	display: inline-block;
+}
+
+/* 分割线 */
+.divider {
+	height: 1rpx;
+	background-color: $border-light;
+	margin: $spacing-lg 0;
+}
+
+/* 安全区域适配 */
+.safe-area-bottom {
+	padding-bottom: constant(safe-area-inset-bottom);
+	padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-top {
+	padding-top: constant(safe-area-inset-top);
+	padding-top: env(safe-area-inset-top);
+}

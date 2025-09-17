@@ -78,8 +78,8 @@
 		z-index: 1;
 }
 
-	/* 大卡片 - 天气 */
-.large-card.data-v-1cf27b2a {
+	/* 大卡片 - 每日热榜 */
+.large-card.data-v-1cf27b2a, .news-card.data-v-1cf27b2a {
 		grid-column: 1 / 2;
 		grid-row: 1 / 2;
 		height: 180rpx;
@@ -113,8 +113,8 @@
 		font-weight: 500;
 }
 
-	/* 中等卡片 - 技能台 */
-.medium-card.data-v-1cf27b2a {
+	/* 中等卡片 - 天气 */
+.medium-card.data-v-1cf27b2a, .weather-card.data-v-1cf27b2a {
 		grid-column: 2 / 3;
 		grid-row: 1 / 2;
 		height: 180rpx;
@@ -177,7 +177,7 @@
 		background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
 }
 .small-card.card-4.data-v-1cf27b2a {
-		background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+		background: linear-gradient(135deg, #ffeaa7 0%, #fcb69f 100%);
 }
 .small-card.card-4 .card-title.data-v-1cf27b2a {
 		color: #333;
