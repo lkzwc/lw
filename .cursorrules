@@ -1,0 +1,191 @@
+# Cursor Rules for hxzyL - uni-app + uniCloud 项目
+
+## 项目概述
+这是一个基于 uni-app + uniCloud 的社区技能分享平台项目。
+
+## 技术栈
+- **前端**: uni-app (Vue 3 + Composition API)
+- **后端**: uniCloud (支付宝云)
+- **数据库**: uniCloud Database (类 MongoDB) 具体介绍:https://doc.dcloud.net.cn/uniCloud/hellodb.html
+- **UI 组件**: uni-ui
+
+## 项目结构
+```
+├── pages/                 # 页面文件
+│   ├── index/             # 首页
+│   ├── skills/            # 技能相关页面
+│   ├── community/         # 社区相关页面
+│   └── me/                # 个人中心
+├── uniCloud-alipay/       # uniCloud 云端代码
+│   ├── cloudfunctions/    # 云对象/云函数
+│   └── database/          # 数据库配置
+├── static/                # 静态资源
+├── pages.json             # 页面路由配置
+├── manifest.json          # 应用配置
+└── App.vue               # 应用入口
+```
+
+## 开发指南
+
+### 代码风格
+- 使用 Vue 3 Composition API 和 `<script setup>`
+- 使用 TypeScript 风格的 JSDoc 注释以获得更好的类型提示
+- 遵循 uni-app 页面和组件命名约定
+- 文件名使用 kebab-case，变量和函数使用 camelCase
+
+### uni-app 特定规则
+1. **页面导航**: 始终使用 `uni.navigateTo()`、`uni.redirectTo()` 等
+2. **API 调用**: 优先使用 `uni.*` API 而不是 web API
+3. **生命周期**: 在 Vue 生命周期基础上使用 uni-app 生命周期钩子 (`onLoad`、`onShow` 等)
+4. **响应式设计**: 使用 rpx 单位实现响应式布局
+5. **跨平台**: 考虑不同平台的行为差异 (H5、微信小程序、App)
+
+### uniCloud 开发
+1. **云对象**: 优先使用云对象而不是云函数，以获得更好的类型安全
+2. **数据库操作**: 使用 云对象或者 JQL (JSON 查询语言) 进行数据库查询
+3. **错误处理**: 始终返回包含 `errCode` 和 `errMsg` 的结构化错误响应
+4. **日志记录**: 为云函数调试添加全面的 console.log 语句
+
+### 云对象结构
+```javascript
+module.exports = {
+  _before: function() {
+    // 预处理逻辑
+  },
+  
+  async methodName(params) {
+    try {
+      // 方法实现
+      return {
+        errCode: 0,
+        errMsg: 'success',
+        data: result
+      };
+    } catch (error) {
+      console.error('方法执行失败:', error);
+      return {
+        errCode: 'ERROR_CODE',
+        errMsg: '错误信息',
+        data: null
+      };
+    }
+  }
+};
+```
+
+### 数据库设计规范
+- 使用英文描述性字段名
+- 所有集合都包含 `createTime` 和 `updateTime` 字段
+- 使用 `status` 字段实现软删除 (1: 启用, 0: 草稿, -1: 已删除)
+- 遵循 `database/*.schema.json` 中的现有模式
+
+### 前端最佳实践
+1. **状态管理**: 使用 Vue 3 reactive/ref 管理本地状态
+2. **API 调用**: 始终处理加载状态和错误情况
+3. **用户反馈**: 使用 `uni.showToast()` 进行用户通知
+4. **表单验证**: 前端和后端都要进行输入验证
+5. **图片处理**: 使用 uniCloud 存储进行图片上传
+
+### 错误处理模式
+```javascript
+// 前端错误处理
+try {
+  const result = await cloudObj.method(params);
+  if (result.errCode === 0) {
+    // 成功处理
+  } else {
+    uni.showToast({
+      title: result.errMsg || '操作失败',
+      icon: 'none'
+    });
+  }
+} catch (error) {
+  console.error('API 调用失败:', error);
+  uni.showToast({
+    title: '网络错误，请重试',
+    icon: 'none'
+  });
+}
+```
+
+### 组件开发指南
+1. 优先使用 uni-ui 组件
+2. 在 `components/` 目录中创建可复用组件
+3. 使用 props 验证和默认值
+4. 使用事件发射进行父子组件通信
+
+### 性能优化
+1. 适当使用 `v-show` vs `v-if`
+2. 为图片和列表实现懒加载
+3. 使用 `onReachBottom` 实现无限滚动
+4. 通过适当的缓存最小化云函数调用
+
+### 安全考虑
+1. 在云函数中始终验证用户权限
+2. 使用 uniID 进行用户认证和授权
+3. 清理用户输入以防止注入攻击
+4. 不要在前端代码中暴露敏感数据
+
+### 测试指南
+1. 在多个平台上测试 (H5、微信小程序)
+2. 测试不同屏幕尺寸和方向
+3. 验证云函数在各种输入下的行为
+4. 在适用的情况下测试离线场景
+
+### 常用模式
+
+#### 页面参数处理
+```javascript
+import { onLoad } from '@dcloudio/uni-app';
+
+onLoad((options) => {
+  if (options.id) {
+    // 处理页面参数
+  }
+});
+```
+
+#### 云对象初始化
+```javascript
+let cloudObj = null;
+
+const initCloudObj = () => {
+  try {
+    cloudObj = uniCloud.importObject('objectName');
+  } catch (error) {
+    console.error('云对象初始化失败:', error);
+  }
+};
+```
+
+#### 列表数据管理
+```javascript
+const listData = reactive([]);
+const isLoading = ref(false);
+const hasMore = ref(true);
+
+const loadData = async (reset = false) => {
+  if (isLoading.value) return;
+  
+  try {
+    isLoading.value = true;
+    // API 调用逻辑
+  } finally {
+    isLoading.value = false;
+  }
+};
+```
+
+## 文件命名约定
+- 页面: `kebab-case.vue` (例如: `skill-detail.vue`)
+- 组件: `PascalCase.vue` (例如: `SkillCard.vue`)
+- 云对象: `camelCase` (例如: `skills`、`userCenter`)
+- 数据库集合: `snake_case` (例如: `skills`、`user_profiles`)
+
+## 代码建议指南
+1. 始终考虑 uni-app 兼容性
+2. 提供完整、可工作的示例
+3. 包含适当的错误处理
+4. 为复杂逻辑添加相关注释
+5. 考虑性能影响
+6. 确保使用 rpx 单位的响应式设计

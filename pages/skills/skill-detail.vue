@@ -1,122 +1,110 @@
 <template>
 	<view class="container">
-		<!-- 技能图片轮播 -->
-		<view class="banner-section" v-if="skillDetail.images && skillDetail.images.length > 0">
-			<swiper class="swiper-box" :indicator-dots="true" :autoplay="false" :circular="true">
-				<swiper-item v-for="(img, index) in skillDetail.images" :key="index">
-					<image :src="img" mode="aspectFill" class="banner-image" @tap="previewImage(index)"></image>
-				</swiper-item>
-			</swiper>
+		<!-- 加载状态 -->
+		<view class="loading-container" v-if="isLoading">
+			<uni-load-more status="loading"></uni-load-more>
 		</view>
 
-		<!-- 技能基本信息 -->
-		<view class="info-section">
-			<view class="skill-header">
-				<text class="skill-title">{{ skillDetail.title }}</text>
-				<view class="price-info">
-					<text class="price">¥{{ skillDetail.price }}</text>
-					<text class="price-unit">/{{ skillDetail.priceUnit }}</text>
-				</view>
+		<!-- 技能详情内容 -->
+		<view v-else-if="skillDetail._id">
+			<!-- 技能图片轮播 -->
+			<view class="banner-section" v-if="skillDetail.images && skillDetail.images.length > 0">
+				<swiper class="swiper-box" :indicator-dots="true" :autoplay="false" :circular="true">
+					<swiper-item v-for="(img, index) in skillDetail.images" :key="index">
+						<image :src="img" mode="aspectFill" class="banner-image" @tap="previewImage(index)"></image>
+					</swiper-item>
+				</swiper>
 			</view>
 
-			<view class="skill-tags">
-				<text class="tag" v-for="(tag, index) in skillDetail.tags" :key="index">
-					{{ tag }}
-				</text>
-			</view>
-
-			<view class="skill-desc">
-				<text>{{ skillDetail.description }}</text>
-			</view>
-
-			<view class="skill-stats">
-				<view class="stat-item">
-					<uni-icons type="star-filled" size="16" color="#FFD700"></uni-icons>
-					<text class="rating">{{ skillDetail.rating }}</text>
-					<text class="review-count">({{ skillDetail.reviewCount }}评价)</text>
-				</view>
-				<text class="publish-time">发布于 {{ formatDate(skillDetail.createTime) }}</text>
-			</view>
-		</view>
-
-		<!-- 服务提供者信息 -->
-		<view class="provider-section">
-			<view class="section-title">服务提供者</view>
-			<view class="provider-info">
-				<image :src="skillDetail.userAvatar" class="provider-avatar" mode="aspectFill"></image>
-				<view class="provider-details">
-					<text class="provider-name">{{ skillDetail.username }}</text>
-					<view class="provider-location">
-						<uni-icons type="location" size="14" color="#999"></uni-icons>
-						<text class="location-text">{{ skillDetail.location }}</text>
-					</view>
-					<view class="provider-stats">
-						<text class="stat">技能数: {{ skillDetail.skillCount || 1 }}</text>
-						<text class="stat">好评率: {{ skillDetail.goodRate || '100%' }}</text>
+			<!-- 技能基本信息 -->
+			<view class="info-section">
+				<view class="skill-header">
+					<text class="skill-title">{{ skillDetail.title }}</text>
+					<view class="price-info">
+						<text class="price">¥{{ skillDetail.price }}</text>
+						<text class="price-unit">/{{ skillDetail.priceUnit }}</text>
 					</view>
 				</view>
-				<view class="contact-btn" @tap="showContactModal">
-					<uni-icons type="chatbubble" size="16" color="#007aff"></uni-icons>
-					<text>联系</text>
+
+				<view class="skill-tags" v-if="skillDetail.tags && skillDetail.tags.length > 0">
+					<text class="tag" v-for="(tag, index) in skillDetail.tags" :key="index">
+						{{ tag }}
+					</text>
+				</view>
+
+				<view class="skill-desc">
+					<text>{{ skillDetail.description }}</text>
+				</view>
+
+				<view class="skill-stats">
+					<view class="stat-item">
+						<uni-icons type="star-filled" size="16" color="#FFD700"></uni-icons>
+						<text class="rating">{{ skillDetail.rating }}</text>
+						<text class="review-count">({{ skillDetail.reviewCount }}评价)</text>
+					</view>
+					<text class="publish-time">发布于 {{ formatDate(skillDetail.createTime) }}</text>
 				</view>
 			</view>
-		</view>
 
-		<!-- 服务评价 -->
-		<view class="reviews-section" v-if="reviews.length > 0">
-			<view class="section-title">
-				<text>服务评价</text>
-				<text class="more-reviews" @tap="goToAllReviews">查看全部</text>
-			</view>
-			<view class="review-item" v-for="(review, index) in reviews.slice(0, 3)" :key="index">
-				<view class="review-header">
-					<image :src="review.userAvatar" class="reviewer-avatar" mode="aspectFill"></image>
-					<view class="reviewer-info">
-						<text class="reviewer-name">{{ review.username }}</text>
-						<view class="review-rating">
-							<uni-icons 
-								v-for="star in 5" 
-								:key="star"
-								type="star-filled" 
-								size="12" 
-								:color="star <= review.rating ? '#FFD700' : '#E8E8E8'">
-							</uni-icons>
+			<!-- 服务提供者信息 -->
+			<view class="provider-section">
+				<view class="section-title">服务提供者</view>
+				<view class="provider-info">
+					<image :src="skillDetail.userAvatar || '/static/default-avatar.png'" class="provider-avatar" mode="aspectFill"></image>
+					<view class="provider-details">
+						<text class="provider-name">{{ skillDetail.username }}</text>
+						<view class="provider-location">
+							<uni-icons type="location" size="14" color="#999"></uni-icons>
+							<text class="location-text">{{ skillDetail.location }}</text>
+						</view>
+						<view class="provider-stats">
+							<text class="stat">浏览: {{ skillDetail.viewCount || 0 }}</text>
+							<text class="stat">评分: {{ skillDetail.rating }}</text>
 						</view>
 					</view>
-					<text class="review-time">{{ formatTime(review.createTime) }}</text>
+					<view class="contact-btn" @tap="showContactModal">
+						<uni-icons type="chatbubble" size="16" color="#007aff"></uni-icons>
+						<text>联系</text>
+					</view>
 				</view>
-				<text class="review-content">{{ review.content }}</text>
+			</view>
+
+			<!-- 相关技能推荐 -->
+			<view class="related-section" v-if="relatedSkills.length > 0">
+				<view class="section-title">相关技能推荐</view>
+				<scroll-view class="related-scroll" scroll-x="true" show-scrollbar="false">
+					<view class="related-item" 
+						v-for="(skill, index) in relatedSkills" 
+						:key="skill._id"
+						@tap="goToSkillDetail(skill._id)">
+						<image :src="skill.images && skill.images[0] ? skill.images[0] : '/static/default-skill.png'" class="related-image" mode="aspectFill"></image>
+						<text class="related-title">{{ skill.title }}</text>
+						<text class="related-price">¥{{ skill.price }}/{{ skill.priceUnit }}</text>
+					</view>
+				</scroll-view>
+			</view>
+
+			<!-- 底部操作栏 -->
+			<view class="bottom-bar">
+				<view class="action-btn collect-btn" @tap="toggleCollect">
+					<uni-icons :type="isCollected ? 'heart-filled' : 'heart'" size="20" :color="isCollected ? '#ff4757' : '#666'"></uni-icons>
+					<text>{{ isCollected ? '已收藏' : '收藏' }}</text>
+				</view>
+				<view class="action-btn share-btn" @tap="shareSkill">
+					<uni-icons type="redo" size="20" color="#666"></uni-icons>
+					<text>分享</text>
+				</view>
+				<view class="contact-main-btn" @tap="showContactModal">
+					<text>立即联系</text>
+				</view>
 			</view>
 		</view>
 
-		<!-- 相关技能推荐 -->
-		<view class="related-section" v-if="relatedSkills.length > 0">
-			<view class="section-title">相关技能推荐</view>
-			<scroll-view class="related-scroll" scroll-x="true" show-scrollbar="false">
-				<view class="related-item" 
-					v-for="(skill, index) in relatedSkills" 
-					:key="skill.id"
-					@tap="goToSkillDetail(skill.id)">
-					<image :src="skill.images[0]" class="related-image" mode="aspectFill"></image>
-					<text class="related-title">{{ skill.title }}</text>
-					<text class="related-price">¥{{ skill.price }}/{{ skill.priceUnit }}</text>
-				</view>
-			</scroll-view>
-		</view>
-
-		<!-- 底部操作栏 -->
-		<view class="bottom-bar">
-			<view class="action-btn collect-btn" @tap="toggleCollect">
-				<uni-icons :type="isCollected ? 'heart-filled' : 'heart'" size="20" :color="isCollected ? '#ff4757' : '#666'"></uni-icons>
-				<text>{{ isCollected ? '已收藏' : '收藏' }}</text>
-			</view>
-			<view class="action-btn share-btn" @tap="shareSkill">
-				<uni-icons type="redo" size="20" color="#666"></uni-icons>
-				<text>分享</text>
-			</view>
-			<view class="contact-main-btn" @tap="showContactModal">
-				<text>立即联系</text>
-			</view>
+		<!-- 错误状态 -->
+		<view class="error-container" v-else-if="!isLoading">
+			<uni-icons type="info" size="60" color="#ccc"></uni-icons>
+			<text class="error-text">技能不存在或已下架</text>
+			<button class="retry-btn" @tap="loadSkillDetail">重新加载</button>
 		</view>
 
 		<!-- 联系方式弹窗 -->
@@ -147,6 +135,9 @@
 							<text class="option-desc">{{ skillDetail.wechat }}</text>
 						</view>
 					</view>
+					<view class="no-contact" v-if="!skillDetail.phone && !skillDetail.wechat">
+						<text>暂无联系方式</text>
+					</view>
 				</view>
 			</view>
 		</uni-popup>
@@ -155,126 +146,193 @@
 
 <script setup>
 	import { ref, reactive, onMounted } from 'vue';
+	import { onLoad } from '@dcloudio/uni-app';
 
 	const contactPopup = ref(null);
 	const isCollected = ref(false);
+	const isLoading = ref(true);
+	const skillId = ref('');
 
 	// 技能详情数据
-	const skillDetail = reactive({
-		id: 1,
-		username: '张师傅',
-		userAvatar: 'https://via.placeholder.com/80x80/4A90E2/FFFFFF?text=张',
-		location: '1号楼301',
-		price: 50,
-		priceUnit: '小时',
-		title: '专业家电维修',
-		description: '10年维修经验，擅长各种家电故障排除，价格公道，服务周到。提供上门维修服务，包括冰箱、洗衣机、空调、电视等各类家电的维修保养。',
-		tags: ['家电维修', '经验丰富', '价格实惠', '上门服务'],
-		images: [
-			'https://via.placeholder.com/750x400/FF6B6B/FFFFFF?text=维修1',
-			'https://via.placeholder.com/750x400/4ECDC4/FFFFFF?text=维修2',
-			'https://via.placeholder.com/750x400/45B7D1/FFFFFF?text=维修3'
-		],
-		rating: 4.8,
-		reviewCount: 23,
-		createTime: new Date('2024-01-15'),
-		category: 'repair',
-		phone: '13800138000',
-		wechat: 'zhangshifu123',
-		skillCount: 3,
-		goodRate: '98%'
-	});
-
-	// 评价数据
-	const reviews = reactive([
-		{
-			id: 1,
-			username: '李女士',
-			userAvatar: 'https://via.placeholder.com/60x60/FF69B4/FFFFFF?text=李',
-			rating: 5,
-			content: '张师傅技术很好，态度也很好，修好了我家的洗衣机，价格合理，推荐！',
-			createTime: new Date('2024-01-20')
-		},
-		{
-			id: 2,
-			username: '王先生',
-			userAvatar: 'https://via.placeholder.com/60x60/32CD32/FFFFFF?text=王',
-			rating: 4,
-			content: '服务及时，修理技术专业，就是时间稍微长了一点。',
-			createTime: new Date('2024-01-18')
-		}
-	]);
+	const skillDetail = reactive({});
 
 	// 相关技能推荐
-	const relatedSkills = reactive([
-		{
-			id: 2,
-			title: '专业家政清洁',
-			price: 30,
-			priceUnit: '小时',
-			images: ['https://via.placeholder.com/200x150/96CEB4/FFFFFF?text=清洁']
-		},
-		{
-			id: 3,
-			title: '小学数学辅导',
-			price: 80,
-			priceUnit: '课时',
-			images: ['https://via.placeholder.com/200x150/DDA0DD/FFFFFF?text=教学']
-		}
-	]);
+	const relatedSkills = reactive([]);
 
-	// 格式化日期
-	const formatDate = (date) => {
-		return date.toLocaleDateString();
+	// 云对象实例
+	let skillsCloudObj = null;
+
+	// 使用 onLoad 获取页面参数 - 这是 uni-app 推荐的方式
+	onLoad((options) => {
+		console.log('页面加载参数:', options);
+		if (options && options.id) {
+			skillId.value = options.id;
+			console.log('获取到技能ID:', skillId.value);
+		} else {
+			console.error('未获取到技能ID参数');
+		}
+	});
+
+	// 初始化云对象
+	const initCloudObj = () => {
+		try {
+			skillsCloudObj = uniCloud.importObject('skills');
+			console.log('云对象初始化成功');
+		} catch (error) {
+			console.error('初始化云对象失败:', error);
+			uni.showToast({
+				title: '服务初始化失败',
+				icon: 'none'
+			});
+		}
 	};
 
-	// 格式化时间
-	const formatTime = (date) => {
-		const now = new Date();
-		const diff = now - date;
-		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+	// 加载技能详情
+	const loadSkillDetail = async () => {
+		console.log('开始加载技能详情, skillId:', skillId.value);
 		
-		if (days === 0) {
-			return '今天';
-		} else if (days === 1) {
-			return '昨天';
-		} else if (days < 7) {
-			return `${days}天前`;
-		} else {
-			return date.toLocaleDateString();
+		if (!skillId.value) {
+			console.error('技能ID为空，无法加载详情');
+			uni.showToast({
+				title: '技能ID不能为空',
+				icon: 'none'
+			});
+			isLoading.value = false;
+			return;
 		}
+
+		if (!skillsCloudObj) {
+			console.error('云对象未初始化');
+			uni.showToast({
+				title: '服务未初始化',
+				icon: 'none'
+			});
+			isLoading.value = false;
+			return;
+		}
+
+		try {
+			isLoading.value = true;
+			console.log('调用云对象获取技能详情...');
+
+			const result = await skillsCloudObj.getSkillDetail(skillId.value);
+			console.log('云对象返回结果:', result);
+
+			if (result && result.errCode === 0) {
+				console.log('获取技能详情成功:', result.data);
+				// 清空原有数据并赋值新数据
+				Object.keys(skillDetail).forEach(key => {
+					delete skillDetail[key];
+				});
+				Object.assign(skillDetail, result.data);
+
+				// 加载相关技能推荐
+				loadRelatedSkills();
+			} else {
+				console.error('获取技能详情失败:', result);
+				const errorMsg = result?.errMsg || '获取技能详情失败';
+				uni.showToast({
+					title: errorMsg,
+					icon: 'none'
+				});
+			}
+		} catch (error) {
+			console.error('获取技能详情异常:', error);
+			console.error('异常详情:', error.message, error.stack);
+			uni.showToast({
+				title: '网络错误，请重试',
+				icon: 'none'
+			});
+		} finally {
+			isLoading.value = false;
+			console.log('技能详情加载流程结束');
+		}
+	};
+
+	// 加载相关技能推荐
+	const loadRelatedSkills = async () => {
+		if (!skillsCloudObj || !skillDetail.category) {
+			console.log('跳过相关技能加载，云对象或分类信息缺失');
+			return;
+		}
+
+		try {
+			console.log('开始加载相关技能推荐...');
+			const result = await skillsCloudObj.getSkillsList({
+				category: skillDetail.category,
+				page: 1,
+				pageSize: 5
+			});
+
+			if (result && result.errCode === 0) {
+				// 过滤掉当前技能，只显示其他技能
+				const filteredSkills = result.data.list.filter(skill => skill._id !== skillId.value);
+				relatedSkills.splice(0, relatedSkills.length, ...filteredSkills.slice(0, 4));
+				console.log('相关技能加载成功，数量:', relatedSkills.length);
+			}
+		} catch (error) {
+			console.error('获取相关技能失败:', error);
+		}
+	};
+
+	// 格式化日期
+	const formatDate = (dateStr) => {
+		if (!dateStr) return '';
+		
+		const date = new Date(dateStr);
+		return date.toLocaleDateString();
 	};
 
 	// 预览图片
 	const previewImage = (current) => {
+		if (!skillDetail.images || skillDetail.images.length === 0) return;
+		
 		uni.previewImage({
 			urls: skillDetail.images,
 			current: current
 		});
 	};
 
-	// 显示联系弹窗
+	// 显示联系方式弹窗
 	const showContactModal = () => {
-		contactPopup.value.open();
+		if (!skillDetail.phone && !skillDetail.wechat) {
+			uni.showToast({
+				title: '暂无联系方式',
+				icon: 'none'
+			});
+			return;
+		}
+		contactPopup.value?.open();
 	};
 
-	// 关闭联系弹窗
+	// 关闭联系方式弹窗
 	const closeContactModal = () => {
-		contactPopup.value.close();
+		contactPopup.value?.close();
 	};
 
 	// 拨打电话
 	const makePhoneCall = () => {
+		if (!skillDetail.phone) return;
+		
 		uni.makePhoneCall({
 			phoneNumber: skillDetail.phone,
 			success: () => {
 				closeContactModal();
+			},
+			fail: (error) => {
+				console.error('拨打电话失败:', error);
+				uni.showToast({
+					title: '拨打电话失败',
+					icon: 'none'
+				});
 			}
 		});
 	};
 
 	// 复制微信号
 	const copyWechat = () => {
+		if (!skillDetail.wechat) return;
+		
 		uni.setClipboardData({
 			data: skillDetail.wechat,
 			success: () => {
@@ -283,17 +341,66 @@
 					icon: 'success'
 				});
 				closeContactModal();
+			},
+			fail: (error) => {
+				console.error('复制微信号失败:', error);
+				uni.showToast({
+					title: '复制失败',
+					icon: 'none'
+				});
 			}
 		});
 	};
 
 	// 切换收藏状态
-	const toggleCollect = () => {
-		isCollected.value = !isCollected.value;
-		uni.showToast({
-			title: isCollected.value ? '已收藏' : '已取消收藏',
-			icon: 'success'
-		});
+	const toggleCollect = async () => {
+		if (!skillsCloudObj) {
+			uni.showToast({
+				title: '服务未初始化',
+				icon: 'none'
+			});
+			return;
+		}
+
+		try {
+			if (isCollected.value) {
+				// 取消收藏
+				const result = await skillsCloudObj.uncollectSkill(skillId.value);
+				if (result.errCode === 0) {
+					isCollected.value = false;
+					uni.showToast({
+						title: '已取消收藏',
+						icon: 'success'
+					});
+				} else {
+					uni.showToast({
+						title: result.errMsg || '取消收藏失败',
+						icon: 'none'
+					});
+				}
+			} else {
+				// 收藏
+				const result = await skillsCloudObj.collectSkill(skillId.value);
+				if (result.errCode === 0) {
+					isCollected.value = true;
+					uni.showToast({
+						title: '已收藏',
+						icon: 'success'
+					});
+				} else {
+					uni.showToast({
+						title: result.errMsg || '收藏失败',
+						icon: 'none'
+					});
+				}
+			}
+		} catch (error) {
+			console.error('收藏操作失败:', error);
+			uni.showToast({
+				title: '操作失败，请重试',
+				icon: 'none'
+			});
+		}
 	};
 
 	// 分享技能
@@ -302,14 +409,28 @@
 			provider: 'weixin',
 			scene: 'WXSceneSession',
 			type: 0,
-			href: '',
+			href: `pages/skills/skill-detail?id=${skillId.value}`,
 			title: skillDetail.title,
 			summary: skillDetail.description,
-			imageUrl: skillDetail.images[0],
+			imageUrl: skillDetail.images && skillDetail.images[0] ? skillDetail.images[0] : '',
 			success: () => {
 				uni.showToast({
 					title: '分享成功',
 					icon: 'success'
+				});
+			},
+			fail: (error) => {
+				console.error('分享失败:', error);
+				// 降级处理：复制链接
+				const shareText = `${skillDetail.title} - ${skillDetail.description}`;
+				uni.setClipboardData({
+					data: shareText,
+					success: () => {
+						uni.showToast({
+							title: '内容已复制到剪贴板',
+							icon: 'success'
+						});
+					}
 				});
 			}
 		});
@@ -317,46 +438,77 @@
 
 	// 跳转到技能详情
 	const goToSkillDetail = (id) => {
-		uni.redirectTo({
+		uni.navigateTo({
 			url: `/pages/skills/skill-detail?id=${id}`
 		});
 	};
 
-	// 查看全部评价
-	const goToAllReviews = () => {
-		uni.showToast({
-			title: '查看全部评价功能开发中',
-			icon: 'none'
-		});
+	// 检查收藏状态 - 暂时禁用，避免报错
+	const checkCollectStatus = async () => {
+		// 暂时注释掉收藏状态检查，避免云对象方法调用错误
+		console.log('收藏状态检查已暂时禁用');
+		return;
+		
+		// if (!skillsCloudObj || !skillId.value) {
+		// 	return;
+		// }
+
+		// try {
+		// 	const result = await skillsCloudObj.isSkillCollected(skillId.value);
+		// 	if (result.errCode === 0) {
+		// 		isCollected.value = result.data.isCollected;
+		// 	}
+		// } catch (error) {
+		// 	console.error('检查收藏状态失败:', error);
+		// }
 	};
 
+	// 页面挂载时初始化
 	onMounted(() => {
-		// 获取页面参数
-		const pages = getCurrentPages();
-		const currentPage = pages[pages.length - 1];
-		const options = currentPage.options;
+		console.log('页面挂载，开始初始化...');
 		
-		if (options.id) {
-			console.log('技能ID:', options.id);
-			// 这里可以根据ID加载具体的技能数据
-		}
+		// 初始化云对象
+		initCloudObj();
+		
+		// 延迟一下确保 skillId 已经通过 onLoad 设置
+		setTimeout(() => {
+			if (skillsCloudObj && skillId.value) {
+				console.log('开始加载技能详情...');
+				loadSkillDetail();
+				// 暂时不检查收藏状态，避免报错
+				// checkCollectStatus();
+			} else {
+				console.log('云对象或技能ID缺失，停止加载');
+				isLoading.value = false;
+			}
+		}, 100);
 	});
 </script>
 
 <style scoped>
 	.container {
-		background-color: #f8f8f8;
+		background-color: #f5f5f5;
 		min-height: 100vh;
 		padding-bottom: 120rpx;
 	}
 
-	/* 轮播图 */
+	/* 加载状态 */
+	.loading-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 400rpx;
+	}
+
+	/* 轮播图区域 */
 	.banner-section {
+		width: 100%;
 		height: 400rpx;
 		background-color: white;
 	}
 
 	.swiper-box {
+		width: 100%;
 		height: 100%;
 	}
 
@@ -365,11 +517,11 @@
 		height: 100%;
 	}
 
-	/* 基本信息区域 */
+	/* 技能信息区域 */
 	.info-section {
 		background-color: white;
-		padding: 32rpx 24rpx;
-		margin-bottom: 16rpx;
+		margin: 20rpx 0;
+		padding: 30rpx;
 	}
 
 	.skill-header {
@@ -380,49 +532,51 @@
 	}
 
 	.skill-title {
-		flex: 1;
 		font-size: 36rpx;
-		font-weight: 700;
+		font-weight: bold;
 		color: #333;
-		line-height: 1.3;
+		flex: 1;
 		margin-right: 20rpx;
 	}
 
 	.price-info {
-		text-align: right;
+		display: flex;
+		align-items: baseline;
 	}
 
 	.price {
-		font-size: 40rpx;
-		font-weight: 700;
+		font-size: 32rpx;
+		font-weight: bold;
 		color: #ff4757;
 	}
 
 	.price-unit {
 		font-size: 24rpx;
 		color: #999;
+		margin-left: 4rpx;
 	}
 
 	.skill-tags {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 12rpx;
-		margin-bottom: 24rpx;
+		margin-bottom: 20rpx;
 	}
 
 	.tag {
-		background-color: #e8f4fd;
-		color: #007aff;
+		background-color: #f0f0f0;
+		color: #666;
 		padding: 8rpx 16rpx;
 		border-radius: 20rpx;
-		font-size: 22rpx;
+		font-size: 24rpx;
+		margin-right: 16rpx;
+		margin-bottom: 10rpx;
 	}
 
 	.skill-desc {
 		font-size: 28rpx;
 		color: #666;
 		line-height: 1.6;
-		margin-bottom: 24rpx;
+		margin-bottom: 20rpx;
 	}
 
 	.skill-stats {
@@ -437,37 +591,34 @@
 	}
 
 	.rating {
-		font-size: 24rpx;
+		font-size: 28rpx;
 		color: #333;
 		margin-left: 8rpx;
 	}
 
 	.review-count {
-		font-size: 22rpx;
+		font-size: 24rpx;
 		color: #999;
 		margin-left: 8rpx;
 	}
 
 	.publish-time {
-		font-size: 22rpx;
+		font-size: 24rpx;
 		color: #999;
 	}
 
 	/* 服务提供者区域 */
 	.provider-section {
 		background-color: white;
-		padding: 32rpx 24rpx;
-		margin-bottom: 16rpx;
+		margin: 20rpx 0;
+		padding: 30rpx;
 	}
 
 	.section-title {
-		font-size: 30rpx;
-		font-weight: 600;
+		font-size: 32rpx;
+		font-weight: bold;
 		color: #333;
-		margin-bottom: 24rpx;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
+		margin-bottom: 20rpx;
 	}
 
 	.provider-info {
@@ -476,10 +627,10 @@
 	}
 
 	.provider-avatar {
-		width: 100rpx;
-		height: 100rpx;
+		width: 80rpx;
+		height: 80rpx;
 		border-radius: 50%;
-		margin-right: 24rpx;
+		margin-right: 20rpx;
 	}
 
 	.provider-details {
@@ -488,9 +639,8 @@
 
 	.provider-name {
 		font-size: 28rpx;
-		font-weight: 600;
+		font-weight: bold;
 		color: #333;
-		display: block;
 		margin-bottom: 8rpx;
 	}
 
@@ -501,19 +651,19 @@
 	}
 
 	.location-text {
-		font-size: 22rpx;
+		font-size: 24rpx;
 		color: #999;
-		margin-left: 8rpx;
+		margin-left: 4rpx;
 	}
 
 	.provider-stats {
 		display: flex;
-		gap: 24rpx;
+		gap: 20rpx;
 	}
 
 	.stat {
-		font-size: 22rpx;
-		color: #666;
+		font-size: 24rpx;
+		color: #999;
 	}
 
 	.contact-btn {
@@ -521,97 +671,35 @@
 		flex-direction: column;
 		align-items: center;
 		padding: 16rpx;
-		border: 2rpx solid #007aff;
+		background-color: #f8f8f8;
 		border-radius: 12rpx;
-		color: #007aff;
-		font-size: 22rpx;
-	}
-
-	/* 评价区域 */
-	.reviews-section {
-		background-color: white;
-		padding: 32rpx 24rpx;
-		margin-bottom: 16rpx;
-	}
-
-	.more-reviews {
 		font-size: 24rpx;
 		color: #007aff;
 	}
 
-	.review-item {
-		padding: 24rpx 0;
-		border-bottom: 1rpx solid #f0f0f0;
-	}
-
-	.review-item:last-child {
-		border-bottom: none;
-	}
-
-	.review-header {
-		display: flex;
-		align-items: center;
-		margin-bottom: 16rpx;
-	}
-
-	.reviewer-avatar {
-		width: 60rpx;
-		height: 60rpx;
-		border-radius: 50%;
-		margin-right: 16rpx;
-	}
-
-	.reviewer-info {
-		flex: 1;
-	}
-
-	.reviewer-name {
-		font-size: 26rpx;
-		color: #333;
-		display: block;
-		margin-bottom: 8rpx;
-	}
-
-	.review-rating {
-		display: flex;
-		gap: 4rpx;
-	}
-
-	.review-time {
-		font-size: 22rpx;
-		color: #999;
-	}
-
-	.review-content {
-		font-size: 26rpx;
-		color: #666;
-		line-height: 1.5;
-	}
-
-	/* 相关推荐区域 */
+	/* 相关技能推荐 */
 	.related-section {
 		background-color: white;
-		padding: 32rpx 0;
-		margin-bottom: 16rpx;
+		margin: 20rpx 0;
+		padding: 30rpx;
 	}
 
 	.related-scroll {
 		white-space: nowrap;
-		padding: 0 24rpx;
 	}
 
 	.related-item {
 		display: inline-block;
 		width: 200rpx;
-		margin-right: 16rpx;
+		margin-right: 20rpx;
 		vertical-align: top;
 	}
 
 	.related-image {
-		width: 100%;
+		width: 200rpx;
 		height: 150rpx;
 		border-radius: 12rpx;
-		margin-bottom: 12rpx;
+		margin-bottom: 10rpx;
 	}
 
 	.related-title {
@@ -627,7 +715,7 @@
 	.related-price {
 		font-size: 22rpx;
 		color: #ff4757;
-		font-weight: 600;
+		font-weight: bold;
 	}
 
 	/* 底部操作栏 */
@@ -637,21 +725,21 @@
 		left: 0;
 		right: 0;
 		background-color: white;
-		padding: 20rpx 24rpx;
-		border-top: 1rpx solid #f0f0f0;
+		padding: 20rpx 30rpx;
+		border-top: 1rpx solid #eee;
 		display: flex;
 		align-items: center;
 		gap: 20rpx;
-		z-index: 999;
+		z-index: 100;
 	}
 
 	.action-btn {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		font-size: 20rpx;
+		padding: 16rpx;
+		font-size: 24rpx;
 		color: #666;
-		min-width: 80rpx;
 	}
 
 	.contact-main-btn {
@@ -662,61 +750,102 @@
 		padding: 24rpx;
 		border-radius: 50rpx;
 		font-size: 28rpx;
-		font-weight: 600;
+		font-weight: bold;
 	}
 
-	/* 联系弹窗 */
+	/* 错误状态 */
+	.error-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 400rpx;
+		color: #999;
+	}
+
+	.error-text {
+		font-size: 28rpx;
+		margin: 20rpx 0;
+	}
+
+	.retry-btn {
+		background-color: #007aff;
+		color: white;
+		border: none;
+		padding: 20rpx 40rpx;
+		border-radius: 50rpx;
+		font-size: 28rpx;
+	}
+
+	/* 联系方式弹窗 */
 	.contact-modal {
 		background-color: white;
 		border-radius: 20rpx 20rpx 0 0;
-		padding: 40rpx 0;
+		padding: 40rpx 30rpx 60rpx 30rpx; /* 增加底部内边距 */
+		min-height: 400rpx; /* 增加最小高度 */
+		max-height: 80vh; /* 限制最大高度 */
+		overflow-y: auto; /* 允许滚动 */
+		position: relative;
+		z-index: 1000; /* 确保在最上层 */
 	}
 
 	.modal-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0 32rpx 32rpx;
-		border-bottom: 1rpx solid #f0f0f0;
+		margin-bottom: 40rpx; /* 增加间距 */
+		padding-bottom: 20rpx;
+		border-bottom: 1rpx solid #f0f0f0; /* 添加分割线 */
 	}
 
 	.modal-title {
 		font-size: 32rpx;
-		font-weight: 600;
+		font-weight: bold;
 		color: #333;
 	}
 
 	.close-btn {
-		padding: 8rpx;
+		padding: 10rpx;
+		border-radius: 50%;
+		background-color: #f8f8f8;
 	}
 
 	.contact-options {
-		padding: 32rpx;
+		display: flex;
+		flex-direction: column;
+		gap: 30rpx; /* 增加间距 */
+		padding-bottom: 40rpx; /* 添加底部内边距 */
 	}
 
 	.contact-option {
 		display: flex;
 		align-items: center;
-		padding: 24rpx 0;
-		border-bottom: 1rpx solid #f0f0f0;
+		padding: 40rpx 30rpx; /* 增加内边距 */
+		background-color: #f8f8f8;
+		border-radius: 20rpx; /* 增加圆角 */
+		border: 2rpx solid transparent;
+		transition: all 0.3s ease;
 	}
 
-	.contact-option:last-child {
-		border-bottom: none;
+	.contact-option:active {
+		background-color: #e8e8e8;
+		border-color: #007aff;
+		transform: scale(0.98);
 	}
 
 	.option-icon {
-		width: 80rpx;
+		width: 80rpx; /* 增大图标 */
 		height: 80rpx;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		margin-right: 24rpx;
+		margin-right: 30rpx; /* 增加间距 */
+		flex-shrink: 0; /* 防止压缩 */
 	}
 
 	.phone-icon {
-		background-color: #07c160;
+		background-color: #4cd964;
 	}
 
 	.wechat-icon {
@@ -725,17 +854,40 @@
 
 	.option-info {
 		flex: 1;
+		min-width: 0; /* 允许文本截断 */
 	}
 
 	.option-title {
-		font-size: 28rpx;
+		font-size: 32rpx; /* 增大字体 */
+		font-weight: bold;
 		color: #333;
-		display: block;
-		margin-bottom: 8rpx;
+		margin-bottom: 12rpx; /* 增加间距 */
 	}
 
 	.option-desc {
-		font-size: 24rpx;
+		font-size: 28rpx; /* 增大字体 */
 		color: #666;
+		word-break: break-all; /* 允许换行 */
+	}
+
+	.no-contact {
+		text-align: center;
+		padding: 80rpx 0; /* 增加内边距 */
+		color: #999;
+		font-size: 32rpx; /* 增大字体 */
+	}
+
+	/* 弹窗遮罩层优化 */
+	.uni-popup__wrapper-box {
+		z-index: 999 !important;
+	}
+
+	.uni-popup {
+		z-index: 999 !important;
+	}
+
+	/* 确保弹窗不被底部操作栏遮挡 */
+	.bottom-bar {
+		z-index: 100; /* 降低底部操作栏的层级 */
 	}
 </style>

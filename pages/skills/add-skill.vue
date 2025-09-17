@@ -159,8 +159,8 @@
 
 			<!-- 提交按钮 -->
 			<view class="submit-section">
-				<button class="submit-btn" @tap="onSubmit" :disabled="!isFormValid">
-					发布技能
+				<button class="submit-btn" @tap="onSubmit" :disabled="!isFormValid || isSubmitting">
+					{{ isSubmitting ? '发布中...' : '发布技能' }}
 				</button>
 			</view>
 		</form>
@@ -168,11 +168,12 @@
 </template>
 
 <script setup>
-	import { ref, reactive, computed } from 'vue';
+	import { ref, reactive, computed, onMounted } from 'vue';
 
 	const currentTag = ref('');
 	const categoryIndex = ref(-1);
 	const priceUnitIndex = ref(-1);
+	const isSubmitting = ref(false);
 
 	// 表单数据
 	const formData = reactive({
@@ -200,6 +201,22 @@
 
 	// 价格单位列表
 	const priceUnitList = reactive(['小时', '次', '天', '课时', '项目']);
+
+	// 云对象实例
+	let skillsCloudObj = null;
+
+	// 初始化云对象
+	const initCloudObj = () => {
+		try {
+			skillsCloudObj = uniCloud.importObject('skills');
+		} catch (error) {
+			console.error('初始化云对象失败:', error);
+			uni.showToast({
+				title: '服务初始化失败',
+				icon: 'none'
+			});
+		}
+	};
 
 	// 表单验证
 	const isFormValid = computed(() => {
@@ -256,15 +273,16 @@
 	// 选择图片
 	const chooseImage = () => {
 		const remainCount = 6 - formData.images.length;
+		
 		uni.chooseImage({
 			count: remainCount,
 			sizeType: ['compressed'],
-			sourceType: ['camera', 'album'],
+			sourceType: ['album', 'camera'],
 			success: (res) => {
-				formData.images.push(...res.tempFilePaths);
+				uploadImages(res.tempFilePaths);
 			},
-			fail: (err) => {
-				console.error('选择图片失败:', err);
+			fail: (error) => {
+				console.error('选择图片失败:', error);
 				uni.showToast({
 					title: '选择图片失败',
 					icon: 'none'
@@ -273,77 +291,254 @@
 		});
 	};
 
-	// 移除图片
-	const removeImage = (index) => {
-		formData.images.splice(index, 1);
-	};
-
-	// 提交表单
-	const onSubmit = () => {
-		if (!isFormValid.value) {
+	// 上传图片
+	const uploadImages = async (tempFilePaths) => {
+		if (!skillsCloudObj) {
 			uni.showToast({
-				title: '请完善必填信息',
-				icon: 'none'
-			});
-			return;
-		}
-
-		// 验证价格
-		if (isNaN(formData.price) || parseFloat(formData.price) <= 0) {
-			uni.showToast({
-				title: '请输入有效价格',
+				title: '服务未初始化',
 				icon: 'none'
 			});
 			return;
 		}
 
 		uni.showLoading({
-			title: '发布中...'
+			title: '上传中...'
 		});
 
-		// 模拟提交
-		setTimeout(() => {
+		try {
+			for (let i = 0; i < tempFilePaths.length; i++) {
+				const tempFilePath = tempFilePaths[i];
+				
+				// 生成云端路径
+				const timestamp = Date.now();
+				const randomStr = Math.random().toString(36).substring(2);
+				const fileExt = tempFilePath.substring(tempFilePath.lastIndexOf('.'));
+				const cloudPath = `skills/${timestamp}_${randomStr}${fileExt}`;
+
+				// 读取文件内容
+				const fileContent = await new Promise((resolve, reject) => {
+					uni.getFileSystemManager().readFile({
+						filePath: tempFilePath,
+						success: (res) => resolve(res.data),
+						fail: reject
+					});
+				});
+
+				// 调用云对象上传图片
+				const result = await skillsCloudObj.uploadImage({
+					cloudPath: cloudPath,
+					fileContent: fileContent
+				});
+
+				if (result.errCode === 0) {
+					formData.images.push(result.data.url);
+				} else {
+					throw new Error(result.errMsg || '上传失败');
+				}
+			}
+
 			uni.hideLoading();
 			uni.showToast({
-				title: '发布成功',
+				title: '上传成功',
 				icon: 'success'
 			});
-			
-			setTimeout(() => {
-				uni.navigateBack();
-			}, 1500);
-		}, 2000);
-
-		console.log('提交的表单数据:', formData);
+		} catch (error) {
+			console.error('上传图片失败:', error);
+			uni.hideLoading();
+			uni.showToast({
+				title: error.message || '上传失败',
+				icon: 'none'
+			});
+		}
 	};
+
+	// 移除图片
+	const removeImage = (index) => {
+		formData.images.splice(index, 1);
+	};
+
+	// 表单验证
+	const validateForm = () => {
+		if (!formData.title.trim()) {
+			uni.showToast({
+				title: '请输入技能标题',
+				icon: 'none'
+			});
+			return false;
+		}
+
+		if (formData.title.trim().length < 2 || formData.title.trim().length > 50) {
+			uni.showToast({
+				title: '技能标题长度应在2-50个字符之间',
+				icon: 'none'
+			});
+			return false;
+		}
+
+		if (!formData.description.trim()) {
+			uni.showToast({
+				title: '请输入技能描述',
+				icon: 'none'
+			});
+			return false;
+		}
+
+		if (formData.description.trim().length < 10 || formData.description.trim().length > 500) {
+			uni.showToast({
+				title: '技能描述长度应在10-500个字符之间',
+				icon: 'none'
+			});
+			return false;
+		}
+
+		if (!formData.category) {
+			uni.showToast({
+				title: '请选择服务分类',
+				icon: 'none'
+			});
+			return false;
+		}
+
+		if (!formData.location.trim()) {
+			uni.showToast({
+				title: '请输入服务位置',
+				icon: 'none'
+			});
+			return false;
+		}
+
+		if (!formData.price || isNaN(formData.price) || parseFloat(formData.price) <= 0) {
+			uni.showToast({
+				title: '请输入有效的服务价格',
+				icon: 'none'
+			});
+			return false;
+		}
+
+		if (!formData.priceUnit) {
+			uni.showToast({
+				title: '请选择价格单位',
+				icon: 'none'
+			});
+			return false;
+		}
+
+		if (formData.phone && !/^1[3-9]\d{9}$/.test(formData.phone)) {
+			uni.showToast({
+				title: '请输入有效的手机号码',
+				icon: 'none'
+			});
+			return false;
+		}
+
+		if (formData.wechat && (formData.wechat.length < 6 || formData.wechat.length > 20)) {
+			uni.showToast({
+				title: '微信号长度应在6-20个字符之间',
+				icon: 'none'
+			});
+			return false;
+		}
+
+		return true;
+	};
+
+	// 提交表单
+	const onSubmit = async () => {
+		if (!validateForm()) {
+			return;
+		}
+
+		if (!skillsCloudObj) {
+			uni.showToast({
+				title: '服务未初始化',
+				icon: 'none'
+			});
+			return;
+		}
+
+		if (isSubmitting.value) {
+			return;
+		}
+
+		try {
+			isSubmitting.value = true;
+
+			// 准备提交数据
+			const submitData = {
+				title: formData.title.trim(),
+				description: formData.description.trim(),
+				category: formData.category,
+				location: formData.location.trim(),
+				price: parseFloat(formData.price),
+				priceUnit: formData.priceUnit,
+				tags: formData.tags,
+				images: formData.images,
+				phone: formData.phone.trim(),
+				wechat: formData.wechat.trim()
+			};
+
+			// 调用云对象发布技能
+			const result = await skillsCloudObj.publishSkill(submitData);
+
+			if (result.errCode === 0) {
+				uni.showToast({
+					title: '发布成功',
+					icon: 'success'
+				});
+
+				// 延迟跳转，让用户看到成功提示
+				setTimeout(() => {
+					uni.navigateBack({
+						delta: 1
+					});
+				}, 1500);
+			} else {
+				uni.showToast({
+					title: result.errMsg || '发布失败',
+					icon: 'none'
+				});
+			}
+		} catch (error) {
+			console.error('发布技能失败:', error);
+			uni.showToast({
+				title: '发布失败，请重试',
+				icon: 'none'
+			});
+		} finally {
+			isSubmitting.value = false;
+		}
+	};
+
+	// 页面加载时初始化
+	onMounted(() => {
+		initCloudObj();
+	});
 </script>
 
 <style scoped>
 	.container {
-		background-color: #f8f8f8;
+		background-color: #f5f5f5;
 		min-height: 100vh;
-		padding-bottom: 40rpx;
+		padding-bottom: 100rpx;
 	}
 
-	/* 表单区块 */
 	.form-section {
 		background-color: white;
 		margin-bottom: 20rpx;
-		padding: 32rpx 24rpx;
+		padding: 30rpx;
 	}
 
 	.section-title {
 		font-size: 32rpx;
-		font-weight: 600;
+		font-weight: bold;
 		color: #333;
-		margin-bottom: 32rpx;
-		padding-bottom: 16rpx;
+		margin-bottom: 30rpx;
+		padding-bottom: 15rpx;
 		border-bottom: 2rpx solid #f0f0f0;
 	}
 
-	/* 表单项 */
 	.form-item {
-		margin-bottom: 32rpx;
+		margin-bottom: 30rpx;
 	}
 
 	.form-item:last-child {
@@ -351,10 +546,10 @@
 	}
 
 	.label {
+		display: block;
 		font-size: 28rpx;
 		color: #333;
-		display: block;
-		margin-bottom: 16rpx;
+		margin-bottom: 15rpx;
 	}
 
 	.required {
@@ -363,84 +558,72 @@
 
 	.input {
 		width: 100%;
-		padding: 20rpx 24rpx;
-		border: 2rpx solid #e8e8e8;
-		border-radius: 12rpx;
+		height: 80rpx;
+		background-color: #f8f8f8;
+		border-radius: 10rpx;
+		padding: 0 20rpx;
 		font-size: 28rpx;
-		color: #333;
-		background-color: #fafafa;
-	}
-
-	.input:focus {
-		border-color: #007aff;
-		background-color: white;
+		box-sizing: border-box;
 	}
 
 	.textarea {
 		width: 100%;
-		min-height: 200rpx;
-		padding: 20rpx 24rpx;
-		border: 2rpx solid #e8e8e8;
-		border-radius: 12rpx;
+		min-height: 150rpx;
+		background-color: #f8f8f8;
+		border-radius: 10rpx;
+		padding: 20rpx;
 		font-size: 28rpx;
-		color: #333;
-		background-color: #fafafa;
-		resize: none;
-	}
-
-	.textarea:focus {
-		border-color: #007aff;
-		background-color: white;
+		box-sizing: border-box;
+		line-height: 1.5;
 	}
 
 	.char-count {
-		font-size: 22rpx;
-		color: #999;
-		text-align: right;
-		margin-top: 8rpx;
 		display: block;
+		text-align: right;
+		font-size: 24rpx;
+		color: #999;
+		margin-top: 10rpx;
 	}
 
-	/* 选择器 */
 	.picker {
+		height: 80rpx;
+		background-color: #f8f8f8;
+		border-radius: 10rpx;
+		padding: 0 20rpx;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 20rpx 24rpx;
-		border: 2rpx solid #e8e8e8;
-		border-radius: 12rpx;
 		font-size: 28rpx;
 		color: #333;
-		background-color: #fafafa;
 	}
 
-	/* 价格输入 */
 	.price-input {
 		display: flex;
 		align-items: center;
-		border: 2rpx solid #e8e8e8;
-		border-radius: 12rpx;
-		background-color: #fafafa;
-		padding: 0 24rpx;
+		background-color: #f8f8f8;
+		border-radius: 10rpx;
+		padding: 0 20rpx;
+		height: 80rpx;
 	}
 
 	.currency {
 		font-size: 28rpx;
 		color: #333;
-		margin-right: 8rpx;
+		margin-right: 10rpx;
 	}
 
 	.price-value {
 		flex: 1;
+		background: none;
 		border: none;
-		background: transparent;
-		padding: 20rpx 0;
+		font-size: 28rpx;
+		height: 100%;
 	}
 
 	.separator {
 		font-size: 28rpx;
 		color: #999;
-		margin: 0 16rpx;
+		margin: 0 15rpx;
 	}
 
 	.unit-picker {
@@ -448,77 +631,82 @@
 		align-items: center;
 		font-size: 28rpx;
 		color: #333;
-		min-width: 80rpx;
 	}
 
-	/* 标签输入 */
 	.tag-input-box {
 		display: flex;
 		align-items: center;
-		border: 2rpx solid #e8e8e8;
-		border-radius: 12rpx;
-		background-color: #fafafa;
-		padding: 0 24rpx;
+		background-color: #f8f8f8;
+		border-radius: 10rpx;
+		padding: 0 20rpx;
+		height: 80rpx;
 		margin-bottom: 20rpx;
 	}
 
 	.tag-input {
 		flex: 1;
+		background: none;
 		border: none;
-		background: transparent;
-		padding: 20rpx 0;
 		font-size: 28rpx;
+		height: 100%;
 	}
 
 	.add-tag-btn {
-		padding: 8rpx;
+		margin-left: 15rpx;
 	}
 
 	.tags-container {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 16rpx;
+		gap: 15rpx;
 	}
 
 	.tag-item {
-		display: flex;
-		align-items: center;
-		background-color: #e8f4fd;
-		color: #007aff;
-		padding: 12rpx 16rpx;
+		background-color: #e3f2fd;
+		color: #1976d2;
+		padding: 10rpx 15rpx;
 		border-radius: 20rpx;
 		font-size: 24rpx;
+		display: flex;
+		align-items: center;
+		gap: 10rpx;
 	}
 
 	.remove-tag {
-		margin-left: 8rpx;
-		padding: 4rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 30rpx;
+		height: 30rpx;
+		background-color: rgba(0, 0, 0, 0.1);
+		border-radius: 50%;
 	}
 
-	/* 图片上传 */
 	.images-container {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 16rpx;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 20rpx;
+		margin-bottom: 15rpx;
 	}
 
 	.image-item {
 		position: relative;
-		aspect-ratio: 1;
+		width: 200rpx;
+		height: 150rpx;
 	}
 
 	.preview-image {
 		width: 100%;
 		height: 100%;
-		border-radius: 12rpx;
+		border-radius: 10rpx;
 	}
 
 	.remove-image {
 		position: absolute;
-		top: 8rpx;
-		right: 8rpx;
-		width: 32rpx;
-		height: 32rpx;
+		top: -10rpx;
+		right: -10rpx;
+		width: 40rpx;
+		height: 40rpx;
 		background-color: rgba(0, 0, 0, 0.6);
 		border-radius: 50%;
 		display: flex;
@@ -527,9 +715,10 @@
 	}
 
 	.add-image {
-		aspect-ratio: 1;
-		border: 2rpx dashed #ddd;
-		border-radius: 12rpx;
+		width: 200rpx;
+		height: 150rpx;
+		border: 2rpx dashed #ccc;
+		border-radius: 10rpx;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -538,35 +727,36 @@
 	}
 
 	.add-text {
-		font-size: 22rpx;
+		font-size: 24rpx;
 		color: #999;
-		margin-top: 8rpx;
+		margin-top: 10rpx;
 	}
 
 	.tip {
-		font-size: 22rpx;
+		font-size: 24rpx;
 		color: #999;
-		margin-top: 16rpx;
-		display: block;
 	}
 
-	/* 提交区域 */
 	.submit-section {
-		padding: 40rpx 24rpx;
+		padding: 30rpx;
 	}
 
 	.submit-btn {
 		width: 100%;
-		height: 88rpx;
+		height: 90rpx;
 		background-color: #007aff;
 		color: white;
-		border: none;
-		border-radius: 44rpx;
+		border-radius: 45rpx;
 		font-size: 32rpx;
-		font-weight: 600;
+		font-weight: bold;
+		border: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
-	.submit-btn[disabled] {
+	.submit-btn:disabled {
 		background-color: #ccc;
+		color: #999;
 	}
 </style>

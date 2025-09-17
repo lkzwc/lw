@@ -25,7 +25,7 @@
 						</view>
 						<view class="card-info">
 							<text class="card-title">{{ menuList[0].name }}</text>
-							<text class="card-desc">今日热门资讯</text>
+							<text class="card-desc">60s读懂全球新闻和AI热点</text>
 						</view>
 					</view>
 				</view>
@@ -33,11 +33,31 @@
 				<!-- 中等卡片 - 天气 -->
 				<view class="menu-card medium-card weather-card" @tap="clickMenuItem(menuList[1])">
 					<view class="card-content">
-						<view class="card-icon">
-							<uni-icons :type="menuList[1].icon" :size="32" color="white"></uni-icons>
+						<view class="weather-loading" v-if="weatherLoading">
+							<uni-icons type="spinner-cycle" :size="24" color="white"></uni-icons>
+							<text class="loading-text">加载中...</text>
 						</view>
-						<text class="card-title">{{ menuList[1].name }}</text>
-						<text class="card-subtitle">今日晴朗 25°C</text>
+						<view class="weather-info" v-else>
+							<view class="weather-main">
+								<view class="weather-icon">
+									<uni-icons :type="getWeatherIcon(weatherData.weather)" :size="36" color="white"></uni-icons>
+								</view>
+								<view class="weather-primary">
+									<text class="temperature">{{ weatherData.temperature }}°C</text>
+									<text class="weather-desc">{{ weatherData.weather }}</text>
+								</view>
+							</view>
+							<view class="weather-details">
+								<view class="detail-item">
+									<uni-icons type="navigate" :size="14" color="rgba(255,255,255,0.8)"></uni-icons>
+									<text class="detail-text">{{ weatherData.winddirection }}风 {{ weatherData.windpower }}级</text>
+								</view>
+								<view class="detail-item">
+									<uni-icons type="water" :size="14" color="rgba(255,255,255,0.8)"></uni-icons>
+									<text class="detail-text">湿度 {{ weatherData.humidity }}%</text>
+								</view>
+							</view>
+						</view>
 					</view>
 				</view>
 
@@ -91,6 +111,19 @@
 
 	const current = ref(0);
 	const swiperCurrent = ref(0);
+	const weatherLoading = ref(true);
+	const isGettingWeather = ref(false); // 添加防重复调用标志
+	const weatherData = reactive({
+		city: '天气',
+		weather: '晴',
+		temperature: '25',
+		winddirection: '东南',
+		windpower: '≤3',
+		humidity: '65'
+	});
+
+	// 云对象实例
+	let utilObj = null;
 
 	// 轮播图数据
 	const bannerList = reactive([
@@ -157,6 +190,114 @@
 		}
 	]);
 
+	// 初始化云对象
+	const initCloudObj = () => {
+		try {
+			utilObj = uniCloud.importObject('util');
+		} catch (error) {
+			uni.showToast({
+				title: '云对象初始化失败',
+				icon: 'none'
+			});
+		}
+	};
+
+	// 获取天气数据
+	const getWeatherData = async () => {
+		// 防止重复调用
+		if (isGettingWeather.value) {
+			return;
+		}
+		
+		if (!utilObj) {
+			weatherLoading.value = false;
+			uni.showToast({
+				title: '云对象未初始化',
+				icon: 'none'
+			});
+			return;
+		}
+
+		try {
+			isGettingWeather.value = true;
+			weatherLoading.value = true;
+			
+			// 调用云对象的天气查询方法
+			const result = await utilObj.getWeatherByCityName();
+			
+			if (result && result.errCode === 0 && result.data) {
+				// 更新天气数据
+				Object.assign(weatherData, {
+					city: result.data.city,
+					weather: result.data.weather,
+					temperature: result.data.temperature,
+					winddirection: result.data.winddirection,
+					windpower: result.data.windpower,
+					humidity: result.data.humidity
+				});
+				
+				uni.showToast({
+					title: '天气数据加载成功',
+					icon: 'success',
+					duration: 1500
+				});
+			} else {
+				uni.showToast({
+					title: result?.errMsg || '天气数据获取失败',
+					icon: 'none'
+				});
+			}
+			
+		} catch (error) {
+			// 使用MOCK数据
+			Object.assign(weatherData, {
+				city: '西安市',
+				weather: '晴',
+				temperature: '22',
+				winddirection: '东南',
+				windpower: '≤3',
+				humidity: '60'
+			});
+			
+			uni.showToast({
+				title: '使用本地数据',
+				icon: 'none'
+			});
+		} finally {
+			weatherLoading.value = false;
+			isGettingWeather.value = false;
+		}
+	};
+
+	// 根据天气状况返回对应图标
+	const getWeatherIcon = (weather) => {
+		const weatherIconMap = {
+			'晴': 'color',
+			'晴天': 'color',
+			'多云': 'cloud',
+			'少云': 'cloud',
+			'阴': 'cloud-filled',
+			'阴天': 'cloud-filled',
+			'小雨': 'cloud-drizzle',
+			'中雨': 'cloud-rain',
+			'大雨': 'cloud-rain-filled',
+			'暴雨': 'cloud-rain-filled',
+			'雷阵雨': 'cloud-lightning',
+			'雷雨': 'cloud-lightning',
+			'雪': 'cloud-snow',
+			'小雪': 'cloud-snow',
+			'中雪': 'cloud-snow',
+			'大雪': 'cloud-snow',
+			'雾': 'eye-slash',
+			'霾': 'eye-slash-filled',
+			'沙尘暴': 'eye-slash-filled',
+			'浮尘': 'eye-slash',
+			'扬沙': 'eye-slash'
+		};
+		
+		return weatherIconMap[weather] || 'cloud';
+	};
+
 	// 轮播图切换事件
 	const change = (e) => {
 		current.value = e.detail.current;
@@ -165,7 +306,6 @@
 
 	// 点击轮播图
 	const clickBannerItem = (item) => {
-		console.log('点击轮播图:', item);
 		uni.showToast({
 			title: item.title,
 			icon: 'none'
@@ -174,19 +314,22 @@
 
 	// 点击菜单项
 	const clickMenuItem = (item) => {
-		console.log('点击菜单:', item);
 		switch (item.type) {
 			case 'news':
-				uni.showToast({
-					title: '每日热榜功能开发中',
-					icon: 'none'
+				uni.navigateTo({
+					url: '/pages/news/news'
 				});
 				break;
 			case 'weather':
-				uni.showToast({
-					title: '天气功能开发中',
-					icon: 'none'
-				});
+				// 重新获取天气数据
+				if (isGettingWeather.value) {
+					uni.showToast({
+						title: '天气数据获取中...',
+						icon: 'loading'
+					});
+				} else {
+					getWeatherData();
+				}
 				break;
 			case 'tools':
 				uni.navigateTo({
@@ -226,6 +369,12 @@
 
 	onMounted(() => {
 		console.log('首页加载完成');
+		// 初始化云对象
+		initCloudObj();
+		// 获取天气数据
+		setTimeout(() => {
+			getWeatherData();
+		}, 500); // 延迟500ms确保云对象初始化完成
 	});
 </script>
 
@@ -251,28 +400,29 @@
 	.swiper-item {
 		position: relative;
 		height: 100%;
+		border-radius: 20rpx;
+		overflow: hidden;
 	}
 
 	.swiper-item image {
 		width: 100%;
 		height: 100%;
+		border-radius: 20rpx;
 	}
 
 	.banner-title {
 		position: absolute;
-		bottom: 24rpx;
-		left: 24rpx;
+		bottom: 20rpx;
+		left: 20rpx;
 		color: white;
-		font-size: 36rpx;
-		font-weight: 700;
+		font-size: 32rpx;
+		font-weight: bold;
 		text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
-		letter-spacing: 1rpx;
 	}
 
-	/* 个性化菜单样式 */
+	/* 菜单网格样式 */
 	.creative-menu-section {
 		margin: 0 20rpx;
-		padding-bottom: 40rpx;
 	}
 
 	.menu-grid {
@@ -280,236 +430,271 @@
 		grid-template-columns: 2fr 1fr;
 		grid-template-rows: auto auto auto;
 		gap: 16rpx;
-		height: auto;
+		grid-template-areas:
+			"news weather"
+			"small-cards small-cards"
+			"learning learning";
 	}
 
 	.menu-card {
-		border-radius: 24rpx;
+		border-radius: 20rpx;
 		overflow: hidden;
-		box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		position: relative;
-	}
-
-	.menu-card::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
-		pointer-events: none;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+		transition: all 0.3s ease;
+		cursor: pointer;
 	}
 
 	.menu-card:active {
-		transform: scale(0.96);
-		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.15);
-	}
-
-	.card-content {
-		padding: 24rpx;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		position: relative;
-		z-index: 1;
+		transform: scale(0.98);
+		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.12);
 	}
 
 	/* 大卡片 - 每日热榜 */
-	.large-card, .news-card {
-		grid-column: 1 / 2;
-		grid-row: 1 / 2;
-		height: 180rpx;
+	.large-card {
+		grid-area: news;
 		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		height: 160rpx;
 	}
 
-	.large-card .card-content {
-		flex-direction: row;
-		align-items: center;
-		justify-content: flex-start;
-		padding: 28rpx;
-	}
-
-	.large-card .card-info {
-		margin-left: 24rpx;
-		flex: 1;
+	.news-card .card-content {
 		display: flex;
-		flex-direction: column;
-		justify-content: center;
+		align-items: center;
+		padding: 24rpx;
+		height: 100%;
 	}
 
-	.large-card .card-title {
+	.news-card .card-icon {
+		margin-right: 20rpx;
+	}
+
+	.news-card .card-info {
+		flex: 1;
+	}
+
+	.news-card .card-title {
+		display: block;
 		color: white;
-		font-size: 34rpx;
-		font-weight: 700;
-		display: block;
+		font-size: 28rpx;
+		font-weight: bold;
 		margin-bottom: 8rpx;
-		letter-spacing: 1rpx;
 	}
 
-	.large-card .card-desc {
-		color: rgba(255, 255, 255, 0.9);
-		font-size: 26rpx;
+	.news-card .card-desc {
 		display: block;
-		font-weight: 500;
+		color: rgba(255, 255, 255, 0.8);
+		font-size: 24rpx;
 	}
 
 	/* 中等卡片 - 天气 */
-	.medium-card, .weather-card {
-		grid-column: 2 / 3;
-		grid-row: 1 / 2;
-		height: 180rpx;
-		background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+	.medium-card {
+		grid-area: weather;
+		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+		height: 160rpx;
 	}
 
-	.medium-card .card-content {
+	.weather-card .card-content {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding: 20rpx;
+		height: 100%;
+	}
+
+	.weather-loading {
+		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		text-align: center;
-		padding: 24rpx;
+		height: 100%;
+		gap: 8rpx;
 	}
 
-	.medium-card .card-title {
+	.loading-text {
+		color: white;
+		font-size: 20rpx;
+	}
+
+	.weather-info {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		height: 100%;
+	}
+
+	.weather-main {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+	}
+
+	.weather-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.weather-primary {
+		display: flex;
+		flex-direction: column;
+		gap: 4rpx;
+	}
+
+	.temperature {
 		color: white;
 		font-size: 28rpx;
-		font-weight: 700;
-		margin-top: 12rpx;
-		letter-spacing: 1rpx;
+		font-weight: bold;
+		line-height: 1;
 	}
 
-	.medium-card .card-subtitle {
+	.weather-desc {
+		color: rgba(255, 255, 255, 0.9);
+		font-size: 20rpx;
+	}
+
+	.weather-details {
+		display: flex;
+		flex-direction: column;
+		gap: 6rpx;
+		margin-top: 8rpx;
+	}
+
+	.detail-item {
+		display: flex;
+		align-items: center;
+		gap: 6rpx;
+	}
+
+	.detail-text {
 		color: rgba(255, 255, 255, 0.8);
-		font-size: 22rpx;
-		margin-top: 6rpx;
-		font-weight: 500;
+		font-size: 18rpx;
+		line-height: 1;
 	}
 
 	/* 小卡片组 */
 	.small-cards-group {
-		grid-column: 1 / 3;
-		grid-row: 2 / 3;
+		grid-area: small-cards;
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
-		gap: 16rpx;
-		margin: 8rpx 0;
+		gap: 12rpx;
 	}
 
 	.small-card {
-		height: 160rpx;
-		background: white;
+		height: 120rpx;
 	}
 
 	.small-card .card-content {
-		align-items: center;
+		display: flex;
+		flex-direction: column;
 		justify-content: center;
+		align-items: center;
+		padding: 16rpx;
+		height: 100%;
 		text-align: center;
-		padding: 24rpx 16rpx;
 	}
 
 	.small-card .card-title {
 		color: white;
-		font-size: 24rpx;
-		font-weight: 600;
-		margin-top: 12rpx;
-		letter-spacing: 0.5rpx;
-		line-height: 1.2;
+		font-size: 20rpx;
+		font-weight: bold;
+		margin-top: 8rpx;
 	}
 
-	.small-card.card-1 {
+	/* 小卡片颜色 */
+	.card-1 {
 		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 	}
 
-	.small-card.card-2 {
+	.card-2 {
 		background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 	}
 
-	.small-card.card-3 {
+	.card-3 {
 		background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
 	}
 
-	.small-card.card-4 {
-		background: linear-gradient(135deg, #ffeaa7 0%, #fcb69f 100%);
-	}
-
-	.small-card.card-4 .card-title {
-		color: #333;
+	.card-4 {
+		background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
 	}
 
 	/* 横向长卡片 - 学习 */
 	.wide-card {
-		grid-column: 1 / 3;
-		grid-row: 3 / 4;
-		height: 120rpx;
+		grid-area: learning;
 		background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-		margin-top: 8rpx;
+		height: 100rpx;
 	}
 
-	.wide-card .card-content {
-		flex-direction: row;
-		align-items: center;
+	.learning-card .card-content {
+		display: flex;
 		justify-content: space-between;
-		padding: 24rpx;
+		align-items: center;
+		padding: 20rpx 24rpx;
+		height: 100%;
 	}
 
-	.wide-card .card-left {
+	.card-left {
 		display: flex;
 		align-items: center;
-		flex: 1;
 	}
 
-	.wide-card .card-info {
-		margin-left: 20rpx;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
+	.learning-card .card-icon {
+		margin-right: 16rpx;
 	}
 
-	.wide-card .card-title {
-		color: #333;
-		font-size: 28rpx;
-		font-weight: 700;
+	.learning-card .card-title {
 		display: block;
+		color: #333;
+		font-size: 26rpx;
+		font-weight: bold;
 		margin-bottom: 4rpx;
-		letter-spacing: 1rpx;
 	}
 
-	.wide-card .card-desc {
+	.learning-card .card-desc {
+		display: block;
 		color: #666;
 		font-size: 22rpx;
-		display: block;
-		font-weight: 500;
 	}
 
-	.wide-card .card-right {
+	.card-right {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		min-width: 100rpx;
+		align-items: flex-end;
 	}
 
 	.progress-text {
 		color: #333;
-		font-size: 30rpx;
-		font-weight: 700;
+		font-size: 24rpx;
+		font-weight: bold;
 		margin-bottom: 8rpx;
 	}
 
 	.progress-bar {
-		width: 80rpx;
-		height: 6rpx;
-		background-color: rgba(255, 255, 255, 0.6);
-		border-radius: 3rpx;
+		width: 120rpx;
+		height: 8rpx;
+		background-color: rgba(255, 255, 255, 0.3);
+		border-radius: 4rpx;
 		overflow: hidden;
 	}
 
 	.progress-fill {
 		height: 100%;
 		background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-		border-radius: 3rpx;
+		border-radius: 4rpx;
 		transition: width 0.3s ease;
+	}
+
+	/* 响应式调整 */
+	@media screen and (max-width: 750rpx) {
+		.menu-grid {
+			grid-template-columns: 1fr;
+			grid-template-areas:
+				"news"
+				"weather"
+				"small-cards"
+				"learning";
+		}
+
+		.medium-card {
+			height: 120rpx;
+		}
 	}
 </style>

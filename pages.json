@@ -13,6 +13,12 @@
 			}
 		},
 		{
+			"path": "pages/news/news",
+			"style": {
+				"navigationBarTitleText": "每日热榜"
+			}
+		},
+		{
 			"path": "pages/community/community",
 			"style": {
 				"navigationBarTitleText": "社区"

@@ -1,0 +1,19 @@
+{
+  "name": "skills",
+  "version": "1.0.0",
+  "description": "技能台云对象 - 提供技能发布、搜索、管理等功能",
+  "main": "index.obj.js",
+  "dependencies": {
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "keywords": [
+    "uniCloud",
+    "云对象",
+    "技能台",
+    "社区服务"
+  ],
+  "author": "张文超",
+  "license": "MIT"
+}

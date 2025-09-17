@@ -33,13 +33,13 @@
 		<!-- 技能列表 -->
 		<view class="skills-list">
 			<view class="skill-item" 
-				v-for="(skill, index) in filteredSkills" 
-				:key="skill.id"
+				v-for="(skill, index) in skillsList" 
+				:key="skill._id"
 				@tap="goToSkillDetail(skill)">
 				
 				<!-- 用户头像和基本信息 -->
 				<view class="skill-header">
-					<image :src="skill.userAvatar" class="user-avatar" mode="aspectFill"></image>
+					<image :src="skill.userAvatar || '/static/default-avatar.png'" class="user-avatar" mode="aspectFill"></image>
 					<view class="user-info">
 						<text class="username">{{ skill.username }}</text>
 						<view class="location">
@@ -92,7 +92,7 @@
 		</view>
 
 		<!-- 空状态 -->
-		<view class="empty-state" v-if="filteredSkills.length === 0 && !isLoading">
+		<view class="empty-state" v-if="skillsList.length === 0 && !isLoading">
 			<uni-icons type="info" size="60" color="#ccc"></uni-icons>
 			<text class="empty-text">暂无相关技能</text>
 			<text class="empty-desc">试试其他搜索条件吧</text>
@@ -100,7 +100,7 @@
 
 		<!-- 加载状态 -->
 		<view class="loading-state" v-if="isLoading">
-			<uni-load-more status="loading"></uni-load-more>
+			<uni-load-more :status="loadMoreStatus"></uni-load-more>
 		</view>
 
 		<!-- 添加技能按钮 -->
@@ -112,127 +112,171 @@
 
 <script setup>
 	import { ref, reactive, computed, onMounted } from 'vue';
+	import { onReachBottom } from '@dcloudio/uni-app';
 
 	const searchKeyword = ref('');
 	const currentFilter = ref('all');
 	const isLoading = ref(false);
+	const loadMoreStatus = ref('more'); // more, loading, noMore
+	const currentPage = ref(1);
+	const pageSize = ref(10);
+	const hasMore = ref(true);
+
+	// 技能列表数据
+	const skillsList = reactive([]);
 
 	// 筛选选项
-	const filterList = reactive([
-		{ label: '全部', value: 'all' },
-		{ label: '家政服务', value: 'housekeeping' },
-		{ label: '维修安装', value: 'repair' },
-		{ label: '教育培训', value: 'education' },
-		{ label: '美容美发', value: 'beauty' },
-		{ label: '健康护理', value: 'health' },
-		{ label: '其他服务', value: 'other' }
-	]);
+	const filterList = reactive([]);
 
-	// 模拟技能数据
-	const skillsList = reactive([
-		{
-			id: 1,
-			username: '张师傅',
-			userAvatar: 'https://via.placeholder.com/80x80/4A90E2/FFFFFF?text=张',
-			location: '1号楼301',
-			price: 50,
-			priceUnit: '小时',
-			title: '专业家电维修',
-			description: '10年维修经验，擅长各种家电故障排除，价格公道，服务周到',
-			tags: ['家电维修', '经验丰富', '价格实惠'],
-			images: [
-				'https://via.placeholder.com/200x150/FF6B6B/FFFFFF?text=维修1',
-				'https://via.placeholder.com/200x150/4ECDC4/FFFFFF?text=维修2',
-				'https://via.placeholder.com/200x150/45B7D1/FFFFFF?text=维修3'
-			],
-			rating: 4.8,
-			reviewCount: 23,
-			createTime: new Date('2024-01-15'),
-			category: 'repair'
-		},
-		{
-			id: 2,
-			username: '李阿姨',
-			userAvatar: 'https://via.placeholder.com/80x80/FF6B6B/FFFFFF?text=李',
-			location: '2号楼205',
-			price: 30,
-			priceUnit: '小时',
-			title: '专业家政清洁',
-			description: '提供家庭清洁、整理收纳服务，细致认真，让您的家焕然一新',
-			tags: ['家政清洁', '整理收纳', '细致认真'],
-			images: [
-				'https://via.placeholder.com/200x150/96CEB4/FFFFFF?text=清洁1',
-				'https://via.placeholder.com/200x150/FFEAA7/FFFFFF?text=清洁2'
-			],
-			rating: 4.9,
-			reviewCount: 45,
-			createTime: new Date('2024-01-20'),
-			category: 'housekeeping'
-		},
-		{
-			id: 3,
-			username: '王老师',
-			userAvatar: 'https://via.placeholder.com/80x80/A8E6CF/FFFFFF?text=王',
-			location: '3号楼102',
-			price: 80,
-			priceUnit: '课时',
-			title: '小学数学辅导',
-			description: '退休小学教师，30年教学经验，擅长小学数学辅导，因材施教',
-			tags: ['数学辅导', '经验丰富', '因材施教'],
-			images: [
-				'https://via.placeholder.com/200x150/DDA0DD/FFFFFF?text=教学1'
-			],
-			rating: 4.7,
-			reviewCount: 18,
-			createTime: new Date('2024-01-25'),
-			category: 'education'
-		},
-		{
-			id: 4,
-			username: '小美',
-			userAvatar: 'https://via.placeholder.com/80x80/FFB6C1/FFFFFF?text=美',
-			location: '4号楼508',
-			price: 60,
-			priceUnit: '次',
-			title: '上门美甲服务',
-			description: '专业美甲师，提供上门美甲服务，款式新颖，技术精湛',
-			tags: ['美甲服务', '上门服务', '款式新颖'],
-			images: [
-				'https://via.placeholder.com/200x150/FF69B4/FFFFFF?text=美甲1',
-				'https://via.placeholder.com/200x150/DA70D6/FFFFFF?text=美甲2',
-				'https://via.placeholder.com/200x150/BA55D3/FFFFFF?text=美甲3',
-				'https://via.placeholder.com/200x150/9370DB/FFFFFF?text=美甲4'
-			],
-			rating: 4.6,
-			reviewCount: 32,
-			createTime: new Date('2024-02-01'),
-			category: 'beauty'
-		}
-	]);
+	// 云对象实例
+	let skillsCloudObj = null;
 
-	// 过滤后的技能列表
-	const filteredSkills = computed(() => {
-		let result = skillsList;
-		
-		// 按分类筛选
-		if (currentFilter.value !== 'all') {
-			result = result.filter(skill => skill.category === currentFilter.value);
+	// 初始化云对象
+	const initCloudObj = () => {
+		try {
+			skillsCloudObj = uniCloud.importObject('skills');
+		} catch (error) {
+			console.error('初始化云对象失败:', error);
+			uni.showToast({
+				title: '服务初始化失败',
+				icon: 'none'
+			});
 		}
-		
-		// 按关键词搜索
-		if (searchKeyword.value.trim()) {
-			const keyword = searchKeyword.value.toLowerCase();
-			result = result.filter(skill => 
-				skill.title.toLowerCase().includes(keyword) ||
-				skill.description.toLowerCase().includes(keyword) ||
-				skill.username.toLowerCase().includes(keyword) ||
-				skill.location.toLowerCase().includes(keyword) ||
-				skill.tags.some(tag => tag.toLowerCase().includes(keyword))
-			);
+	};
+
+	// 获取技能分类列表
+	const getCategories = async () => {
+		try {
+			const result = await skillsCloudObj.getCategories();
+			if (result.errCode === 0) {
+				filterList.splice(0, filterList.length, ...result.data);
+			}
+		} catch (error) {
+			console.error('获取分类失败:', error);
 		}
+	};
+
+	// 获取技能列表
+	const getSkillsList = async (reset = false) => {
+		if (isLoading.value) return;
 		
-		return result;
-	});
+		console.log('开始获取技能列表, reset:', reset);
+		
+		try {
+			isLoading.value = true;
+			loadMoreStatus.value = 'loading';
+			
+			if (reset) {
+				currentPage.value = 1;
+				hasMore.value = true;
+			}
+
+			const params = {
+				keyword: searchKeyword.value.trim(),
+				category: currentFilter.value,
+				page: currentPage.value,
+				pageSize: pageSize.value
+			};
+
+			console.log('调用云对象参数:', params);
+			console.log('云对象实例状态:', skillsCloudObj ? '已初始化' : '未初始化');
+			
+			if (!skillsCloudObj) {
+				console.error('云对象未初始化');
+				uni.showToast({
+					title: '服务未初始化，请重试',
+					icon: 'none'
+				});
+				return;
+			}
+			
+			console.log('准备调用云对象方法...');
+			const result = await skillsCloudObj.getSkillsList(params);
+			console.log('云对象返回结果:', result);
+			
+			if (result && result.errCode === 0) {
+				console.log('获取成功，数据:', result.data);
+				const { list, hasMore: moreData } = result.data;
+				
+				if (reset) {
+					skillsList.splice(0, skillsList.length, ...list);
+				} else {
+					skillsList.push(...list);
+				}
+				
+				hasMore.value = moreData;
+				loadMoreStatus.value = hasMore.value ? 'more' : 'noMore';
+				
+				if (list.length > 0) {
+					currentPage.value++;
+				}
+				
+				console.log('技能列表更新完成，当前列表长度:', skillsList.length);
+			} else {
+				console.error('获取技能列表失败:', result);
+				const errorMsg = result?.errMsg || '获取技能列表失败';
+				uni.showToast({
+					title: errorMsg,
+					icon: 'none'
+				});
+				loadMoreStatus.value = 'more';
+			}
+		} catch (error) {
+			console.error('获取技能列表异常:', error);
+			console.error('异常详情:', error.message, error.stack);
+			uni.showToast({
+				title: '网络错误，请重试',
+				icon: 'none'
+			});
+			loadMoreStatus.value = 'more';
+		} finally {
+			isLoading.value = false;
+			console.log('获取技能列表流程结束');
+		}
+	};
+
+	// 搜索技能
+	const searchSkills = async () => {
+		if (!skillsCloudObj) return;
+		
+		try {
+			isLoading.value = true;
+			
+			const params = {
+				keyword: searchKeyword.value.trim(),
+				category: currentFilter.value,
+				page: 1,
+				pageSize: pageSize.value
+			};
+
+			console.log('搜索参数:', params);
+			const result = await skillsCloudObj.searchSkills(searchKeyword.value.trim(), params);
+			console.log('搜索结果:', result);
+			
+			if (result && result.errCode === 0) {
+				const { list, hasMore: moreData } = result.data;
+				skillsList.splice(0, skillsList.length, ...list);
+				hasMore.value = moreData;
+				currentPage.value = 2;
+				loadMoreStatus.value = hasMore.value ? 'more' : 'noMore';
+			} else {
+				console.error('搜索失败:', result);
+				const errorMsg = result?.errMsg || '搜索失败';
+				uni.showToast({
+					title: errorMsg,
+					icon: 'none'
+				});
+			}
+		} catch (error) {
+			console.error('搜索异常:', error);
+			uni.showToast({
+				title: '搜索失败，请重试',
+				icon: 'none'
+			});
+		} finally {
+			isLoading.value = false;
+		}
+	};
 
 	// 搜索输入
 	const onSearchInput = (e) => {
@@ -241,17 +285,24 @@
 
 	// 执行搜索
 	const onSearch = () => {
-		console.log('搜索关键词:', searchKeyword.value);
-		// 这里可以调用搜索API
+		if (searchKeyword.value.trim()) {
+			searchSkills();
+		} else {
+			getSkillsList(true);
+		}
 	};
 
 	// 选择筛选条件
 	const selectFilter = (value) => {
 		currentFilter.value = value;
+		getSkillsList(true);
 	};
 
 	// 格式化时间
-	const formatTime = (date) => {
+	const formatTime = (dateStr) => {
+		if (!dateStr) return '';
+		
+		const date = new Date(dateStr);
 		const now = new Date();
 		const diff = now - date;
 		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -268,9 +319,9 @@
 	};
 
 	// 预览图片
-	const previewImage = (images, current) => {
+	const previewImage = (urls, current) => {
 		uni.previewImage({
-			urls: images,
+			urls: urls,
 			current: current
 		});
 	};
@@ -278,7 +329,7 @@
 	// 跳转到技能详情
 	const goToSkillDetail = (skill) => {
 		uni.navigateTo({
-			url: `/pages/skills/skill-detail?id=${skill.id}`
+			url: `/pages/skills/skill-detail?id=${skill._id}`
 		});
 	};
 
@@ -289,58 +340,64 @@
 		});
 	};
 
+	// 页面触底加载更多
+	onReachBottom(() => {
+		if (hasMore.value && !isLoading.value) {
+			getSkillsList(false);
+		}
+	});
+
+	// 页面加载时初始化
 	onMounted(() => {
-		console.log('技能台页面加载完成');
+		initCloudObj();
+		if (skillsCloudObj) {
+			getCategories();
+			getSkillsList(true);
+		}
 	});
 </script>
 
 <style scoped>
 	.container {
-		background-color: #f8f8f8;
+		background-color: #f5f5f5;
 		min-height: 100vh;
-		padding-bottom: 120rpx;
+		padding-bottom: 100rpx;
 	}
 
-	/* 搜索区域 */
 	.search-section {
 		background-color: white;
-		padding: 24rpx;
-		margin-bottom: 16rpx;
+		padding: 20rpx;
+		margin-bottom: 20rpx;
 	}
 
 	.search-box {
 		display: flex;
 		align-items: center;
-		background-color: #f5f5f5;
+		background-color: #f8f8f8;
 		border-radius: 50rpx;
-		padding: 16rpx 24rpx;
+		padding: 0 30rpx;
+		height: 80rpx;
 	}
 
 	.search-input {
 		flex: 1;
-		margin-left: 16rpx;
+		margin-left: 20rpx;
 		font-size: 28rpx;
-		color: #333;
 	}
 
 	.search-btn {
 		background-color: #007aff;
 		color: white;
-		padding: 12rpx 24rpx;
+		padding: 10rpx 20rpx;
 		border-radius: 30rpx;
-		margin-left: 16rpx;
-	}
-
-	.search-btn text {
 		font-size: 24rpx;
-		color: white;
+		margin-left: 20rpx;
 	}
 
-	/* 筛选区域 */
 	.filter-section {
 		background-color: white;
-		padding: 24rpx 0;
-		margin-bottom: 16rpx;
+		padding: 20rpx 0;
+		margin-bottom: 20rpx;
 	}
 
 	.filter-scroll {
@@ -349,13 +406,12 @@
 
 	.filter-item {
 		display: inline-block;
-		padding: 12rpx 24rpx;
-		margin: 0 12rpx;
-		border-radius: 30rpx;
-		background-color: #f5f5f5;
+		padding: 15rpx 30rpx;
+		margin: 0 10rpx;
+		background-color: #f8f8f8;
+		border-radius: 40rpx;
+		font-size: 26rpx;
 		color: #666;
-		font-size: 24rpx;
-		transition: all 0.3s;
 	}
 
 	.filter-item.active {
@@ -363,20 +419,18 @@
 		color: white;
 	}
 
-	/* 技能列表 */
 	.skills-list {
-		padding: 0 24rpx;
+		padding: 0 20rpx;
 	}
 
 	.skill-item {
 		background-color: white;
-		border-radius: 16rpx;
-		padding: 24rpx;
-		margin-bottom: 24rpx;
-		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+		border-radius: 20rpx;
+		padding: 30rpx;
+		margin-bottom: 20rpx;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
 	}
 
-	/* 技能头部 */
 	.skill-header {
 		display: flex;
 		align-items: center;
@@ -386,7 +440,7 @@
 	.user-avatar {
 		width: 80rpx;
 		height: 80rpx;
-		border-radius: 50%;
+		border-radius: 40rpx;
 		margin-right: 20rpx;
 	}
 
@@ -396,21 +450,20 @@
 
 	.username {
 		font-size: 28rpx;
-		font-weight: 600;
+		font-weight: bold;
 		color: #333;
-		display: block;
-		margin-bottom: 8rpx;
 	}
 
 	.location {
 		display: flex;
 		align-items: center;
+		margin-top: 10rpx;
 	}
 
 	.location-text {
-		font-size: 22rpx;
+		font-size: 24rpx;
 		color: #999;
-		margin-left: 8rpx;
+		margin-left: 5rpx;
 	}
 
 	.price {
@@ -419,33 +472,32 @@
 
 	.price-text {
 		font-size: 32rpx;
-		font-weight: 700;
+		font-weight: bold;
 		color: #ff4757;
 	}
 
 	.price-unit {
-		font-size: 22rpx;
+		font-size: 24rpx;
 		color: #999;
 	}
 
-	/* 技能图片 */
 	.skill-images {
 		display: flex;
 		margin-bottom: 20rpx;
-		gap: 12rpx;
+		gap: 10rpx;
 	}
 
 	.skill-image {
 		width: 200rpx;
 		height: 150rpx;
-		border-radius: 12rpx;
+		border-radius: 10rpx;
 	}
 
 	.more-images {
 		width: 200rpx;
 		height: 150rpx;
-		border-radius: 12rpx;
-		background-color: rgba(0, 0, 0, 0.6);
+		background-color: rgba(0, 0, 0, 0.5);
+		border-radius: 10rpx;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -453,42 +505,38 @@
 		font-size: 24rpx;
 	}
 
-	/* 技能内容 */
 	.skill-content {
 		margin-bottom: 20rpx;
 	}
 
 	.skill-title {
-		font-size: 30rpx;
-		font-weight: 600;
+		font-size: 32rpx;
+		font-weight: bold;
 		color: #333;
-		display: block;
-		margin-bottom: 12rpx;
+		margin-bottom: 10rpx;
 	}
 
 	.skill-desc {
-		font-size: 26rpx;
+		font-size: 28rpx;
 		color: #666;
 		line-height: 1.5;
-		display: block;
-		margin-bottom: 16rpx;
+		margin-bottom: 15rpx;
 	}
 
 	.skill-tags {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 12rpx;
+		gap: 10rpx;
 	}
 
 	.tag {
-		background-color: #e8f4fd;
-		color: #007aff;
+		background-color: #e3f2fd;
+		color: #1976d2;
 		padding: 8rpx 16rpx;
 		border-radius: 20rpx;
-		font-size: 22rpx;
+		font-size: 24rpx;
 	}
 
-	/* 技能底部 */
 	.skill-footer {
 		display: flex;
 		justify-content: space-between;
@@ -501,47 +549,44 @@
 	}
 
 	.rating-text {
-		font-size: 24rpx;
+		font-size: 26rpx;
 		color: #333;
-		margin-left: 8rpx;
+		margin: 0 10rpx;
 	}
 
 	.review-count {
-		font-size: 22rpx;
+		font-size: 24rpx;
 		color: #999;
-		margin-left: 8rpx;
 	}
 
 	.publish-time {
-		font-size: 22rpx;
+		font-size: 24rpx;
 		color: #999;
 	}
 
-	/* 空状态 */
 	.empty-state {
 		text-align: center;
-		padding: 120rpx 40rpx;
+		padding: 100rpx 0;
 	}
 
 	.empty-text {
-		font-size: 28rpx;
-		color: #999;
 		display: block;
-		margin: 24rpx 0 12rpx;
+		font-size: 32rpx;
+		color: #999;
+		margin-top: 20rpx;
 	}
 
 	.empty-desc {
-		font-size: 24rpx;
-		color: #ccc;
 		display: block;
+		font-size: 26rpx;
+		color: #ccc;
+		margin-top: 10rpx;
 	}
 
-	/* 加载状态 */
 	.loading-state {
-		padding: 40rpx;
+		padding: 40rpx 0;
 	}
 
-	/* 添加技能按钮 */
 	.add-skill-btn {
 		position: fixed;
 		right: 40rpx;
@@ -549,11 +594,11 @@
 		width: 100rpx;
 		height: 100rpx;
 		background-color: #007aff;
-		border-radius: 50%;
+		border-radius: 50rpx;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		box-shadow: 0 8rpx 24rpx rgba(0, 122, 255, 0.3);
+		box-shadow: 0 4rpx 20rpx rgba(0, 122, 255, 0.3);
 		z-index: 999;
 	}
 </style>

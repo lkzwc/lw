@@ -1,0 +1,102 @@
+[
+  {
+    "title": "专业家电维修",
+    "description": "10年维修经验，擅长各种家电故障排除，价格公道，服务周到。提供上门服务，快速响应，质量保证。",
+    "category": "repair",
+    "location": "1号楼301",
+    "price": 50,
+    "priceUnit": "小时",
+    "tags": ["家电维修", "经验丰富", "价格实惠"],
+    "images": [],
+    "phone": "13800138001",
+    "wechat": "repair_master",
+    "userId": "demo_user_1",
+    "username": "张师傅",
+    "userAvatar": "",
+    "rating": 4.8,
+    "reviewCount": 23,
+    "viewCount": 156,
+    "status": 1,
+    "createTime": {
+      "$date": "2024-01-15T08:00:00.000Z"
+    },
+    "updateTime": {
+      "$date": "2024-01-15T08:00:00.000Z"
+    }
+  },
+  {
+    "title": "专业家政清洁",
+    "description": "提供家庭清洁、整理收纳服务，细致认真，让您的家焕然一新。多年经验，口碑良好。",
+    "category": "housekeeping",
+    "location": "2号楼205",
+    "price": 30,
+    "priceUnit": "小时",
+    "tags": ["家政清洁", "整理收纳", "细致认真"],
+    "images": [],
+    "phone": "13800138002",
+    "wechat": "clean_helper",
+    "userId": "demo_user_2",
+    "username": "李阿姨",
+    "userAvatar": "",
+    "rating": 4.9,
+    "reviewCount": 45,
+    "viewCount": 203,
+    "status": 1,
+    "createTime": {
+      "$date": "2024-01-20T09:30:00.000Z"
+    },
+    "updateTime": {
+      "$date": "2024-01-20T09:30:00.000Z"
+    }
+  },
+  {
+    "title": "小学数学辅导",
+    "description": "退休小学教师，30年教学经验，擅长小学数学辅导，因材施教，提高学习兴趣和成绩。",
+    "category": "education",
+    "location": "3号楼102",
+    "price": 80,
+    "priceUnit": "课时",
+    "tags": ["数学辅导", "经验丰富", "因材施教"],
+    "images": [],
+    "phone": "13800138003",
+    "wechat": "math_teacher",
+    "userId": "demo_user_3",
+    "username": "王老师",
+    "userAvatar": "",
+    "rating": 4.7,
+    "reviewCount": 18,
+    "viewCount": 89,
+    "status": 1,
+    "createTime": {
+      "$date": "2024-01-25T14:00:00.000Z"
+    },
+    "updateTime": {
+      "$date": "2024-01-25T14:00:00.000Z"
+    }
+  },
+  {
+    "title": "上门美甲服务",
+    "description": "专业美甲师，提供上门美甲服务，款式新颖，技术精湛。使用进口材料，健康安全。",
+    "category": "beauty",
+    "location": "4号楼508",
+    "price": 60,
+    "priceUnit": "次",
+    "tags": ["美甲服务", "上门服务", "款式新颖"],
+    "images": [],
+    "phone": "13800138004",
+    "wechat": "nail_artist",
+    "userId": "demo_user_4",
+    "username": "小美",
+    "userAvatar": "",
+    "rating": 4.6,
+    "reviewCount": 32,
+    "viewCount": 127,
+    "status": 1,
+    "createTime": {
+      "$date": "2024-02-01T16:20:00.000Z"
+    },
+    "updateTime": {
+      "$date": "2024-02-01T16:20:00.000Z"
+    }
+  }
+]

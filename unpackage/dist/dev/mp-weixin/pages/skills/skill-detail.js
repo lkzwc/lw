@@ -1,116 +1,170 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 if (!Array) {
+  const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
-  (_easycom_uni_icons2 + _easycom_uni_popup2)();
+  (_easycom_uni_load_more2 + _easycom_uni_icons2 + _easycom_uni_popup2)();
 }
+const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_popup)();
+  (_easycom_uni_load_more + _easycom_uni_icons + _easycom_uni_popup)();
 }
 const _sfc_main = {
   __name: "skill-detail",
   setup(__props) {
     const contactPopup = common_vendor.ref(null);
     const isCollected = common_vendor.ref(false);
-    const skillDetail = common_vendor.reactive({
-      id: 1,
-      username: "张师傅",
-      userAvatar: "https://via.placeholder.com/80x80/4A90E2/FFFFFF?text=张",
-      location: "1号楼301",
-      price: 50,
-      priceUnit: "小时",
-      title: "专业家电维修",
-      description: "10年维修经验，擅长各种家电故障排除，价格公道，服务周到。提供上门维修服务，包括冰箱、洗衣机、空调、电视等各类家电的维修保养。",
-      tags: ["家电维修", "经验丰富", "价格实惠", "上门服务"],
-      images: [
-        "https://via.placeholder.com/750x400/FF6B6B/FFFFFF?text=维修1",
-        "https://via.placeholder.com/750x400/4ECDC4/FFFFFF?text=维修2",
-        "https://via.placeholder.com/750x400/45B7D1/FFFFFF?text=维修3"
-      ],
-      rating: 4.8,
-      reviewCount: 23,
-      createTime: /* @__PURE__ */ new Date("2024-01-15"),
-      category: "repair",
-      phone: "13800138000",
-      wechat: "zhangshifu123",
-      skillCount: 3,
-      goodRate: "98%"
+    const isLoading = common_vendor.ref(true);
+    const skillId = common_vendor.ref("");
+    const skillDetail = common_vendor.reactive({});
+    const relatedSkills = common_vendor.reactive([]);
+    let skillsCloudObj = null;
+    common_vendor.onLoad((options) => {
+      common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:167", "页面加载参数:", options);
+      if (options && options.id) {
+        skillId.value = options.id;
+        common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:170", "获取到技能ID:", skillId.value);
+      } else {
+        common_vendor.index.__f__("error", "at pages/skills/skill-detail.vue:172", "未获取到技能ID参数");
+      }
     });
-    const reviews = common_vendor.reactive([
-      {
-        id: 1,
-        username: "李女士",
-        userAvatar: "https://via.placeholder.com/60x60/FF69B4/FFFFFF?text=李",
-        rating: 5,
-        content: "张师傅技术很好，态度也很好，修好了我家的洗衣机，价格合理，推荐！",
-        createTime: /* @__PURE__ */ new Date("2024-01-20")
-      },
-      {
-        id: 2,
-        username: "王先生",
-        userAvatar: "https://via.placeholder.com/60x60/32CD32/FFFFFF?text=王",
-        rating: 4,
-        content: "服务及时，修理技术专业，就是时间稍微长了一点。",
-        createTime: /* @__PURE__ */ new Date("2024-01-18")
+    const initCloudObj = () => {
+      try {
+        skillsCloudObj = common_vendor.nr.importObject("skills");
+        common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:180", "云对象初始化成功");
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/skills/skill-detail.vue:182", "初始化云对象失败:", error);
+        common_vendor.index.showToast({
+          title: "服务初始化失败",
+          icon: "none"
+        });
       }
-    ]);
-    const relatedSkills = common_vendor.reactive([
-      {
-        id: 2,
-        title: "专业家政清洁",
-        price: 30,
-        priceUnit: "小时",
-        images: ["https://via.placeholder.com/200x150/96CEB4/FFFFFF?text=清洁"]
-      },
-      {
-        id: 3,
-        title: "小学数学辅导",
-        price: 80,
-        priceUnit: "课时",
-        images: ["https://via.placeholder.com/200x150/DDA0DD/FFFFFF?text=教学"]
+    };
+    const loadSkillDetail = async () => {
+      common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:192", "开始加载技能详情, skillId:", skillId.value);
+      if (!skillId.value) {
+        common_vendor.index.__f__("error", "at pages/skills/skill-detail.vue:195", "技能ID为空，无法加载详情");
+        common_vendor.index.showToast({
+          title: "技能ID不能为空",
+          icon: "none"
+        });
+        isLoading.value = false;
+        return;
       }
-    ]);
-    const formatDate = (date) => {
+      if (!skillsCloudObj) {
+        common_vendor.index.__f__("error", "at pages/skills/skill-detail.vue:205", "云对象未初始化");
+        common_vendor.index.showToast({
+          title: "服务未初始化",
+          icon: "none"
+        });
+        isLoading.value = false;
+        return;
+      }
+      try {
+        isLoading.value = true;
+        common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:216", "调用云对象获取技能详情...");
+        const result = await skillsCloudObj.getSkillDetail(skillId.value);
+        common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:219", "云对象返回结果:", result);
+        if (result && result.errCode === 0) {
+          common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:222", "获取技能详情成功:", result.data);
+          Object.keys(skillDetail).forEach((key) => {
+            delete skillDetail[key];
+          });
+          Object.assign(skillDetail, result.data);
+          loadRelatedSkills();
+        } else {
+          common_vendor.index.__f__("error", "at pages/skills/skill-detail.vue:232", "获取技能详情失败:", result);
+          const errorMsg = (result == null ? void 0 : result.errMsg) || "获取技能详情失败";
+          common_vendor.index.showToast({
+            title: errorMsg,
+            icon: "none"
+          });
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/skills/skill-detail.vue:240", "获取技能详情异常:", error);
+        common_vendor.index.__f__("error", "at pages/skills/skill-detail.vue:241", "异常详情:", error.message, error.stack);
+        common_vendor.index.showToast({
+          title: "网络错误，请重试",
+          icon: "none"
+        });
+      } finally {
+        isLoading.value = false;
+        common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:248", "技能详情加载流程结束");
+      }
+    };
+    const loadRelatedSkills = async () => {
+      if (!skillsCloudObj || !skillDetail.category) {
+        common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:255", "跳过相关技能加载，云对象或分类信息缺失");
+        return;
+      }
+      try {
+        common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:260", "开始加载相关技能推荐...");
+        const result = await skillsCloudObj.getSkillsList({
+          category: skillDetail.category,
+          page: 1,
+          pageSize: 5
+        });
+        if (result && result.errCode === 0) {
+          const filteredSkills = result.data.list.filter((skill) => skill._id !== skillId.value);
+          relatedSkills.splice(0, relatedSkills.length, ...filteredSkills.slice(0, 4));
+          common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:271", "相关技能加载成功，数量:", relatedSkills.length);
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/skills/skill-detail.vue:274", "获取相关技能失败:", error);
+      }
+    };
+    const formatDate = (dateStr) => {
+      if (!dateStr)
+        return "";
+      const date = new Date(dateStr);
       return date.toLocaleDateString();
     };
-    const formatTime = (date) => {
-      const now = /* @__PURE__ */ new Date();
-      const diff = now - date;
-      const days = Math.floor(diff / (1e3 * 60 * 60 * 24));
-      if (days === 0) {
-        return "今天";
-      } else if (days === 1) {
-        return "昨天";
-      } else if (days < 7) {
-        return `${days}天前`;
-      } else {
-        return date.toLocaleDateString();
-      }
-    };
     const previewImage = (current) => {
+      if (!skillDetail.images || skillDetail.images.length === 0)
+        return;
       common_vendor.index.previewImage({
         urls: skillDetail.images,
         current
       });
     };
     const showContactModal = () => {
-      contactPopup.value.open();
+      var _a;
+      if (!skillDetail.phone && !skillDetail.wechat) {
+        common_vendor.index.showToast({
+          title: "暂无联系方式",
+          icon: "none"
+        });
+        return;
+      }
+      (_a = contactPopup.value) == null ? void 0 : _a.open();
     };
     const closeContactModal = () => {
-      contactPopup.value.close();
+      var _a;
+      (_a = contactPopup.value) == null ? void 0 : _a.close();
     };
     const makePhoneCall = () => {
+      if (!skillDetail.phone)
+        return;
       common_vendor.index.makePhoneCall({
         phoneNumber: skillDetail.phone,
         success: () => {
           closeContactModal();
+        },
+        fail: (error) => {
+          common_vendor.index.__f__("error", "at pages/skills/skill-detail.vue:323", "拨打电话失败:", error);
+          common_vendor.index.showToast({
+            title: "拨打电话失败",
+            icon: "none"
+          });
         }
       });
     };
     const copyWechat = () => {
+      if (!skillDetail.wechat)
+        return;
       common_vendor.index.setClipboardData({
         data: skillDetail.wechat,
         success: () => {
@@ -119,57 +173,121 @@ const _sfc_main = {
             icon: "success"
           });
           closeContactModal();
+        },
+        fail: (error) => {
+          common_vendor.index.__f__("error", "at pages/skills/skill-detail.vue:346", "复制微信号失败:", error);
+          common_vendor.index.showToast({
+            title: "复制失败",
+            icon: "none"
+          });
         }
       });
     };
-    const toggleCollect = () => {
-      isCollected.value = !isCollected.value;
-      common_vendor.index.showToast({
-        title: isCollected.value ? "已收藏" : "已取消收藏",
-        icon: "success"
-      });
+    const toggleCollect = async () => {
+      if (!skillsCloudObj) {
+        common_vendor.index.showToast({
+          title: "服务未初始化",
+          icon: "none"
+        });
+        return;
+      }
+      try {
+        if (isCollected.value) {
+          const result = await skillsCloudObj.uncollectSkill(skillId.value);
+          if (result.errCode === 0) {
+            isCollected.value = false;
+            common_vendor.index.showToast({
+              title: "已取消收藏",
+              icon: "success"
+            });
+          } else {
+            common_vendor.index.showToast({
+              title: result.errMsg || "取消收藏失败",
+              icon: "none"
+            });
+          }
+        } else {
+          const result = await skillsCloudObj.collectSkill(skillId.value);
+          if (result.errCode === 0) {
+            isCollected.value = true;
+            common_vendor.index.showToast({
+              title: "已收藏",
+              icon: "success"
+            });
+          } else {
+            common_vendor.index.showToast({
+              title: result.errMsg || "收藏失败",
+              icon: "none"
+            });
+          }
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/skills/skill-detail.vue:398", "收藏操作失败:", error);
+        common_vendor.index.showToast({
+          title: "操作失败，请重试",
+          icon: "none"
+        });
+      }
     };
     const shareSkill = () => {
       common_vendor.index.share({
         provider: "weixin",
         scene: "WXSceneSession",
         type: 0,
-        href: "",
+        href: `pages/skills/skill-detail?id=${skillId.value}`,
         title: skillDetail.title,
         summary: skillDetail.description,
-        imageUrl: skillDetail.images[0],
+        imageUrl: skillDetail.images && skillDetail.images[0] ? skillDetail.images[0] : "",
         success: () => {
           common_vendor.index.showToast({
             title: "分享成功",
             icon: "success"
           });
+        },
+        fail: (error) => {
+          common_vendor.index.__f__("error", "at pages/skills/skill-detail.vue:423", "分享失败:", error);
+          const shareText = `${skillDetail.title} - ${skillDetail.description}`;
+          common_vendor.index.setClipboardData({
+            data: shareText,
+            success: () => {
+              common_vendor.index.showToast({
+                title: "内容已复制到剪贴板",
+                icon: "success"
+              });
+            }
+          });
         }
       });
     };
     const goToSkillDetail = (id) => {
-      common_vendor.index.redirectTo({
+      common_vendor.index.navigateTo({
         url: `/pages/skills/skill-detail?id=${id}`
       });
     };
-    const goToAllReviews = () => {
-      common_vendor.index.showToast({
-        title: "查看全部评价功能开发中",
-        icon: "none"
-      });
-    };
     common_vendor.onMounted(() => {
-      const pages = getCurrentPages();
-      const currentPage = pages[pages.length - 1];
-      const options = currentPage.options;
-      if (options.id) {
-        common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:340", "技能ID:", options.id);
-      }
+      common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:468", "页面挂载，开始初始化...");
+      initCloudObj();
+      setTimeout(() => {
+        if (skillsCloudObj && skillId.value) {
+          common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:476", "开始加载技能详情...");
+          loadSkillDetail();
+        } else {
+          common_vendor.index.__f__("log", "at pages/skills/skill-detail.vue:481", "云对象或技能ID缺失，停止加载");
+          isLoading.value = false;
+        }
+      }, 100);
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: skillDetail.images && skillDetail.images.length > 0
+        a: isLoading.value
+      }, isLoading.value ? {
+        b: common_vendor.p({
+          status: "loading"
+        })
+      } : skillDetail._id ? common_vendor.e({
+        d: skillDetail.images && skillDetail.images.length > 0
       }, skillDetail.images && skillDetail.images.length > 0 ? {
-        b: common_vendor.f(skillDetail.images, (img, index, i0) => {
+        e: common_vendor.f(skillDetail.images, (img, index, i0) => {
           return {
             a: img,
             b: common_vendor.o(($event) => previewImage(index), index),
@@ -177,121 +295,112 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        c: common_vendor.t(skillDetail.title),
-        d: common_vendor.t(skillDetail.price),
-        e: common_vendor.t(skillDetail.priceUnit),
-        f: common_vendor.f(skillDetail.tags, (tag, index, i0) => {
+        f: common_vendor.t(skillDetail.title),
+        g: common_vendor.t(skillDetail.price),
+        h: common_vendor.t(skillDetail.priceUnit),
+        i: skillDetail.tags && skillDetail.tags.length > 0
+      }, skillDetail.tags && skillDetail.tags.length > 0 ? {
+        j: common_vendor.f(skillDetail.tags, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: index
           };
-        }),
-        g: common_vendor.t(skillDetail.description),
-        h: common_vendor.p({
+        })
+      } : {}, {
+        k: common_vendor.t(skillDetail.description),
+        l: common_vendor.p({
           type: "star-filled",
           size: "16",
           color: "#FFD700"
         }),
-        i: common_vendor.t(skillDetail.rating),
-        j: common_vendor.t(skillDetail.reviewCount),
-        k: common_vendor.t(formatDate(skillDetail.createTime)),
-        l: skillDetail.userAvatar,
-        m: common_vendor.t(skillDetail.username),
-        n: common_vendor.p({
+        m: common_vendor.t(skillDetail.rating),
+        n: common_vendor.t(skillDetail.reviewCount),
+        o: common_vendor.t(formatDate(skillDetail.createTime)),
+        p: skillDetail.userAvatar || "/static/default-avatar.png",
+        q: common_vendor.t(skillDetail.username),
+        r: common_vendor.p({
           type: "location",
           size: "14",
           color: "#999"
         }),
-        o: common_vendor.t(skillDetail.location),
-        p: common_vendor.t(skillDetail.skillCount || 1),
-        q: common_vendor.t(skillDetail.goodRate || "100%"),
-        r: common_vendor.p({
+        s: common_vendor.t(skillDetail.location),
+        t: common_vendor.t(skillDetail.viewCount || 0),
+        v: common_vendor.t(skillDetail.rating),
+        w: common_vendor.p({
           type: "chatbubble",
           size: "16",
           color: "#007aff"
         }),
-        s: common_vendor.o(showContactModal),
-        t: reviews.length > 0
-      }, reviews.length > 0 ? {
-        v: common_vendor.o(goToAllReviews),
-        w: common_vendor.f(reviews.slice(0, 3), (review, index, i0) => {
-          return {
-            a: review.userAvatar,
-            b: common_vendor.t(review.username),
-            c: common_vendor.f(5, (star, k1, i1) => {
-              return {
-                a: star,
-                b: "aae43d6e-3-" + i0 + "-" + i1,
-                c: common_vendor.p({
-                  type: "star-filled",
-                  size: "12",
-                  color: star <= review.rating ? "#FFD700" : "#E8E8E8"
-                })
-              };
-            }),
-            d: common_vendor.t(formatTime(review.createTime)),
-            e: common_vendor.t(review.content),
-            f: index
-          };
-        })
-      } : {}, {
-        x: relatedSkills.length > 0
+        x: common_vendor.o(showContactModal),
+        y: relatedSkills.length > 0
       }, relatedSkills.length > 0 ? {
-        y: common_vendor.f(relatedSkills, (skill, index, i0) => {
+        z: common_vendor.f(relatedSkills, (skill, index, i0) => {
           return {
-            a: skill.images[0],
+            a: skill.images && skill.images[0] ? skill.images[0] : "/static/default-skill.png",
             b: common_vendor.t(skill.title),
             c: common_vendor.t(skill.price),
             d: common_vendor.t(skill.priceUnit),
-            e: skill.id,
-            f: common_vendor.o(($event) => goToSkillDetail(skill.id), skill.id)
+            e: skill._id,
+            f: common_vendor.o(($event) => goToSkillDetail(skill._id), skill._id)
           };
         })
       } : {}, {
-        z: common_vendor.p({
+        A: common_vendor.p({
           type: isCollected.value ? "heart-filled" : "heart",
           size: "20",
           color: isCollected.value ? "#ff4757" : "#666"
         }),
-        A: common_vendor.t(isCollected.value ? "已收藏" : "收藏"),
-        B: common_vendor.o(toggleCollect),
-        C: common_vendor.p({
+        B: common_vendor.t(isCollected.value ? "已收藏" : "收藏"),
+        C: common_vendor.o(toggleCollect),
+        D: common_vendor.p({
           type: "redo",
           size: "20",
           color: "#666"
         }),
-        D: common_vendor.o(shareSkill),
-        E: common_vendor.o(showContactModal),
-        F: common_vendor.p({
+        E: common_vendor.o(shareSkill),
+        F: common_vendor.o(showContactModal)
+      }) : !isLoading.value ? {
+        H: common_vendor.p({
+          type: "info",
+          size: "60",
+          color: "#ccc"
+        }),
+        I: common_vendor.o(loadSkillDetail)
+      } : {}, {
+        c: skillDetail._id,
+        G: !isLoading.value,
+        J: common_vendor.p({
           type: "close",
           size: "20",
           color: "#999"
         }),
-        G: common_vendor.o(closeContactModal),
-        H: skillDetail.phone
+        K: common_vendor.o(closeContactModal),
+        L: skillDetail.phone
       }, skillDetail.phone ? {
-        I: common_vendor.p({
+        M: common_vendor.p({
           type: "phone",
           size: "24",
           color: "white"
         }),
-        J: common_vendor.t(skillDetail.phone),
-        K: common_vendor.o(makePhoneCall)
+        N: common_vendor.t(skillDetail.phone),
+        O: common_vendor.o(makePhoneCall)
       } : {}, {
-        L: skillDetail.wechat
+        P: skillDetail.wechat
       }, skillDetail.wechat ? {
-        M: common_vendor.p({
+        Q: common_vendor.p({
           type: "weixin",
           size: "24",
           color: "white"
         }),
-        N: common_vendor.t(skillDetail.wechat),
-        O: common_vendor.o(copyWechat)
+        R: common_vendor.t(skillDetail.wechat),
+        S: common_vendor.o(copyWechat)
       } : {}, {
-        P: common_vendor.sr(contactPopup, "aae43d6e-6", {
+        T: !skillDetail.phone && !skillDetail.wechat
+      }, !skillDetail.phone && !skillDetail.wechat ? {} : {}, {
+        U: common_vendor.sr(contactPopup, "aae43d6e-7", {
           "k": "contactPopup"
         }),
-        Q: common_vendor.p({
+        V: common_vendor.p({
           type: "bottom"
         })
       });

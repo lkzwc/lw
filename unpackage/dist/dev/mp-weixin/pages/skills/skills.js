@@ -16,118 +16,156 @@ const _sfc_main = {
     const searchKeyword = common_vendor.ref("");
     const currentFilter = common_vendor.ref("all");
     const isLoading = common_vendor.ref(false);
-    const filterList = common_vendor.reactive([
-      { label: "全部", value: "all" },
-      { label: "家政服务", value: "housekeeping" },
-      { label: "维修安装", value: "repair" },
-      { label: "教育培训", value: "education" },
-      { label: "美容美发", value: "beauty" },
-      { label: "健康护理", value: "health" },
-      { label: "其他服务", value: "other" }
-    ]);
-    const skillsList = common_vendor.reactive([
-      {
-        id: 1,
-        username: "张师傅",
-        userAvatar: "https://via.placeholder.com/80x80/4A90E2/FFFFFF?text=张",
-        location: "1号楼301",
-        price: 50,
-        priceUnit: "小时",
-        title: "专业家电维修",
-        description: "10年维修经验，擅长各种家电故障排除，价格公道，服务周到",
-        tags: ["家电维修", "经验丰富", "价格实惠"],
-        images: [
-          "https://via.placeholder.com/200x150/FF6B6B/FFFFFF?text=维修1",
-          "https://via.placeholder.com/200x150/4ECDC4/FFFFFF?text=维修2",
-          "https://via.placeholder.com/200x150/45B7D1/FFFFFF?text=维修3"
-        ],
-        rating: 4.8,
-        reviewCount: 23,
-        createTime: /* @__PURE__ */ new Date("2024-01-15"),
-        category: "repair"
-      },
-      {
-        id: 2,
-        username: "李阿姨",
-        userAvatar: "https://via.placeholder.com/80x80/FF6B6B/FFFFFF?text=李",
-        location: "2号楼205",
-        price: 30,
-        priceUnit: "小时",
-        title: "专业家政清洁",
-        description: "提供家庭清洁、整理收纳服务，细致认真，让您的家焕然一新",
-        tags: ["家政清洁", "整理收纳", "细致认真"],
-        images: [
-          "https://via.placeholder.com/200x150/96CEB4/FFFFFF?text=清洁1",
-          "https://via.placeholder.com/200x150/FFEAA7/FFFFFF?text=清洁2"
-        ],
-        rating: 4.9,
-        reviewCount: 45,
-        createTime: /* @__PURE__ */ new Date("2024-01-20"),
-        category: "housekeeping"
-      },
-      {
-        id: 3,
-        username: "王老师",
-        userAvatar: "https://via.placeholder.com/80x80/A8E6CF/FFFFFF?text=王",
-        location: "3号楼102",
-        price: 80,
-        priceUnit: "课时",
-        title: "小学数学辅导",
-        description: "退休小学教师，30年教学经验，擅长小学数学辅导，因材施教",
-        tags: ["数学辅导", "经验丰富", "因材施教"],
-        images: [
-          "https://via.placeholder.com/200x150/DDA0DD/FFFFFF?text=教学1"
-        ],
-        rating: 4.7,
-        reviewCount: 18,
-        createTime: /* @__PURE__ */ new Date("2024-01-25"),
-        category: "education"
-      },
-      {
-        id: 4,
-        username: "小美",
-        userAvatar: "https://via.placeholder.com/80x80/FFB6C1/FFFFFF?text=美",
-        location: "4号楼508",
-        price: 60,
-        priceUnit: "次",
-        title: "上门美甲服务",
-        description: "专业美甲师，提供上门美甲服务，款式新颖，技术精湛",
-        tags: ["美甲服务", "上门服务", "款式新颖"],
-        images: [
-          "https://via.placeholder.com/200x150/FF69B4/FFFFFF?text=美甲1",
-          "https://via.placeholder.com/200x150/DA70D6/FFFFFF?text=美甲2",
-          "https://via.placeholder.com/200x150/BA55D3/FFFFFF?text=美甲3",
-          "https://via.placeholder.com/200x150/9370DB/FFFFFF?text=美甲4"
-        ],
-        rating: 4.6,
-        reviewCount: 32,
-        createTime: /* @__PURE__ */ new Date("2024-02-01"),
-        category: "beauty"
+    const loadMoreStatus = common_vendor.ref("more");
+    const currentPage = common_vendor.ref(1);
+    const pageSize = common_vendor.ref(10);
+    const hasMore = common_vendor.ref(true);
+    const skillsList = common_vendor.reactive([]);
+    const filterList = common_vendor.reactive([]);
+    let skillsCloudObj = null;
+    const initCloudObj = () => {
+      try {
+        skillsCloudObj = common_vendor.nr.importObject("skills");
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/skills/skills.vue:139", "初始化云对象失败:", error);
+        common_vendor.index.showToast({
+          title: "服务初始化失败",
+          icon: "none"
+        });
       }
-    ]);
-    const filteredSkills = common_vendor.computed(() => {
-      let result = skillsList;
-      if (currentFilter.value !== "all") {
-        result = result.filter((skill) => skill.category === currentFilter.value);
+    };
+    const getCategories = async () => {
+      try {
+        const result = await skillsCloudObj.getCategories();
+        if (result.errCode === 0) {
+          filterList.splice(0, filterList.length, ...result.data);
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/skills/skills.vue:155", "获取分类失败:", error);
       }
-      if (searchKeyword.value.trim()) {
-        const keyword = searchKeyword.value.toLowerCase();
-        result = result.filter(
-          (skill) => skill.title.toLowerCase().includes(keyword) || skill.description.toLowerCase().includes(keyword) || skill.username.toLowerCase().includes(keyword) || skill.location.toLowerCase().includes(keyword) || skill.tags.some((tag) => tag.toLowerCase().includes(keyword))
-        );
+    };
+    const getSkillsList = async (reset = false) => {
+      if (isLoading.value)
+        return;
+      common_vendor.index.__f__("log", "at pages/skills/skills.vue:163", "开始获取技能列表, reset:", reset);
+      try {
+        isLoading.value = true;
+        loadMoreStatus.value = "loading";
+        if (reset) {
+          currentPage.value = 1;
+          hasMore.value = true;
+        }
+        const params = {
+          keyword: searchKeyword.value.trim(),
+          category: currentFilter.value,
+          page: currentPage.value,
+          pageSize: pageSize.value
+        };
+        common_vendor.index.__f__("log", "at pages/skills/skills.vue:181", "调用云对象参数:", params);
+        common_vendor.index.__f__("log", "at pages/skills/skills.vue:182", "云对象实例状态:", skillsCloudObj ? "已初始化" : "未初始化");
+        if (!skillsCloudObj) {
+          common_vendor.index.__f__("error", "at pages/skills/skills.vue:185", "云对象未初始化");
+          common_vendor.index.showToast({
+            title: "服务未初始化，请重试",
+            icon: "none"
+          });
+          return;
+        }
+        common_vendor.index.__f__("log", "at pages/skills/skills.vue:193", "准备调用云对象方法...");
+        const result = await skillsCloudObj.getSkillsList(params);
+        common_vendor.index.__f__("log", "at pages/skills/skills.vue:195", "云对象返回结果:", result);
+        if (result && result.errCode === 0) {
+          common_vendor.index.__f__("log", "at pages/skills/skills.vue:198", "获取成功，数据:", result.data);
+          const { list, hasMore: moreData } = result.data;
+          if (reset) {
+            skillsList.splice(0, skillsList.length, ...list);
+          } else {
+            skillsList.push(...list);
+          }
+          hasMore.value = moreData;
+          loadMoreStatus.value = hasMore.value ? "more" : "noMore";
+          if (list.length > 0) {
+            currentPage.value++;
+          }
+          common_vendor.index.__f__("log", "at pages/skills/skills.vue:214", "技能列表更新完成，当前列表长度:", skillsList.length);
+        } else {
+          common_vendor.index.__f__("error", "at pages/skills/skills.vue:216", "获取技能列表失败:", result);
+          const errorMsg = (result == null ? void 0 : result.errMsg) || "获取技能列表失败";
+          common_vendor.index.showToast({
+            title: errorMsg,
+            icon: "none"
+          });
+          loadMoreStatus.value = "more";
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/skills/skills.vue:225", "获取技能列表异常:", error);
+        common_vendor.index.__f__("error", "at pages/skills/skills.vue:226", "异常详情:", error.message, error.stack);
+        common_vendor.index.showToast({
+          title: "网络错误，请重试",
+          icon: "none"
+        });
+        loadMoreStatus.value = "more";
+      } finally {
+        isLoading.value = false;
+        common_vendor.index.__f__("log", "at pages/skills/skills.vue:234", "获取技能列表流程结束");
       }
-      return result;
-    });
+    };
+    const searchSkills = async () => {
+      if (!skillsCloudObj)
+        return;
+      try {
+        isLoading.value = true;
+        const params = {
+          keyword: searchKeyword.value.trim(),
+          category: currentFilter.value,
+          page: 1,
+          pageSize: pageSize.value
+        };
+        common_vendor.index.__f__("log", "at pages/skills/skills.vue:252", "搜索参数:", params);
+        const result = await skillsCloudObj.searchSkills(searchKeyword.value.trim(), params);
+        common_vendor.index.__f__("log", "at pages/skills/skills.vue:254", "搜索结果:", result);
+        if (result && result.errCode === 0) {
+          const { list, hasMore: moreData } = result.data;
+          skillsList.splice(0, skillsList.length, ...list);
+          hasMore.value = moreData;
+          currentPage.value = 2;
+          loadMoreStatus.value = hasMore.value ? "more" : "noMore";
+        } else {
+          common_vendor.index.__f__("error", "at pages/skills/skills.vue:263", "搜索失败:", result);
+          const errorMsg = (result == null ? void 0 : result.errMsg) || "搜索失败";
+          common_vendor.index.showToast({
+            title: errorMsg,
+            icon: "none"
+          });
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/skills/skills.vue:271", "搜索异常:", error);
+        common_vendor.index.showToast({
+          title: "搜索失败，请重试",
+          icon: "none"
+        });
+      } finally {
+        isLoading.value = false;
+      }
+    };
     const onSearchInput = (e) => {
       searchKeyword.value = e.detail.value;
     };
     const onSearch = () => {
-      common_vendor.index.__f__("log", "at pages/skills/skills.vue:244", "搜索关键词:", searchKeyword.value);
+      if (searchKeyword.value.trim()) {
+        searchSkills();
+      } else {
+        getSkillsList(true);
+      }
     };
     const selectFilter = (value) => {
       currentFilter.value = value;
+      getSkillsList(true);
     };
-    const formatTime = (date) => {
+    const formatTime = (dateStr) => {
+      if (!dateStr)
+        return "";
+      const date = new Date(dateStr);
       const now = /* @__PURE__ */ new Date();
       const diff = now - date;
       const days = Math.floor(diff / (1e3 * 60 * 60 * 24));
@@ -141,15 +179,15 @@ const _sfc_main = {
         return date.toLocaleDateString();
       }
     };
-    const previewImage = (images, current) => {
+    const previewImage = (urls, current) => {
       common_vendor.index.previewImage({
-        urls: images,
+        urls,
         current
       });
     };
     const goToSkillDetail = (skill) => {
       common_vendor.index.navigateTo({
-        url: `/pages/skills/skill-detail?id=${skill.id}`
+        url: `/pages/skills/skill-detail?id=${skill._id}`
       });
     };
     const goToAddSkill = () => {
@@ -157,8 +195,17 @@ const _sfc_main = {
         url: "/pages/skills/add-skill"
       });
     };
+    common_vendor.onReachBottom(() => {
+      if (hasMore.value && !isLoading.value) {
+        getSkillsList(false);
+      }
+    });
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/skills/skills.vue:293", "技能台页面加载完成");
+      initCloudObj();
+      if (skillsCloudObj) {
+        getCategories();
+        getSkillsList(true);
+      }
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -182,9 +229,9 @@ const _sfc_main = {
             d: common_vendor.o(($event) => selectFilter(item.value), index)
           };
         }),
-        h: common_vendor.f(filteredSkills.value, (skill, index, i0) => {
+        h: common_vendor.f(skillsList, (skill, index, i0) => {
           return common_vendor.e({
-            a: skill.userAvatar,
+            a: skill.userAvatar || "/static/default-avatar.png",
             b: common_vendor.t(skill.username),
             c: "1c7c41d0-1-" + i0,
             d: common_vendor.t(skill.location),
@@ -215,8 +262,8 @@ const _sfc_main = {
             o: common_vendor.t(skill.rating),
             p: common_vendor.t(skill.reviewCount),
             q: common_vendor.t(formatTime(skill.createTime)),
-            r: skill.id,
-            s: common_vendor.o(($event) => goToSkillDetail(skill), skill.id)
+            r: skill._id,
+            s: common_vendor.o(($event) => goToSkillDetail(skill), skill._id)
           });
         }),
         i: common_vendor.p({
@@ -229,8 +276,8 @@ const _sfc_main = {
           size: "14",
           color: "#FFD700"
         }),
-        k: filteredSkills.value.length === 0 && !isLoading.value
-      }, filteredSkills.value.length === 0 && !isLoading.value ? {
+        k: skillsList.length === 0 && !isLoading.value
+      }, skillsList.length === 0 && !isLoading.value ? {
         l: common_vendor.p({
           type: "info",
           size: "60",
@@ -240,7 +287,7 @@ const _sfc_main = {
         m: isLoading.value
       }, isLoading.value ? {
         n: common_vendor.p({
-          status: "loading"
+          status: loadMoreStatus.value
         })
       } : {}, {
         o: common_vendor.p({

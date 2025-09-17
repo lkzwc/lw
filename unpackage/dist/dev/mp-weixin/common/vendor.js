@@ -2886,21 +2886,21 @@ function injectHook(type, hook, target = currentInstance, prepend = false) {
     );
   }
 }
-const createHook = (lifecycle) => (hook, target = currentInstance) => (
+const createHook$1 = (lifecycle) => (hook, target = currentInstance) => (
   // post-create lifecycle registrations are noops during SSR (except for serverPrefetch)
   (!isInSSRComponentSetup || lifecycle === "sp") && injectHook(lifecycle, (...args) => hook(...args), target)
 );
-const onBeforeMount = createHook("bm");
-const onMounted = createHook("m");
-const onBeforeUpdate = createHook("bu");
-const onUpdated = createHook("u");
-const onBeforeUnmount = createHook("bum");
-const onUnmounted = createHook("um");
-const onServerPrefetch = createHook("sp");
-const onRenderTriggered = createHook(
+const onBeforeMount = createHook$1("bm");
+const onMounted = createHook$1("m");
+const onBeforeUpdate = createHook$1("bu");
+const onUpdated = createHook$1("u");
+const onBeforeUnmount = createHook$1("bum");
+const onUnmounted = createHook$1("um");
+const onServerPrefetch = createHook$1("sp");
+const onRenderTriggered = createHook$1(
   "rtg"
 );
-const onRenderTracked = createHook(
+const onRenderTracked = createHook$1(
   "rtc"
 );
 function onErrorCaptured(hook, target = currentInstance) {
@@ -8244,6 +8244,12 @@ const pages = [
     }
   },
   {
+    path: "pages/news/news",
+    style: {
+      navigationBarTitleText: "每日热榜"
+    }
+  },
+  {
     path: "pages/community/community",
     style: {
       navigationBarTitleText: "社区"
@@ -8621,7 +8627,7 @@ class v {
 function I(e2) {
   return e2 && "string" == typeof e2 ? JSON.parse(e2) : e2;
 }
-const S = true, b = "mp-weixin", T = I(define_process_env_UNI_SECURE_NETWORK_CONFIG_default), A = b, P = I('{"address":["127.0.0.1","30.205.108.126"],"servePort":7002,"debugPort":9001,"initialLaunchType":"local","skipFiles":["<node_internals>/**","/Applications/HBuilderX.app/Contents/HBuilderX/plugins/unicloud/**/*.js"]}'), C = I('[{"provider":"alipay","spaceName":"club","spaceId":"env-00jxu2733mom","spaceAppId":"2021004162626930","accessKey":"ffOgWNxrGEwp2mkE","secretKey":"GLr2GvPOP7KTeqcR"}]') || [];
+const S = true, b = "mp-weixin", T = I(define_process_env_UNI_SECURE_NETWORK_CONFIG_default), A = b, P = I('{"address":["127.0.0.1","30.205.108.126"],"servePort":7001,"debugPort":9000,"initialLaunchType":"local","skipFiles":["<node_internals>/**","/Applications/HBuilderX.app/Contents/HBuilderX/plugins/unicloud/**/*.js"]}'), C = I('[{"provider":"alipay","spaceName":"club","spaceId":"env-00jxu2733mom","spaceAppId":"2021004162626930","accessKey":"ffOgWNxrGEwp2mkE","secretKey":"GLr2GvPOP7KTeqcR"}]') || [];
 let O = "";
 try {
   O = "__UNI__62B76DE";
@@ -11171,6 +11177,11 @@ let tr = new class {
     ;
 })();
 var nr = tr;
+const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
+  !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
+};
+const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
+const onReachBottom = /* @__PURE__ */ createHook(ON_REACH_BOTTOM);
 exports._export_sfc = _export_sfc;
 exports.computed = computed;
 exports.createSSRApp = createSSRApp;
@@ -11181,7 +11192,9 @@ exports.initVueI18n = initVueI18n;
 exports.n = n$1;
 exports.nr = nr;
 exports.o = o$1;
+exports.onLoad = onLoad;
 exports.onMounted = onMounted;
+exports.onReachBottom = onReachBottom;
 exports.p = p$1;
 exports.reactive = reactive;
 exports.ref = ref;

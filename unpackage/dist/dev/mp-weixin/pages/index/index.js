@@ -15,6 +15,17 @@ const _sfc_main = {
   setup(__props) {
     const current = common_vendor.ref(0);
     const swiperCurrent = common_vendor.ref(0);
+    const weatherLoading = common_vendor.ref(true);
+    const isGettingWeather = common_vendor.ref(false);
+    const weatherData = common_vendor.reactive({
+      city: "天气",
+      weather: "晴",
+      temperature: "25",
+      winddirection: "东南",
+      windpower: "≤3",
+      humidity: "65"
+    });
+    let utilObj = null;
     const bannerList = common_vendor.reactive([
       {
         image: "https://via.placeholder.com/750x300/667eea/FFFFFF?text=欢迎使用hxzyL",
@@ -76,31 +87,122 @@ const _sfc_main = {
         type: "study"
       }
     ]);
+    const initCloudObj = () => {
+      try {
+        utilObj = common_vendor.nr.importObject("util");
+      } catch (error) {
+        common_vendor.index.showToast({
+          title: "云对象初始化失败",
+          icon: "none"
+        });
+      }
+    };
+    const getWeatherData = async () => {
+      if (isGettingWeather.value) {
+        return;
+      }
+      if (!utilObj) {
+        weatherLoading.value = false;
+        common_vendor.index.showToast({
+          title: "云对象未初始化",
+          icon: "none"
+        });
+        return;
+      }
+      try {
+        isGettingWeather.value = true;
+        weatherLoading.value = true;
+        const result = await utilObj.getWeatherByCityName();
+        if (result && result.errCode === 0 && result.data) {
+          Object.assign(weatherData, {
+            city: result.data.city,
+            weather: result.data.weather,
+            temperature: result.data.temperature,
+            winddirection: result.data.winddirection,
+            windpower: result.data.windpower,
+            humidity: result.data.humidity
+          });
+          common_vendor.index.showToast({
+            title: "天气数据加载成功",
+            icon: "success",
+            duration: 1500
+          });
+        } else {
+          common_vendor.index.showToast({
+            title: (result == null ? void 0 : result.errMsg) || "天气数据获取失败",
+            icon: "none"
+          });
+        }
+      } catch (error) {
+        Object.assign(weatherData, {
+          city: "西安市",
+          weather: "晴",
+          temperature: "22",
+          winddirection: "东南",
+          windpower: "≤3",
+          humidity: "60"
+        });
+        common_vendor.index.showToast({
+          title: "使用本地数据",
+          icon: "none"
+        });
+      } finally {
+        weatherLoading.value = false;
+        isGettingWeather.value = false;
+      }
+    };
+    const getWeatherIcon = (weather) => {
+      const weatherIconMap = {
+        "晴": "color",
+        "晴天": "color",
+        "多云": "cloud",
+        "少云": "cloud",
+        "阴": "cloud-filled",
+        "阴天": "cloud-filled",
+        "小雨": "cloud-drizzle",
+        "中雨": "cloud-rain",
+        "大雨": "cloud-rain-filled",
+        "暴雨": "cloud-rain-filled",
+        "雷阵雨": "cloud-lightning",
+        "雷雨": "cloud-lightning",
+        "雪": "cloud-snow",
+        "小雪": "cloud-snow",
+        "中雪": "cloud-snow",
+        "大雪": "cloud-snow",
+        "雾": "eye-slash",
+        "霾": "eye-slash-filled",
+        "沙尘暴": "eye-slash-filled",
+        "浮尘": "eye-slash",
+        "扬沙": "eye-slash"
+      };
+      return weatherIconMap[weather] || "cloud";
+    };
     const change = (e) => {
       current.value = e.detail.current;
       swiperCurrent.value = e.detail.current;
     };
     const clickBannerItem = (item) => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:168", "点击轮播图:", item);
       common_vendor.index.showToast({
         title: item.title,
         icon: "none"
       });
     };
     const clickMenuItem = (item) => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:177", "点击菜单:", item);
       switch (item.type) {
         case "news":
-          common_vendor.index.showToast({
-            title: "每日热榜功能开发中",
-            icon: "none"
+          common_vendor.index.navigateTo({
+            url: "/pages/news/news"
           });
           break;
         case "weather":
-          common_vendor.index.showToast({
-            title: "天气功能开发中",
-            icon: "none"
-          });
+          if (isGettingWeather.value) {
+            common_vendor.index.showToast({
+              title: "天气数据获取中...",
+              icon: "loading"
+            });
+          } else {
+            getWeatherData();
+          }
           break;
         case "tools":
           common_vendor.index.navigateTo({
@@ -138,10 +240,14 @@ const _sfc_main = {
       }
     };
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:228", "首页加载完成");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:371", "首页加载完成");
+      initCloudObj();
+      setTimeout(() => {
+        getWeatherData();
+      }, 500);
     });
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_vendor.f(bannerList, (item, index, i0) => {
           return {
             a: item.image,
@@ -165,16 +271,39 @@ const _sfc_main = {
         }),
         f: common_vendor.t(menuList[0].name),
         g: common_vendor.o(($event) => clickMenuItem(menuList[0])),
-        h: common_vendor.p({
-          type: menuList[1].icon,
-          size: 32,
+        h: weatherLoading.value
+      }, weatherLoading.value ? {
+        i: common_vendor.p({
+          type: "spinner-cycle",
+          size: 24,
+          color: "white"
+        })
+      } : {
+        j: common_vendor.p({
+          type: getWeatherIcon(weatherData.weather),
+          size: 36,
           color: "white"
         }),
-        i: common_vendor.t(menuList[1].name),
-        j: common_vendor.o(($event) => clickMenuItem(menuList[1])),
-        k: common_vendor.f(menuList.slice(2, 6), (item, index, i0) => {
+        k: common_vendor.t(weatherData.temperature),
+        l: common_vendor.t(weatherData.weather),
+        m: common_vendor.p({
+          type: "navigate",
+          size: 14,
+          color: "rgba(255,255,255,0.8)"
+        }),
+        n: common_vendor.t(weatherData.winddirection),
+        o: common_vendor.t(weatherData.windpower),
+        p: common_vendor.p({
+          type: "water",
+          size: 14,
+          color: "rgba(255,255,255,0.8)"
+        }),
+        q: common_vendor.t(weatherData.humidity)
+      }, {
+        r: common_vendor.o(($event) => clickMenuItem(menuList[1])),
+        s: common_vendor.f(menuList.slice(2, 6), (item, index, i0) => {
           return {
-            a: "1cf27b2a-3-" + i0,
+            a: "1cf27b2a-6-" + i0,
             b: common_vendor.p({
               type: item.icon,
               size: 24,
@@ -186,14 +315,14 @@ const _sfc_main = {
             f: common_vendor.n("card-" + (index + 1))
           };
         }),
-        l: common_vendor.p({
+        t: common_vendor.p({
           type: menuList[6].icon,
           size: 28,
           color: "#333"
         }),
-        m: common_vendor.t(menuList[6].name),
-        n: common_vendor.o(($event) => clickMenuItem(menuList[6]))
-      };
+        v: common_vendor.t(menuList[6].name),
+        w: common_vendor.o(($event) => clickMenuItem(menuList[6]))
+      });
     };
   }
 };

@@ -1,0 +1,100 @@
+[
+  {
+    "IndexName": "status_createTime",
+    "MgoKeySchema": {
+      "MgoIndexKeys": [
+        {
+          "Name": "status",
+          "Direction": "1"
+        },
+        {
+          "Name": "createTime",
+          "Direction": "-1"
+        }
+      ],
+      "MgoIsUnique": false,
+      "MgoIsSparse": false
+    }
+  },
+  {
+    "IndexName": "category_status_createTime",
+    "MgoKeySchema": {
+      "MgoIndexKeys": [
+        {
+          "Name": "category",
+          "Direction": "1"
+        },
+        {
+          "Name": "status",
+          "Direction": "1"
+        },
+        {
+          "Name": "createTime",
+          "Direction": "-1"
+        }
+      ],
+      "MgoIsUnique": false,
+      "MgoIsSparse": false
+    }
+  },
+  {
+    "IndexName": "userId_status_createTime",
+    "MgoKeySchema": {
+      "MgoIndexKeys": [
+        {
+          "Name": "userId",
+          "Direction": "1"
+        },
+        {
+          "Name": "status",
+          "Direction": "1"
+        },
+        {
+          "Name": "createTime",
+          "Direction": "-1"
+        }
+      ],
+      "MgoIsUnique": false,
+      "MgoIsSparse": false
+    }
+  },
+  {
+    "IndexName": "title_text",
+    "MgoKeySchema": {
+      "MgoIndexKeys": [
+        {
+          "Name": "title",
+          "Direction": "text"
+        }
+      ],
+      "MgoIsUnique": false,
+      "MgoIsSparse": false
+    }
+  },
+  {
+    "IndexName": "description_text",
+    "MgoKeySchema": {
+      "MgoIndexKeys": [
+        {
+          "Name": "description",
+          "Direction": "text"
+        }
+      ],
+      "MgoIsUnique": false,
+      "MgoIsSparse": false
+    }
+  },
+  {
+    "IndexName": "location_text",
+    "MgoKeySchema": {
+      "MgoIndexKeys": [
+        {
+          "Name": "location",
+          "Direction": "text"
+        }
+      ],
+      "MgoIsUnique": false,
+      "MgoIsSparse": false
+    }
+  }
+]
