@@ -25,6 +25,30 @@
 			}
 		},
 		{
+			"path": "pages/skills/skills",
+			"style": {
+				"navigationBarTitleText": "技能台"
+			}
+		},
+		{
+			"path": "pages/skills/add-skill",
+			"style": {
+				"navigationBarTitleText": "添加技能"
+			}
+		},
+		{
+			"path": "pages/skills/skill-detail",
+			"style": {
+				"navigationBarTitleText": "技能详情"
+			}
+		},
+		{
+			"path": "pages/camera/camera",
+			"style": {
+				"navigationBarTitleText": "随手拍"
+			}
+		},
+		{
 			"path": "pages/community/post-detail",
 			"style": {
 				"navigationBarTitleText": "帖子详情"

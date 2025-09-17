@@ -28,15 +28,21 @@ const _sfc_main = {
       },
       {
         image: "https://via.placeholder.com/750x300/f093fb/FFFFFF?text=技能提升",
-        title: "技能提升",
+        title: "业主共享技能",
         content: "学习新技能，提升自己"
       }
     ]);
     const menuList = common_vendor.reactive([
       {
-        name: "天气",
+        name: "每日热榜",
         icon: "cloud",
         color: "#667eea",
+        type: "news"
+      },
+      {
+        name: "技能台",
+        icon: "gear",
+        color: "#764ba2",
         type: "weather"
       },
       {
@@ -49,13 +55,7 @@ const _sfc_main = {
         name: "随手拍",
         icon: "settings",
         color: "#f093fb",
-        type: "tools"
-      },
-      {
-        name: "娱乐",
-        icon: "videocam",
-        color: "#4facfe",
-        type: "entertainment"
+        type: "cars"
       },
       {
         name: "健康",
@@ -97,9 +97,13 @@ const _sfc_main = {
           });
           break;
         case "skills":
-          common_vendor.index.showToast({
-            title: "技能台功能开发中",
-            icon: "none"
+          common_vendor.index.navigateTo({
+            url: "/pages/skills/skills"
+          });
+          break;
+        case "tools":
+          common_vendor.index.navigateTo({
+            url: "/pages/camera/camera"
           });
           break;
         default:
@@ -110,7 +114,7 @@ const _sfc_main = {
       }
     };
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:200", "首页加载完成");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:204", "首页加载完成");
     });
     return (_ctx, _cache) => {
       return {

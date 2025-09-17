@@ -1,0 +1,225 @@
+
+.container.data-v-8ed1818b {
+		background-color: #f8f8f8;
+		min-height: 100vh;
+		padding-bottom: 40rpx;
+}
+
+	/* 表单区块 */
+.form-section.data-v-8ed1818b {
+		background-color: white;
+		margin-bottom: 20rpx;
+		padding: 32rpx 24rpx;
+}
+.section-title.data-v-8ed1818b {
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #333;
+		margin-bottom: 32rpx;
+		padding-bottom: 16rpx;
+		border-bottom: 2rpx solid #f0f0f0;
+}
+
+	/* 表单项 */
+.form-item.data-v-8ed1818b {
+		margin-bottom: 32rpx;
+}
+.form-item.data-v-8ed1818b:last-child {
+		margin-bottom: 0;
+}
+.label.data-v-8ed1818b {
+		font-size: 28rpx;
+		color: #333;
+		display: block;
+		margin-bottom: 16rpx;
+}
+.required.data-v-8ed1818b {
+		color: #ff4757;
+}
+.input.data-v-8ed1818b {
+		width: 100%;
+		padding: 20rpx 24rpx;
+		border: 2rpx solid #e8e8e8;
+		border-radius: 12rpx;
+		font-size: 28rpx;
+		color: #333;
+		background-color: #fafafa;
+}
+.input.data-v-8ed1818b:focus {
+		border-color: #007aff;
+		background-color: white;
+}
+.textarea.data-v-8ed1818b {
+		width: 100%;
+		min-height: 200rpx;
+		padding: 20rpx 24rpx;
+		border: 2rpx solid #e8e8e8;
+		border-radius: 12rpx;
+		font-size: 28rpx;
+		color: #333;
+		background-color: #fafafa;
+		resize: none;
+}
+.textarea.data-v-8ed1818b:focus {
+		border-color: #007aff;
+		background-color: white;
+}
+.char-count.data-v-8ed1818b {
+		font-size: 22rpx;
+		color: #999;
+		text-align: right;
+		margin-top: 8rpx;
+		display: block;
+}
+
+	/* 选择器 */
+.picker.data-v-8ed1818b {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 20rpx 24rpx;
+		border: 2rpx solid #e8e8e8;
+		border-radius: 12rpx;
+		font-size: 28rpx;
+		color: #333;
+		background-color: #fafafa;
+}
+
+	/* 价格输入 */
+.price-input.data-v-8ed1818b {
+		display: flex;
+		align-items: center;
+		border: 2rpx solid #e8e8e8;
+		border-radius: 12rpx;
+		background-color: #fafafa;
+		padding: 0 24rpx;
+}
+.currency.data-v-8ed1818b {
+		font-size: 28rpx;
+		color: #333;
+		margin-right: 8rpx;
+}
+.price-value.data-v-8ed1818b {
+		flex: 1;
+		border: none;
+		background: transparent;
+		padding: 20rpx 0;
+}
+.separator.data-v-8ed1818b {
+		font-size: 28rpx;
+		color: #999;
+		margin: 0 16rpx;
+}
+.unit-picker.data-v-8ed1818b {
+		display: flex;
+		align-items: center;
+		font-size: 28rpx;
+		color: #333;
+		min-width: 80rpx;
+}
+
+	/* 标签输入 */
+.tag-input-box.data-v-8ed1818b {
+		display: flex;
+		align-items: center;
+		border: 2rpx solid #e8e8e8;
+		border-radius: 12rpx;
+		background-color: #fafafa;
+		padding: 0 24rpx;
+		margin-bottom: 20rpx;
+}
+.tag-input.data-v-8ed1818b {
+		flex: 1;
+		border: none;
+		background: transparent;
+		padding: 20rpx 0;
+		font-size: 28rpx;
+}
+.add-tag-btn.data-v-8ed1818b {
+		padding: 8rpx;
+}
+.tags-container.data-v-8ed1818b {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 16rpx;
+}
+.tag-item.data-v-8ed1818b {
+		display: flex;
+		align-items: center;
+		background-color: #e8f4fd;
+		color: #007aff;
+		padding: 12rpx 16rpx;
+		border-radius: 20rpx;
+		font-size: 24rpx;
+}
+.remove-tag.data-v-8ed1818b {
+		margin-left: 8rpx;
+		padding: 4rpx;
+}
+
+	/* 图片上传 */
+.images-container.data-v-8ed1818b {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 16rpx;
+}
+.image-item.data-v-8ed1818b {
+		position: relative;
+		aspect-ratio: 1;
+}
+.preview-image.data-v-8ed1818b {
+		width: 100%;
+		height: 100%;
+		border-radius: 12rpx;
+}
+.remove-image.data-v-8ed1818b {
+		position: absolute;
+		top: 8rpx;
+		right: 8rpx;
+		width: 32rpx;
+		height: 32rpx;
+		background-color: rgba(0, 0, 0, 0.6);
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+}
+.add-image.data-v-8ed1818b {
+		aspect-ratio: 1;
+		border: 2rpx dashed #ddd;
+		border-radius: 12rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background-color: #fafafa;
+}
+.add-text.data-v-8ed1818b {
+		font-size: 22rpx;
+		color: #999;
+		margin-top: 8rpx;
+}
+.tip.data-v-8ed1818b {
+		font-size: 22rpx;
+		color: #999;
+		margin-top: 16rpx;
+		display: block;
+}
+
+	/* 提交区域 */
+.submit-section.data-v-8ed1818b {
+		padding: 40rpx 24rpx;
+}
+.submit-btn.data-v-8ed1818b {
+		width: 100%;
+		height: 88rpx;
+		background-color: #007aff;
+		color: white;
+		border: none;
+		border-radius: 44rpx;
+		font-size: 32rpx;
+		font-weight: 600;
+}
+.submit-btn[disabled].data-v-8ed1818b {
+		background-color: #ccc;
+}

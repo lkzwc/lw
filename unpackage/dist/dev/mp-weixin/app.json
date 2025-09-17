@@ -3,6 +3,10 @@
     "pages/index/index",
     "pages/community/community",
     "pages/me/me",
+    "pages/skills/skills",
+    "pages/skills/add-skill",
+    "pages/skills/skill-detail",
+    "pages/camera/camera",
     "pages/community/post-detail",
     "pages/community/publish"
   ],

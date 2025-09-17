@@ -30,40 +30,30 @@
 
 		<!-- 快捷功能区域 -->
 		<view class="quick-actions">
-			<view class="action-item" @tap="goToMyPosts">
-				<view class="action-icon">
-					<uni-icons type="compose" size="20" color="#4A90E2"></uni-icons>
+			<view class="actions-grid">
+				<view class="grid-item" @tap="goToMyPosts">
+					<view class="grid-icon">
+						<uni-icons type="compose" size="20" color="#4A90E2"></uni-icons>
+					</view>
+					<text class="grid-text">我的帖子</text>
 				</view>
-				<text class="action-text">我的帖子</text>
-				<view class="action-arrow">
-					<uni-icons type="right" size="14" color="#c0c4cc"></uni-icons>
+				<view class="grid-item" @tap="goToMyLikes">
+					<view class="grid-icon">
+						<uni-icons type="heart" size="20" color="#FF6B6B"></uni-icons>
+					</view>
+					<text class="grid-text">我的点赞</text>
 				</view>
-			</view>
-			<view class="action-item" @tap="goToMyLikes">
-				<view class="action-icon">
-					<uni-icons type="heart" size="20" color="#FF6B6B"></uni-icons>
+				<view class="grid-item" @tap="goToMyComments">
+					<view class="grid-icon">
+						<uni-icons type="chatbubble" size="20" color="#50C878"></uni-icons>
+					</view>
+					<text class="grid-text">我的评论</text>
 				</view>
-				<text class="action-text">我的点赞</text>
-				<view class="action-arrow">
-					<uni-icons type="right" size="14" color="#c0c4cc"></uni-icons>
-				</view>
-			</view>
-			<view class="action-item" @tap="goToMyComments">
-				<view class="action-icon">
-					<uni-icons type="chatbubble" size="20" color="#50C878"></uni-icons>
-				</view>
-				<text class="action-text">我的评论</text>
-				<view class="action-arrow">
-					<uni-icons type="right" size="14" color="#c0c4cc"></uni-icons>
-				</view>
-			</view>
-			<view class="action-item" @tap="goToMyCollections">
-				<view class="action-icon">
-					<uni-icons type="star" size="20" color="#FFD700"></uni-icons>
-				</view>
-				<text class="action-text">我的收藏</text>
-				<view class="action-arrow">
-					<uni-icons type="right" size="14" color="#c0c4cc"></uni-icons>
+				<view class="grid-item" @tap="goToMyCollections">
+					<view class="grid-icon">
+						<uni-icons type="star" size="20" color="#FFD700"></uni-icons>
+					</view>
+					<text class="grid-text">我的收藏</text>
 				</view>
 			</view>
 		</view>
@@ -543,8 +533,49 @@
 		border-radius: 16rpx;
 		margin: 0 20rpx 20rpx;
 		overflow: hidden;
+		padding: 20rpx;
 	}
 
+	.actions-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr 1fr;
+		gap: 20rpx;
+	}
+
+	.grid-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 30rpx 20rpx;
+		border-radius: 12rpx;
+		background-color: #fafafa;
+		transition: background-color 0.2s;
+	}
+
+	.grid-item:active {
+		background-color: #f0f0f0;
+	}
+
+	.grid-icon {
+		width: 60rpx;
+		height: 60rpx;
+		border-radius: 50%;
+		background-color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 16rpx;
+		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+	}
+
+	.grid-text {
+		font-size: 24rpx;
+		color: #333;
+		text-align: center;
+	}
+
+	/* 保留原有的 action-item 样式以防其他地方使用 */
 	.action-item {
 		display: flex;
 		align-items: center;

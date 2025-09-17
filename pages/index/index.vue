@@ -106,7 +106,7 @@
 		},
 		{
 			image: 'https://via.placeholder.com/750x300/f093fb/FFFFFF?text=技能提升',
-			title: '技能提升',
+			title: '业主共享技能',
 			content: '学习新技能，提升自己'
 		}
 	]);
@@ -114,9 +114,15 @@
 	// 菜单数据（去掉更多选项）
 	const menuList = reactive([
 		{
-			name: '天气',
+			name: '每日热榜',
 			icon: 'cloud',
 			color: '#667eea',
+			type: 'news'
+		},
+		{
+			name: '技能台',
+			icon: 'gear',
+			color: '#764ba2',
 			type: 'weather'
 		},
 		{
@@ -129,13 +135,7 @@
 			name: '随手拍',
 			icon: 'settings',
 			color: '#f093fb',
-			type: 'tools'
-		},
-		{
-			name: '娱乐',
-			icon: 'videocam',
-			color: '#4facfe',
-			type: 'entertainment'
+			type: 'cars'
 		},
 		{
 			name: '健康',
@@ -183,9 +183,13 @@
 				});
 				break;
 			case 'skills':
-				uni.showToast({
-					title: '技能台功能开发中',
-					icon: 'none'
+				uni.navigateTo({
+					url: '/pages/skills/skills'
+				});
+				break;
+			case 'tools':
+				uni.navigateTo({
+					url: '/pages/camera/camera'
 				});
 				break;
 			default:
@@ -205,7 +209,7 @@
 	.container {
 		background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
 		min-height: 100vh;
-		padding-bottom: 20rpx;
+		padding-bottom: 60rpx;
 	}
 
 	/* 轮播图样式 */
@@ -244,6 +248,7 @@
 	/* 个性化菜单样式 */
 	.creative-menu-section {
 		margin: 0 20rpx;
+		padding-bottom: 40rpx;
 	}
 
 	.menu-grid {
@@ -364,11 +369,12 @@
 		grid-row: 2 / 3;
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
-		gap: 12rpx;
+		gap: 16rpx;
+		margin: 8rpx 0;
 	}
 
 	.small-card {
-		height: 140rpx;
+		height: 160rpx;
 		background: white;
 	}
 
@@ -376,15 +382,16 @@
 		align-items: center;
 		justify-content: center;
 		text-align: center;
-		padding: 20rpx;
+		padding: 24rpx 16rpx;
 	}
 
 	.small-card .card-title {
 		color: white;
 		font-size: 24rpx;
 		font-weight: 600;
-		margin-top: 10rpx;
+		margin-top: 12rpx;
 		letter-spacing: 0.5rpx;
+		line-height: 1.2;
 	}
 
 	.small-card.card-1 {
@@ -413,6 +420,7 @@
 		grid-row: 3 / 4;
 		height: 120rpx;
 		background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+		margin-top: 8rpx;
 	}
 
 	.wide-card .card-content {

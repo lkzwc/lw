@@ -46,10 +46,10 @@ const _sfc_main = {
             fail: reject
           });
         });
-        common_vendor.index.__f__("log", "at pages/me/me.vue:235", "微信登录结果:", loginRes);
+        common_vendor.index.__f__("log", "at pages/me/me.vue:225", "微信登录结果:", loginRes);
         const login = common_vendor.nr.importObject("Login");
         const openid = await login.getUniID(loginRes.code);
-        common_vendor.index.__f__("log", "at pages/me/me.vue:241", "获取到openid:", openid);
+        common_vendor.index.__f__("log", "at pages/me/me.vue:231", "获取到openid:", openid);
         const userProfile = await new Promise((resolve, reject) => {
           common_vendor.index.getUserProfile({
             desc: "用于完善用户资料",
@@ -57,7 +57,7 @@ const _sfc_main = {
             fail: reject
           });
         });
-        common_vendor.index.__f__("log", "at pages/me/me.vue:252", "用户信息:", userProfile);
+        common_vendor.index.__f__("log", "at pages/me/me.vue:242", "用户信息:", userProfile);
         userInfo.isLogin = true;
         userInfo.nickname = userProfile.userInfo.nickName;
         userInfo.avatar = userProfile.userInfo.avatarUrl;
@@ -73,7 +73,7 @@ const _sfc_main = {
         });
         closeLogin();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/me/me.vue:275", "登录失败:", error);
+        common_vendor.index.__f__("error", "at pages/me/me.vue:265", "登录失败:", error);
         common_vendor.index.showToast({
           title: "登录失败",
           icon: "none"
@@ -130,7 +130,7 @@ const _sfc_main = {
           closeAvatarModal();
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/me/me.vue:346", "选择头像失败:", err);
+          common_vendor.index.__f__("error", "at pages/me/me.vue:336", "选择头像失败:", err);
           common_vendor.index.showToast({
             title: "选择头像失败",
             icon: "none"
@@ -218,11 +218,11 @@ const _sfc_main = {
           Object.assign(userInfo, savedUserInfo);
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/me/me.vue:456", "加载用户信息失败:", e);
+        common_vendor.index.__f__("error", "at pages/me/me.vue:446", "加载用户信息失败:", e);
       }
     };
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/me/me.vue:461", "我的页面加载完成");
+      common_vendor.index.__f__("log", "at pages/me/me.vue:451", "我的页面加载完成");
       loadUserInfo();
     });
     return (_ctx, _cache) => {
@@ -248,147 +248,127 @@ const _sfc_main = {
           size: "20",
           color: "#4A90E2"
         }),
-        l: common_vendor.p({
-          type: "right",
-          size: "14",
-          color: "#c0c4cc"
-        }),
-        m: common_vendor.o(goToMyPosts),
-        n: common_vendor.p({
+        l: common_vendor.o(goToMyPosts),
+        m: common_vendor.p({
           type: "heart",
           size: "20",
           color: "#FF6B6B"
         }),
+        n: common_vendor.o(goToMyLikes),
         o: common_vendor.p({
-          type: "right",
-          size: "14",
-          color: "#c0c4cc"
-        }),
-        p: common_vendor.o(goToMyLikes),
-        q: common_vendor.p({
           type: "chatbubble",
           size: "20",
           color: "#50C878"
         }),
-        r: common_vendor.p({
-          type: "right",
-          size: "14",
-          color: "#c0c4cc"
-        }),
-        s: common_vendor.o(goToMyComments),
-        t: common_vendor.p({
+        p: common_vendor.o(goToMyComments),
+        q: common_vendor.p({
           type: "star",
           size: "20",
           color: "#FFD700"
         }),
-        v: common_vendor.p({
-          type: "right",
-          size: "14",
-          color: "#c0c4cc"
-        }),
-        w: common_vendor.o(goToMyCollections),
-        x: common_vendor.p({
+        r: common_vendor.o(goToMyCollections),
+        s: common_vendor.p({
           type: "gear",
           size: "20",
           color: "#666"
         }),
-        y: common_vendor.p({
+        t: common_vendor.p({
           type: "right",
           size: "14",
           color: "#c0c4cc"
         }),
-        z: common_vendor.o(goToSettings),
-        A: common_vendor.p({
+        v: common_vendor.o(goToSettings),
+        w: common_vendor.p({
           type: "help",
           size: "20",
           color: "#666"
         }),
-        B: common_vendor.p({
+        x: common_vendor.p({
           type: "right",
           size: "14",
           color: "#c0c4cc"
         }),
-        C: common_vendor.o(goToHelp),
-        D: common_vendor.p({
+        y: common_vendor.o(goToHelp),
+        z: common_vendor.p({
           type: "info",
           size: "20",
           color: "#666"
         }),
-        E: common_vendor.p({
+        A: common_vendor.p({
           type: "right",
           size: "14",
           color: "#c0c4cc"
         }),
-        F: common_vendor.o(goToAbout),
-        G: common_vendor.p({
+        B: common_vendor.o(goToAbout),
+        C: common_vendor.p({
           type: "locked",
           size: "20",
           color: "#666"
         }),
-        H: common_vendor.p({
+        D: common_vendor.p({
           type: "right",
           size: "14",
           color: "#c0c4cc"
         }),
-        I: common_vendor.o(goToPrivacy),
-        J: common_vendor.p({
+        E: common_vendor.o(goToPrivacy),
+        F: common_vendor.p({
           type: "paperplane",
           size: "20",
           color: "#666"
         }),
-        K: common_vendor.p({
+        G: common_vendor.p({
           type: "right",
           size: "14",
           color: "#c0c4cc"
         }),
-        L: common_vendor.o(goToTerms),
-        M: userInfo.isLogin
+        H: common_vendor.o(goToTerms),
+        I: userInfo.isLogin
       }, userInfo.isLogin ? {
-        N: common_vendor.p({
+        J: common_vendor.p({
           type: "loop",
           size: "20",
           color: "#ff4757"
         }),
-        O: common_vendor.o(handleLogout)
+        K: common_vendor.o(handleLogout)
       } : {}, {
-        P: common_vendor.t(appVersion.value),
-        Q: common_vendor.p({
+        L: common_vendor.t(appVersion.value),
+        M: common_vendor.p({
           type: "close",
           size: "20",
           color: "#999"
         }),
-        R: common_vendor.o(closeLogin),
-        S: common_vendor.p({
+        N: common_vendor.o(closeLogin),
+        O: common_vendor.p({
           type: "weixin",
           size: "20",
           color: "white"
         }),
-        T: common_vendor.o(wechatLogin),
-        U: isLogging.value,
-        V: common_vendor.sr(loginPopup, "19c123a7-20", {
+        P: common_vendor.o(wechatLogin),
+        Q: isLogging.value,
+        R: common_vendor.sr(loginPopup, "19c123a7-16", {
           "k": "loginPopup"
         }),
-        W: common_vendor.p({
+        S: common_vendor.p({
           type: "center",
           ["mask-click"]: false
         }),
-        X: common_vendor.p({
+        T: common_vendor.p({
           type: "camera",
           size: "24",
           color: "#4A90E2"
         }),
-        Y: common_vendor.o(($event) => chooseAvatar("camera")),
-        Z: common_vendor.p({
+        U: common_vendor.o(($event) => chooseAvatar("camera")),
+        V: common_vendor.p({
           type: "image",
           size: "24",
           color: "#50C878"
         }),
-        aa: common_vendor.o(($event) => chooseAvatar("album")),
-        ab: common_vendor.o(closeAvatarModal),
-        ac: common_vendor.sr(avatarPopup, "19c123a7-23", {
+        W: common_vendor.o(($event) => chooseAvatar("album")),
+        X: common_vendor.o(closeAvatarModal),
+        Y: common_vendor.sr(avatarPopup, "19c123a7-19", {
           "k": "avatarPopup"
         }),
-        ad: common_vendor.p({
+        Z: common_vendor.p({
           type: "bottom"
         })
       });

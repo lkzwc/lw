@@ -22,11 +22,12 @@ const _sfc_main = {
     const loadStatus = common_vendor.ref("more");
     const categoryList = common_vendor.reactive([
       { id: "all", name: "全部" },
-      { id: "tech", name: "技术" },
-      { id: "life", name: "生活" },
-      { id: "study", name: "学习" },
-      { id: "entertainment", name: "娱乐" },
-      { id: "health", name: "健康" }
+      { id: "notice", name: "公告" },
+      { id: "us", name: "业主" },
+      { id: "entertainment", name: "举报" },
+      { id: "health", name: "畅玩" },
+      { id: "life", name: "失物" },
+      { id: "study", name: "活动" }
     ]);
     const postList = common_vendor.reactive([
       {
@@ -94,11 +95,11 @@ const _sfc_main = {
     ]);
     const onSearchInput = (value) => {
       searchKeyword.value = value;
-      common_vendor.index.__f__("log", "at pages/community/community.vue:192", "搜索关键词:", value);
+      common_vendor.index.__f__("log", "at pages/community/community.vue:193", "搜索关键词:", value);
     };
     const switchCategory = (categoryId) => {
       currentCategory.value = categoryId;
-      common_vendor.index.__f__("log", "at pages/community/community.vue:199", "切换分类:", categoryId);
+      common_vendor.index.__f__("log", "at pages/community/community.vue:200", "切换分类:", categoryId);
     };
     const toggleLike = (post) => {
       post.isLiked = !post.isLiked;
@@ -107,13 +108,13 @@ const _sfc_main = {
       } else {
         post.likeCount--;
       }
-      common_vendor.index.__f__("log", "at pages/community/community.vue:211", "点赞操作:", post.id, post.isLiked);
+      common_vendor.index.__f__("log", "at pages/community/community.vue:212", "点赞操作:", post.id, post.isLiked);
     };
     const sharePost = (post) => {
       common_vendor.index.showActionSheet({
         itemList: ["分享到微信", "分享到朋友圈", "复制链接"],
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/community/community.vue:219", "分享选择:", res.tapIndex, post.id);
+          common_vendor.index.__f__("log", "at pages/community/community.vue:220", "分享选择:", res.tapIndex, post.id);
           common_vendor.index.showToast({
             title: "分享功能开发中",
             icon: "none"
@@ -143,12 +144,12 @@ const _sfc_main = {
       }
       loadStatus.value = "loading";
       setTimeout(() => {
-        common_vendor.index.__f__("log", "at pages/community/community.vue:261", "加载更多数据");
+        common_vendor.index.__f__("log", "at pages/community/community.vue:262", "加载更多数据");
         loadStatus.value = "more";
       }, 1500);
     };
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/community/community.vue:267", "社区页面加载完成");
+      common_vendor.index.__f__("log", "at pages/community/community.vue:268", "社区页面加载完成");
     });
     return (_ctx, _cache) => {
       return {

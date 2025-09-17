@@ -5,6 +5,10 @@ if (!Math) {
   "./pages/index/index.js";
   "./pages/community/community.js";
   "./pages/me/me.js";
+  "./pages/skills/skills.js";
+  "./pages/skills/add-skill.js";
+  "./pages/skills/skill-detail.js";
+  "./pages/camera/camera.js";
   "./pages/community/post-detail.js";
   "./pages/community/publish.js";
 }

@@ -112,11 +112,12 @@
 	// 分类数据
 	const categoryList = reactive([
 		{ id: 'all', name: '全部' },
-		{ id: 'tech', name: '技术' },
-		{ id: 'life', name: '生活' },
-		{ id: 'study', name: '学习' },
-		{ id: 'entertainment', name: '娱乐' },
-		{ id: 'health', name: '健康' }
+		{ id: 'notice', name: '公告' },
+		{ id: 'us', name: '业主' },
+		{ id: 'entertainment', name: '举报' },
+		{ id: 'health', name: '畅玩' },
+		{ id: 'life', name: '失物' },
+		{ id: 'study', name: '活动' },
 	]);
 
 	// 帖子列表数据

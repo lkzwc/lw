@@ -2,7 +2,7 @@
 .container.data-v-1cf27b2a {
 		background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
 		min-height: 100vh;
-		padding-bottom: 20rpx;
+		padding-bottom: 60rpx;
 }
 
 	/* 轮播图样式 */
@@ -37,6 +37,7 @@
 	/* 个性化菜单样式 */
 .creative-menu-section.data-v-1cf27b2a {
 		margin: 0 20rpx;
+		padding-bottom: 40rpx;
 }
 .menu-grid.data-v-1cf27b2a {
 		display: grid;
@@ -145,24 +146,26 @@
 		grid-row: 2 / 3;
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
-		gap: 12rpx;
+		gap: 16rpx;
+		margin: 8rpx 0;
 }
 .small-card.data-v-1cf27b2a {
-		height: 140rpx;
+		height: 160rpx;
 		background: white;
 }
 .small-card .card-content.data-v-1cf27b2a {
 		align-items: center;
 		justify-content: center;
 		text-align: center;
-		padding: 20rpx;
+		padding: 24rpx 16rpx;
 }
 .small-card .card-title.data-v-1cf27b2a {
 		color: white;
 		font-size: 24rpx;
 		font-weight: 600;
-		margin-top: 10rpx;
+		margin-top: 12rpx;
 		letter-spacing: 0.5rpx;
+		line-height: 1.2;
 }
 .small-card.card-1.data-v-1cf27b2a {
 		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
@@ -186,6 +189,7 @@
 		grid-row: 3 / 4;
 		height: 120rpx;
 		background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+		margin-top: 8rpx;
 }
 .wide-card .card-content.data-v-1cf27b2a {
 		flex-direction: row;
