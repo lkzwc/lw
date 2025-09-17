@@ -1,0 +1,230 @@
+
+.container.data-v-19c123a7 {
+		background-color: #f8f8f8;
+		min-height: 100vh;
+}
+
+	/* 个人信息区域样式 */
+.profile-section.data-v-19c123a7 {
+		background-color: white;
+		padding: 40rpx 24rpx 24rpx;
+		margin-bottom: 20rpx;
+}
+.profile-header.data-v-19c123a7 {
+		display: flex;
+		align-items: center;
+}
+.user-avatar.data-v-19c123a7 {
+		width: 120rpx;
+		height: 120rpx;
+		border-radius: 50%;
+		margin-right: 24rpx;
+		border: 4rpx solid #f0f0f0;
+}
+.user-info.data-v-19c123a7 {
+		flex: 1;
+}
+.username.data-v-19c123a7 {
+		font-size: 36rpx;
+		color: #333;
+		font-weight: bold;
+		margin-bottom: 12rpx;
+		display: block;
+}
+.user-desc.data-v-19c123a7 {
+		font-size: 24rpx;
+		color: #999;
+		margin-bottom: 20rpx;
+		display: block;
+}
+.user-stats.data-v-19c123a7 {
+		display: flex;
+		align-items: center;
+}
+.stat-item.data-v-19c123a7 {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		margin-right: 40rpx;
+}
+.stat-number.data-v-19c123a7 {
+		font-size: 32rpx;
+		color: #333;
+		font-weight: bold;
+		margin-bottom: 8rpx;
+}
+.stat-label.data-v-19c123a7 {
+		font-size: 22rpx;
+		color: #999;
+}
+.login-btn.data-v-19c123a7 {
+		padding: 12rpx;
+}
+
+	/* 快捷功能区域样式 */
+.quick-actions.data-v-19c123a7 {
+		background-color: white;
+		margin-bottom: 20rpx;
+		border-radius: 16rpx;
+		margin: 0 20rpx 20rpx;
+		overflow: hidden;
+}
+.action-item.data-v-19c123a7 {
+		display: flex;
+		align-items: center;
+		padding: 32rpx 24rpx;
+		border-bottom: 1rpx solid #f0f0f0;
+}
+.action-item.data-v-19c123a7:last-child {
+		border-bottom: none;
+}
+.action-icon.data-v-19c123a7 {
+		width: 60rpx;
+		height: 60rpx;
+		border-radius: 50%;
+		background-color: #f8f8f8;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 24rpx;
+}
+.action-text.data-v-19c123a7 {
+		flex: 1;
+		font-size: 28rpx;
+		color: #333;
+}
+.action-arrow.data-v-19c123a7 {
+		margin-left: 20rpx;
+}
+
+	/* 功能菜单区域样式 */
+.menu-section.data-v-19c123a7 {
+		padding: 0 20rpx;
+}
+.menu-group.data-v-19c123a7 {
+		background-color: white;
+		border-radius: 16rpx;
+		margin-bottom: 20rpx;
+		overflow: hidden;
+}
+.menu-item.data-v-19c123a7 {
+		display: flex;
+		align-items: center;
+		padding: 32rpx 24rpx;
+		border-bottom: 1rpx solid #f0f0f0;
+}
+.menu-item.data-v-19c123a7:last-child {
+		border-bottom: none;
+}
+.menu-icon.data-v-19c123a7 {
+		margin-right: 24rpx;
+}
+.menu-text.data-v-19c123a7 {
+		flex: 1;
+		font-size: 28rpx;
+		color: #333;
+}
+.menu-arrow.data-v-19c123a7 {
+		margin-left: 20rpx;
+}
+.logout-item.data-v-19c123a7 {
+		justify-content: center;
+}
+.logout-text.data-v-19c123a7 {
+		color: #ff4757;
+		text-align: center;
+		flex: none;
+}
+
+	/* 版本信息样式 */
+.version-info.data-v-19c123a7 {
+		text-align: center;
+		padding: 40rpx 0;
+}
+.version-text.data-v-19c123a7 {
+		font-size: 22rpx;
+		color: #999;
+}
+
+	/* 登录弹窗样式 */
+.login-modal.data-v-19c123a7 {
+		width: 600rpx;
+		background-color: white;
+		border-radius: 20rpx;
+		overflow: hidden;
+}
+.modal-header.data-v-19c123a7 {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 32rpx 24rpx;
+		border-bottom: 1rpx solid #f0f0f0;
+}
+.modal-title.data-v-19c123a7 {
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #333;
+}
+.close-btn.data-v-19c123a7 {
+		padding: 8rpx;
+}
+.modal-content.data-v-19c123a7 {
+		padding: 60rpx 40rpx;
+		text-align: center;
+}
+.login-avatar.data-v-19c123a7 {
+		margin-bottom: 40rpx;
+}
+.login-avatar-img.data-v-19c123a7 {
+		width: 120rpx;
+		height: 120rpx;
+		border-radius: 50%;
+}
+.login-desc.data-v-19c123a7 {
+		font-size: 28rpx;
+		color: #666;
+		margin-bottom: 60rpx;
+		display: block;
+}
+.wechat-login-btn.data-v-19c123a7 {
+		width: 100%;
+		height: 80rpx;
+		background-color: #07c160;
+		color: white;
+		border: none;
+		border-radius: 40rpx;
+		font-size: 28rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+}
+
+	/* 头像选择弹窗样式 */
+.avatar-modal.data-v-19c123a7 {
+		background-color: white;
+		border-radius: 20rpx 20rpx 0 0;
+		padding: 40rpx 0;
+}
+.avatar-options.data-v-19c123a7 {
+		display: flex;
+		justify-content: space-around;
+		padding: 40rpx 0;
+}
+.avatar-option.data-v-19c123a7 {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 40rpx;
+}
+.option-text.data-v-19c123a7 {
+		font-size: 24rpx;
+		color: #333;
+		margin-top: 16rpx;
+}
+.cancel-btn.data-v-19c123a7 {
+		text-align: center;
+		padding: 32rpx;
+		border-top: 1rpx solid #f0f0f0;
+		font-size: 28rpx;
+		color: #666;
+}
