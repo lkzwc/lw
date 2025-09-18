@@ -34,7 +34,7 @@
 		<view class="skills-list">
 			<view class="skill-item" 
 				v-for="(skill, index) in skillsList" 
-				:key="skill._id"
+				:key="skill._id || index"
 				@tap="goToSkillDetail(skill)">
 				
 				<!-- 用户头像和基本信息 -->
@@ -72,7 +72,7 @@
 				<view class="skill-content">
 					<text class="skill-title">{{ skill.title }}</text>
 					<text class="skill-desc">{{ skill.description }}</text>
-					<view class="skill-tags">
+					<view class="skill-tags" v-if="skill.tags && skill.tags.length > 0">
 						<text class="tag" v-for="(tag, tagIndex) in skill.tags" :key="tagIndex">
 							{{ tag }}
 						</text>
@@ -83,8 +83,8 @@
 				<view class="skill-footer">
 					<view class="rating">
 						<uni-icons type="star-filled" size="14" color="#FFD700"></uni-icons>
-						<text class="rating-text">{{ skill.rating }}</text>
-						<text class="review-count">({{ skill.reviewCount }}评价)</text>
+						<text class="rating-text">{{ skill.rating || 5.0 }}</text>
+						<text class="review-count">({{ skill.reviewCount || 0 }}评价)</text>
 					</view>
 					<text class="publish-time">{{ formatTime(skill.createTime) }}</text>
 				</view>
@@ -111,22 +111,29 @@
 </template>
 
 <script setup>
-	import { ref, reactive, computed, onMounted } from 'vue';
-	import { onReachBottom } from '@dcloudio/uni-app';
+	import { ref, onMounted } from 'vue';
+	import { onReachBottom, onShow } from '@dcloudio/uni-app';
 
 	const searchKeyword = ref('');
 	const currentFilter = ref('all');
 	const isLoading = ref(false);
-	const loadMoreStatus = ref('more'); // more, loading, noMore
+	const loadMoreStatus = ref('more');
 	const currentPage = ref(1);
-	const pageSize = ref(10);
 	const hasMore = ref(true);
 
 	// 技能列表数据
-	const skillsList = reactive([]);
+	const skillsList = ref([]);
 
 	// 筛选选项
-	const filterList = reactive([]);
+	const filterList = ref([
+		{ label: '全部', value: 'all' },
+		{ label: '家政服务', value: 'housekeeping' },
+		{ label: '维修服务', value: 'repair' },
+		{ label: '教育培训', value: 'education' },
+		{ label: '美容美发', value: 'beauty' },
+		{ label: '健康服务', value: 'health' },
+		{ label: '其他', value: 'other' }
+	]);
 
 	// 云对象实例
 	let skillsCloudObj = null;
@@ -136,7 +143,7 @@
 		try {
 			skillsCloudObj = uniCloud.importObject('skills');
 		} catch (error) {
-			console.error('初始化云对象失败:', error);
+			console.error('技能云对象初始化失败:', error);
 			uni.showToast({
 				title: '服务初始化失败',
 				icon: 'none'
@@ -144,133 +151,90 @@
 		}
 	};
 
-	// 获取技能分类列表
-	const getCategories = async () => {
-		try {
-			const result = await skillsCloudObj.getCategories();
-			if (result.errCode === 0) {
-				filterList.splice(0, filterList.length, ...result.data);
-			}
-		} catch (error) {
-			console.error('获取分类失败:', error);
-		}
-	};
-
 	// 获取技能列表
 	const getSkillsList = async (reset = false) => {
-		if (isLoading.value) return;
-		
-		console.log('开始获取技能列表, reset:', reset);
-		
-		try {
-			isLoading.value = true;
-			loadMoreStatus.value = 'loading';
-			
-			if (reset) {
-				currentPage.value = 1;
-				hasMore.value = true;
-			}
+		if (isLoading.value && !reset) {
+			return;
+		}
 
-			const params = {
-				keyword: searchKeyword.value.trim(),
-				category: currentFilter.value,
-				page: currentPage.value,
-				pageSize: pageSize.value
-			};
+		if (!hasMore.value && !reset) {
+			return;
+		}
 
-			console.log('调用云对象参数:', params);
-			console.log('云对象实例状态:', skillsCloudObj ? '已初始化' : '未初始化');
-			
+		if (!skillsCloudObj) {
+			initCloudObj();
 			if (!skillsCloudObj) {
-				console.error('云对象未初始化');
 				uni.showToast({
-					title: '服务未初始化，请重试',
+					title: '服务不可用，请重试',
 					icon: 'none'
 				});
 				return;
 			}
-			
-			console.log('准备调用云对象方法...');
-			const result = await skillsCloudObj.getSkillsList(params);
-			console.log('云对象返回结果:', result);
-			
-			if (result && result.errCode === 0) {
-				console.log('获取成功，数据:', result.data);
-				const { list, hasMore: moreData } = result.data;
-				
-				if (reset) {
-					skillsList.splice(0, skillsList.length, ...list);
-				} else {
-					skillsList.push(...list);
-				}
-				
-				hasMore.value = moreData;
-				loadMoreStatus.value = hasMore.value ? 'more' : 'noMore';
-				
-				if (list.length > 0) {
-					currentPage.value++;
-				}
-				
-				console.log('技能列表更新完成，当前列表长度:', skillsList.length);
-			} else {
-				console.error('获取技能列表失败:', result);
-				const errorMsg = result?.errMsg || '获取技能列表失败';
-				uni.showToast({
-					title: errorMsg,
-					icon: 'none'
-				});
-				loadMoreStatus.value = 'more';
-			}
-		} catch (error) {
-			console.error('获取技能列表异常:', error);
-			console.error('异常详情:', error.message, error.stack);
-			uni.showToast({
-				title: '网络错误，请重试',
-				icon: 'none'
-			});
-			loadMoreStatus.value = 'more';
-		} finally {
-			isLoading.value = false;
-			console.log('获取技能列表流程结束');
 		}
-	};
 
-	// 搜索技能
-	const searchSkills = async () => {
-		if (!skillsCloudObj) return;
-		
 		try {
 			isLoading.value = true;
-			
+
+			if (reset) {
+				currentPage.value = 1;
+				skillsList.value = [];
+				hasMore.value = true;
+			}
+
+			// 构建查询参数
 			const params = {
 				keyword: searchKeyword.value.trim(),
-				category: currentFilter.value,
-				page: 1,
-				pageSize: pageSize.value
+				category: currentFilter.value === 'all' ? '' : currentFilter.value,
+				page: currentPage.value,
+				pageSize: 10
 			};
 
-			console.log('搜索参数:', params);
-			const result = await skillsCloudObj.searchSkills(searchKeyword.value.trim(), params);
-			console.log('搜索结果:', result);
-			
-			if (result && result.errCode === 0) {
+			// 调用云对象查询
+			const result = await skillsCloudObj.getSkillsList(params);
+
+			if (result && result.errCode === 0 && result.data) {
 				const { list, hasMore: moreData } = result.data;
-				skillsList.splice(0, skillsList.length, ...list);
-				hasMore.value = moreData;
-				currentPage.value = 2;
-				loadMoreStatus.value = hasMore.value ? 'more' : 'noMore';
+
+				if (reset) {
+					skillsList.value = list || [];
+				} else {
+					skillsList.value.push(...(list || []));
+				}
+
+				hasMore.value = moreData || false;
+				currentPage.value++;
+
+				// 如果是搜索或筛选后没有数据
+				if (skillsList.value.length === 0) {
+					uni.showToast({
+						title: '暂无相关技能',
+						icon: 'none'
+					});
+				}
 			} else {
-				console.error('搜索失败:', result);
-				const errorMsg = result?.errMsg || '搜索失败';
+				// 处理业务错误
+				const errorMsg = result?.errMsg || '获取技能列表失败';
+				console.error('获取技能列表失败:', result);
+				
 				uni.showToast({
 					title: errorMsg,
 					icon: 'none'
 				});
 			}
+
 		} catch (error) {
-			console.error('搜索异常:', error);
+			console.error('获取技能列表异常:', error);
+			
+			let errorMessage = '网络错误，请检查网络连接';
+			
+			if (error.message && error.message.includes('timeout')) {
+				errorMessage = '请求超时，请重试';
+			} else if (error.message && error.message.includes('uniCloud')) {
+				errorMessage = '云服务连接失败，请重试';
+			}
+			
 			uni.showToast({
-				title: '搜索失败，请重试',
+				title: errorMessage,
 				icon: 'none'
 			});
 		} finally {
@@ -285,11 +249,7 @@
 
 	// 执行搜索
 	const onSearch = () => {
-		if (searchKeyword.value.trim()) {
-			searchSkills();
-		} else {
-			getSkillsList(true);
-		}
+		getSkillsList(true);
 	};
 
 	// 选择筛选条件
@@ -302,24 +262,39 @@
 	const formatTime = (dateStr) => {
 		if (!dateStr) return '';
 		
-		const date = new Date(dateStr);
-		const now = new Date();
-		const diff = now - date;
-		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-		
-		if (days === 0) {
-			return '今天';
-		} else if (days === 1) {
-			return '昨天';
-		} else if (days < 7) {
-			return `${days}天前`;
-		} else {
-			return date.toLocaleDateString();
+		try {
+			let date;
+			// 处理不同的时间格式
+			if (typeof dateStr === 'object' && dateStr.$date) {
+				date = new Date(dateStr.$date);
+			} else if (dateStr instanceof Date) {
+				date = dateStr;
+			} else {
+				date = new Date(dateStr);
+			}
+			
+			const now = new Date();
+			const diff = now - date;
+			const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+			
+			if (days === 0) {
+				return '今天';
+			} else if (days === 1) {
+				return '昨天';
+			} else if (days < 7) {
+				return `${days}天前`;
+			} else {
+				return date.toLocaleDateString();
+			}
+		} catch (error) {
+			console.error('时间格式化错误:', error);
+			return '';
 		}
 	};
 
 	// 预览图片
 	const previewImage = (urls, current) => {
+		if (!urls || urls.length === 0) return;
 		uni.previewImage({
 			urls: urls,
 			current: current
@@ -347,12 +322,26 @@
 		}
 	});
 
-	// 页面加载时初始化
-	onMounted(() => {
+	// 页面初始化
+	const initPage = async () => {
+		// 初始化云对象
 		initCloudObj();
-		if (skillsCloudObj) {
-			getCategories();
-			getSkillsList(true);
+		
+		// 等待云对象初始化完成
+		await new Promise(resolve => setTimeout(resolve, 100));
+		
+		// 获取技能列表
+		await getSkillsList(true);
+	};
+
+	onMounted(() => {
+		initPage();
+	});
+
+	onShow(() => {
+		// 如果技能列表为空，则重新加载
+		if (!skillsList.value || skillsList.value.length === 0) {
+			initPage();
 		}
 	});
 </script>
@@ -406,10 +395,10 @@
 
 	.filter-item {
 		display: inline-block;
-		padding: 15rpx 30rpx;
+		padding: 10rpx 30rpx;
 		margin: 0 10rpx;
 		background-color: #f8f8f8;
-		border-radius: 40rpx;
+		border-radius: 30rpx;
 		font-size: 26rpx;
 		color: #666;
 	}
@@ -440,7 +429,7 @@
 	.user-avatar {
 		width: 80rpx;
 		height: 80rpx;
-		border-radius: 40rpx;
+		border-radius: 50%;
 		margin-right: 20rpx;
 	}
 
@@ -449,15 +438,16 @@
 	}
 
 	.username {
-		font-size: 28rpx;
+		font-size: 32rpx;
 		font-weight: bold;
 		color: #333;
+		display: block;
+		margin-bottom: 10rpx;
 	}
 
 	.location {
 		display: flex;
 		align-items: center;
-		margin-top: 10rpx;
 	}
 
 	.location-text {
@@ -473,7 +463,7 @@
 	.price-text {
 		font-size: 32rpx;
 		font-weight: bold;
-		color: #ff4757;
+		color: #ff6b35;
 	}
 
 	.price-unit {
@@ -484,24 +474,24 @@
 	.skill-images {
 		display: flex;
 		margin-bottom: 20rpx;
-		gap: 10rpx;
 	}
 
 	.skill-image {
 		width: 200rpx;
 		height: 150rpx;
 		border-radius: 10rpx;
+		margin-right: 20rpx;
 	}
 
 	.more-images {
 		width: 200rpx;
 		height: 150rpx;
-		background-color: rgba(0, 0, 0, 0.5);
 		border-radius: 10rpx;
+		background-color: #f5f5f5;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: white;
+		color: #999;
 		font-size: 24rpx;
 	}
 
@@ -513,6 +503,7 @@
 		font-size: 32rpx;
 		font-weight: bold;
 		color: #333;
+		display: block;
 		margin-bottom: 10rpx;
 	}
 
@@ -520,21 +511,23 @@
 		font-size: 28rpx;
 		color: #666;
 		line-height: 1.5;
+		display: block;
 		margin-bottom: 15rpx;
 	}
 
 	.skill-tags {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 10rpx;
 	}
 
 	.tag {
-		background-color: #e3f2fd;
-		color: #1976d2;
-		padding: 8rpx 16rpx;
+		background-color: #e8f4fd;
+		color: #007aff;
+		padding: 5rpx 15rpx;
 		border-radius: 20rpx;
-		font-size: 24rpx;
+		font-size: 22rpx;
+		margin-right: 10rpx;
+		margin-bottom: 10rpx;
 	}
 
 	.skill-footer {
@@ -551,12 +544,13 @@
 	.rating-text {
 		font-size: 26rpx;
 		color: #333;
-		margin: 0 10rpx;
+		margin-left: 5rpx;
 	}
 
 	.review-count {
 		font-size: 24rpx;
 		color: #999;
+		margin-left: 10rpx;
 	}
 
 	.publish-time {
@@ -567,20 +561,18 @@
 	.empty-state {
 		text-align: center;
 		padding: 100rpx 0;
+		color: #999;
 	}
 
 	.empty-text {
-		display: block;
 		font-size: 32rpx;
-		color: #999;
-		margin-top: 20rpx;
+		margin: 20rpx 0 10rpx;
+		display: block;
 	}
 
 	.empty-desc {
-		display: block;
 		font-size: 26rpx;
-		color: #ccc;
-		margin-top: 10rpx;
+		display: block;
 	}
 
 	.loading-state {
@@ -590,11 +582,11 @@
 	.add-skill-btn {
 		position: fixed;
 		right: 40rpx;
-		bottom: 120rpx;
+		bottom: 40rpx;
 		width: 100rpx;
 		height: 100rpx;
 		background-color: #007aff;
-		border-radius: 50rpx;
+		border-radius: 50%;
 		display: flex;
 		align-items: center;
 		justify-content: center;

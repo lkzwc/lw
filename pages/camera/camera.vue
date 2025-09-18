@@ -21,26 +21,23 @@
 				<view class="section-title">
 					<uni-icons type="camera" size="20" color="#007aff"></uni-icons>
 					<text>违停拍照</text>
-					<text class="photo-count">({{ photos.length }}/3)</text>
+					<text class="photo-count">({{ uploadedImages.length }}/3)</text>
 				</view>
 				
-				<view class="photos-container">
-					<view class="photo-item" v-for="(photo, index) in photos" :key="index">
-						<image :src="photo" mode="aspectFill" class="photo-image" @tap="previewPhoto(index)"></image>
-						<view class="remove-photo" @tap="removePhoto(index)">
-							<uni-icons type="close" size="16" color="white"></uni-icons>
-						</view>
-					</view>
-					<view class="add-photo" @tap="takePhoto" v-if="photos.length < 3">
-						<uni-icons type="plus" size="40" color="#ccc"></uni-icons>
-						<text class="add-text">拍照举报</text>
-					</view>
-				</view>
+				<!-- 使用封装的图片上传组件 -->
+				<ImageUploader 
+					v-model="uploadedImages"
+					:max-count="3"
+					module="report"
+					@upload-success="onUploadSuccess"
+					@upload-error="onUploadError"
+				/>
+				
 				<text class="photo-tip">最多可拍摄3张照片，请确保车牌号清晰可见</text>
 			</view>
 
 			<!-- 车牌识别区域 -->
-			<view class="license-section" v-if="photos.length > 0">
+			<view class="license-section" v-if="uploadedImages.length > 0">
 				<view class="section-title">
 					<uni-icons type="scan" size="20" color="#ff4757"></uni-icons>
 					<text>车牌识别</text>
@@ -64,7 +61,7 @@
 			</view>
 
 			<!-- 违停信息 -->
-			<view class="violation-section" v-if="photos.length > 0">
+			<view class="violation-section" v-if="uploadedImages.length > 0">
 				<view class="section-title">
 					<uni-icons type="location" size="20" color="#50c878"></uni-icons>
 					<text>违停信息</text>
@@ -105,9 +102,9 @@
 			</view>
 
 			<!-- 提交按钮 -->
-			<view class="submit-section" v-if="photos.length > 0">
-				<button class="submit-btn" @tap="submitReport" :disabled="!canSubmit">
-					提交举报
+			<view class="submit-section" v-if="uploadedImages.length > 0">
+				<button class="submit-btn" @tap="submitReport" :disabled="!canSubmit || isSubmitting">
+					{{ isSubmitting ? '提交中...' : '提交举报' }}
 				</button>
 			</view>
 		</view>
@@ -158,9 +155,10 @@
 
 <script setup>
 	import { ref, reactive, computed, onMounted } from 'vue';
+	import ImageUploader from '@/components/ImageUploader.vue';
 
 	const currentTab = ref('report');
-	const photos = ref([]);
+	const uploadedImages = ref([]);
 	const licenseNumber = ref('');
 	const recognizedLicense = ref('');
 	const isRecognizing = ref(false);
@@ -169,6 +167,7 @@
 	const violationTypeIndex = ref(-1);
 	const violationDesc = ref('');
 	const successPopup = ref(null);
+	const isSubmitting = ref(false);
 
 	// 违停类型选项
 	const violationTypes = reactive([
@@ -210,9 +209,21 @@
 		}
 	]);
 
+	// 云对象实例
+	let reportCloudObj = null;
+
+	// 初始化云对象
+	const initCloudObj = () => {
+		try {
+			reportCloudObj = uniCloud.importObject('report');
+		} catch (error) {
+			console.error('举报云对象初始化失败:', error);
+		}
+	};
+
 	// 是否可以提交
 	const canSubmit = computed(() => {
-		return photos.value.length > 0 && 
+		return uploadedImages.value.length > 0 && 
 			   licenseNumber.value.trim() && 
 			   violationLocation.value.trim() && 
 			   violationType.value;
@@ -223,54 +234,31 @@
 		currentTab.value = tab;
 	};
 
-	// 拍照
-	const takePhoto = () => {
-		uni.chooseImage({
-			count: 3 - photos.value.length,
-			sizeType: ['compressed'],
-			sourceType: ['camera'],
-			success: (res) => {
-				photos.value.push(...res.tempFilePaths);
-				// 自动触发车牌识别
-				if (photos.value.length === 1) {
-					setTimeout(() => {
-						recognizeLicense();
-					}, 500);
-				}
-			},
-			fail: (err) => {
-				console.error('拍照失败:', err);
-				uni.showToast({
-					title: '拍照失败',
-					icon: 'none'
-				});
-			}
-		});
-	};
-
-	// 预览照片
-	const previewPhoto = (index) => {
-		uni.previewImage({
-			urls: photos.value,
-			current: index
-		});
-	};
-
-	// 删除照片
-	const removePhoto = (index) => {
-		photos.value.splice(index, 1);
-		// 如果删除了所有照片，清空识别结果
-		if (photos.value.length === 0) {
-			licenseNumber.value = '';
-			recognizedLicense.value = '';
+	// 图片上传成功回调
+	const onUploadSuccess = (data) => {
+		console.log('图片上传成功:', data);
+		// 自动触发车牌识别
+		if (uploadedImages.value.length === 1) {
+			setTimeout(() => {
+				recognizeLicense();
+			}, 500);
 		}
 	};
 
+	// 图片上传失败回调
+	const onUploadError = (error) => {
+		console.error('图片上传失败:', error);
+		uni.showToast({
+			title: '图片上传失败',
+			icon: 'none'
+		});
+	};
+
 	// 车牌识别
-	const recognizeLicense = () => {
-		if (photos.value.length === 0) {
+	const recognizeLicense = async () => {
+		if (uploadedImages.value.length === 0) {
 			uni.showToast({
-				title: '请先拍照',
+				title: '请先上传照片',
 				icon: 'none'
 			});
 			return;
@@ -278,21 +266,30 @@
 
 		isRecognizing.value = true;
 		
-		// 模拟车牌识别API调用
-		setTimeout(() => {
+		try {
+			// 模拟车牌识别过程
+			await new Promise(resolve => setTimeout(resolve, 2000));
+			
 			// 模拟识别结果
-			const mockLicenses = ['京A12345', '沪B67890', '粤C11111', '川D22222', '鲁E33333'];
+			const mockLicenses = ['京A12345', '沪B67890', '粤C11111', '川D22222'];
 			const randomLicense = mockLicenses[Math.floor(Math.random() * mockLicenses.length)];
 			
 			recognizedLicense.value = randomLicense;
 			licenseNumber.value = randomLicense;
-			isRecognizing.value = false;
 			
 			uni.showToast({
 				title: '识别成功',
 				icon: 'success'
 			});
-		}, 2000);
+		} catch (error) {
+			console.error('车牌识别失败:', error);
+			uni.showToast({
+				title: '识别失败，请手动输入',
+				icon: 'none'
+			});
+		} finally {
+			isRecognizing.value = false;
+		}
 	};
 
 	// 违停类型选择
@@ -302,7 +299,7 @@
 	};
 
 	// 提交举报
-	const submitReport = () => {
+	const submitReport = async () => {
 		if (!canSubmit.value) {
 			uni.showToast({
 				title: '请完善举报信息',
@@ -311,36 +308,62 @@
 			return;
 		}
 
-		uni.showLoading({
-			title: '提交中...'
-		});
+		isSubmitting.value = true;
 
-		// 模拟提交API
-		setTimeout(() => {
-			uni.hideLoading();
-			
-			// 显示成功弹窗
-			successPopup.value.open();
-			
-			// 清空表单
-			photos.value = [];
-			licenseNumber.value = '';
-			recognizedLicense.value = '';
-			violationLocation.value = '';
-			violationType.value = '';
-			violationTypeIndex.value = -1;
-			violationDesc.value = '';
-			
-		}, 2000);
+		try {
+			// 构建举报数据
+			const reportData = {
+				licenseNumber: licenseNumber.value.trim(),
+				violationLocation: violationLocation.value.trim(),
+				violationType: violationType.value,
+				violationDesc: violationDesc.value.trim(),
+				images: uploadedImages.value,
+				reportTime: new Date().toISOString()
+			};
 
-		console.log('提交举报数据:', {
-			photos: photos.value,
-			licenseNumber: licenseNumber.value,
-			violationLocation: violationLocation.value,
-			violationType: violationType.value,
-			violationDesc: violationDesc.value,
-			reportTime: new Date()
-		});
+			console.log('提交举报数据:', reportData);
+
+			// 如果有举报云对象，调用云函数
+			if (reportCloudObj) {
+				const result = await reportCloudObj.submitReport(reportData);
+				
+				if (result.errCode === 0) {
+					// 提交成功
+					successPopup.value.open();
+					resetForm();
+				} else {
+					uni.showToast({
+						title: result.errMsg || '提交失败',
+						icon: 'none'
+					});
+				}
+			} else {
+				// 模拟提交成功
+				await new Promise(resolve => setTimeout(resolve, 1000));
+				successPopup.value.open();
+				resetForm();
+			}
+
+		} catch (error) {
+			console.error('提交举报失败:', error);
+			uni.showToast({
+				title: '提交失败，请重试',
+				icon: 'none'
+			});
+		} finally {
+			isSubmitting.value = false;
+		}
+	};
+
+	// 重置表单
+	const resetForm = () => {
+		uploadedImages.value = [];
+		licenseNumber.value = '';
+		recognizedLicense.value = '';
+		violationLocation.value = '';
+		violationType.value = '';
+		violationTypeIndex.value = -1;
+		violationDesc.value = '';
 	};
 
 	// 关闭成功弹窗
@@ -350,6 +373,8 @@
 
 	// 格式化时间
 	const formatTime = (date) => {
+		if (!date) return '';
+		
 		const now = new Date();
 		const diff = now - date;
 		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -366,35 +391,34 @@
 	};
 
 	onMounted(() => {
-		console.log('随手拍页面加载完成');
+		initCloudObj();
 	});
 </script>
 
 <style scoped>
 	.container {
-		background-color: #f8f8f8;
+		background-color: #f5f5f5;
 		min-height: 100vh;
 	}
 
-	/* TAB栏样式 */
 	.tab-bar {
 		display: flex;
 		background-color: white;
-		border-bottom: 1rpx solid #e8e8e8;
+		border-bottom: 1rpx solid #eee;
 	}
 
 	.tab-item {
 		flex: 1;
 		text-align: center;
-		padding: 32rpx 0;
-		font-size: 28rpx;
+		padding: 30rpx 0;
+		font-size: 32rpx;
 		color: #666;
 		position: relative;
 	}
 
 	.tab-item.active {
 		color: #007aff;
-		font-weight: 600;
+		font-weight: bold;
 	}
 
 	.tab-item.active::after {
@@ -409,252 +433,176 @@
 		border-radius: 2rpx;
 	}
 
-	/* 举报界面样式 */
 	.report-section {
-		padding: 24rpx;
+		padding: 20rpx;
+	}
+
+	.photo-section,
+	.license-section,
+	.violation-section {
+		background-color: white;
+		border-radius: 20rpx;
+		padding: 30rpx;
+		margin-bottom: 20rpx;
 	}
 
 	.section-title {
 		display: flex;
 		align-items: center;
-		margin-bottom: 24rpx;
-		font-size: 28rpx;
-		font-weight: 600;
+		margin-bottom: 30rpx;
+		font-size: 32rpx;
+		font-weight: bold;
 		color: #333;
 	}
 
 	.section-title text {
-		margin-left: 12rpx;
+		margin-left: 10rpx;
 	}
 
 	.photo-count {
+		margin-left: auto !important;
+		font-size: 28rpx !important;
 		color: #999 !important;
 		font-weight: normal !important;
-		margin-left: auto !important;
+	}
+
+	.photo-tip {
+		display: block;
+		margin-top: 20rpx;
+		font-size: 24rpx;
+		color: #999;
+		text-align: center;
 	}
 
 	.scan-btn {
 		margin-left: auto;
 		background-color: #007aff;
 		color: white;
-		padding: 8rpx 16rpx;
-		border-radius: 20rpx;
-		font-size: 22rpx;
+		padding: 10rpx 20rpx;
+		border-radius: 30rpx;
+		font-size: 24rpx;
 	}
 
 	.scan-btn.loading {
 		background-color: #ccc;
 	}
 
-	/* 拍照区域 */
-	.photo-section {
-		background-color: white;
-		border-radius: 16rpx;
-		padding: 32rpx 24rpx;
-		margin-bottom: 24rpx;
-	}
-
-	.photos-container {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 16rpx;
-		margin-bottom: 16rpx;
-	}
-
-	.photo-item {
-		position: relative;
-		aspect-ratio: 1;
-	}
-
-	.photo-image {
-		width: 100%;
-		height: 100%;
-		border-radius: 12rpx;
-	}
-
-	.remove-photo {
-		position: absolute;
-		top: 8rpx;
-		right: 8rpx;
-		width: 32rpx;
-		height: 32rpx;
-		background-color: rgba(0, 0, 0, 0.6);
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.add-photo {
-		aspect-ratio: 1;
-		border: 2rpx dashed #ddd;
-		border-radius: 12rpx;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		background-color: #fafafa;
-	}
-
-	.add-text {
-		font-size: 22rpx;
-		color: #999;
-		margin-top: 8rpx;
-	}
-
-	.photo-tip {
-		font-size: 22rpx;
-		color: #999;
-		text-align: center;
-	}
-
-	/* 车牌识别区域 */
-	.license-section {
-		background-color: white;
-		border-radius: 16rpx;
-		padding: 32rpx 24rpx;
-		margin-bottom: 24rpx;
-	}
-
 	.license-result {
-		margin-top: 16rpx;
+		margin-top: 20rpx;
 	}
 
 	.license-input {
 		width: 100%;
-		padding: 20rpx 24rpx;
-		border: 2rpx solid #e8e8e8;
-		border-radius: 12rpx;
-		font-size: 28rpx;
-		color: #333;
-		background-color: #fafafa;
+		padding: 20rpx;
+		border: 2rpx solid #eee;
+		border-radius: 10rpx;
+		font-size: 32rpx;
 		text-align: center;
-		font-weight: 600;
-		letter-spacing: 2rpx;
+		letter-spacing: 4rpx;
 	}
 
 	.license-tip {
-		font-size: 22rpx;
+		display: block;
+		margin-top: 10rpx;
+		font-size: 24rpx;
 		color: #007aff;
 		text-align: center;
-		margin-top: 12rpx;
-		display: block;
-	}
-
-	/* 违停信息区域 */
-	.violation-section {
-		background-color: white;
-		border-radius: 16rpx;
-		padding: 32rpx 24rpx;
-		margin-bottom: 24rpx;
 	}
 
 	.form-item {
-		margin-bottom: 24rpx;
-	}
-
-	.form-item:last-child {
-		margin-bottom: 0;
+		margin-bottom: 30rpx;
 	}
 
 	.label {
-		font-size: 26rpx;
-		color: #333;
 		display: block;
-		margin-bottom: 12rpx;
-	}
-
-	.input {
-		width: 100%;
-		padding: 20rpx 24rpx;
-		border: 2rpx solid #e8e8e8;
-		border-radius: 12rpx;
+		margin-bottom: 15rpx;
 		font-size: 28rpx;
 		color: #333;
-		background-color: #fafafa;
+		font-weight: bold;
+	}
+
+	.input,
+	.textarea {
+		width: 100%;
+		padding: 20rpx;
+		border: 2rpx solid #eee;
+		border-radius: 10rpx;
+		font-size: 28rpx;
+		box-sizing: border-box;
+	}
+
+	.textarea {
+		height: 120rpx;
+		resize: none;
 	}
 
 	.picker {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 20rpx 24rpx;
-		border: 2rpx solid #e8e8e8;
-		border-radius: 12rpx;
+		padding: 20rpx;
+		border: 2rpx solid #eee;
+		border-radius: 10rpx;
 		font-size: 28rpx;
 		color: #333;
-		background-color: #fafafa;
 	}
 
-	.textarea {
-		width: 100%;
-		min-height: 120rpx;
-		padding: 20rpx 24rpx;
-		border: 2rpx solid #e8e8e8;
-		border-radius: 12rpx;
-		font-size: 28rpx;
-		color: #333;
-		background-color: #fafafa;
-		resize: none;
-	}
-
-	/* 提交按钮 */
 	.submit-section {
-		padding: 20rpx 0;
+		margin-top: 40rpx;
 	}
 
 	.submit-btn {
 		width: 100%;
-		height: 88rpx;
 		background-color: #007aff;
 		color: white;
 		border: none;
-		border-radius: 44rpx;
+		border-radius: 50rpx;
+		padding: 30rpx 0;
 		font-size: 32rpx;
-		font-weight: 600;
+		font-weight: bold;
 	}
 
-	.submit-btn[disabled] {
+	.submit-btn:disabled {
 		background-color: #ccc;
 	}
 
-	/* 榜单界面样式 */
 	.ranking-section {
-		padding: 24rpx;
+		padding: 20rpx;
 	}
 
 	.ranking-header {
 		background-color: white;
-		border-radius: 16rpx;
-		padding: 32rpx 24rpx;
-		margin-bottom: 24rpx;
+		border-radius: 20rpx;
+		padding: 30rpx;
+		margin-bottom: 20rpx;
 		text-align: center;
 	}
 
 	.ranking-title {
-		font-size: 32rpx;
-		font-weight: 700;
+		font-size: 36rpx;
+		font-weight: bold;
 		color: #333;
 		display: block;
-		margin-bottom: 12rpx;
+		margin-bottom: 10rpx;
 	}
 
 	.ranking-desc {
-		font-size: 24rpx;
+		font-size: 26rpx;
 		color: #999;
+		display: block;
 	}
 
 	.ranking-list {
 		background-color: white;
-		border-radius: 16rpx;
+		border-radius: 20rpx;
 		overflow: hidden;
 	}
 
 	.ranking-item {
 		display: flex;
 		align-items: center;
-		padding: 24rpx;
-		border-bottom: 1rpx solid #f0f0f0;
+		padding: 30rpx;
+		border-bottom: 1rpx solid #f5f5f5;
 	}
 
 	.ranking-item:last-child {
@@ -669,9 +617,9 @@
 		align-items: center;
 		justify-content: center;
 		font-size: 24rpx;
-		font-weight: 700;
+		font-weight: bold;
 		color: white;
-		margin-right: 24rpx;
+		margin-right: 20rpx;
 	}
 
 	.rank-1 {
@@ -692,20 +640,21 @@
 
 	.license-info {
 		flex: 1;
+		margin-right: 20rpx;
 	}
 
 	.license-plate {
-		font-size: 30rpx;
-		font-weight: 600;
+		font-size: 32rpx;
+		font-weight: bold;
 		color: #333;
 		display: block;
-		margin-bottom: 8rpx;
-		letter-spacing: 1rpx;
+		margin-bottom: 5rpx;
 	}
 
 	.report-count {
 		font-size: 24rpx;
 		color: #ff4757;
+		display: block;
 	}
 
 	.latest-report {
@@ -713,51 +662,49 @@
 	}
 
 	.report-time {
-		font-size: 22rpx;
+		font-size: 24rpx;
 		color: #999;
 	}
 
-	/* 空状态 */
 	.empty-ranking {
 		text-align: center;
-		padding: 120rpx 40rpx;
+		padding: 100rpx 0;
+		color: #999;
 	}
 
 	.empty-text {
-		font-size: 28rpx;
-		color: #999;
+		font-size: 32rpx;
+		margin: 20rpx 0 10rpx;
 		display: block;
-		margin: 24rpx 0 12rpx;
 	}
 
 	.empty-desc {
-		font-size: 24rpx;
-		color: #ccc;
+		font-size: 26rpx;
+		display: block;
 	}
 
-	/* 成功弹窗 */
 	.success-modal {
-		width: 600rpx;
 		background-color: white;
 		border-radius: 20rpx;
-		padding: 60rpx 40rpx;
+		padding: 60rpx 40rpx 40rpx;
 		text-align: center;
+		width: 600rpx;
 	}
 
 	.success-icon {
-		margin-bottom: 32rpx;
+		margin-bottom: 30rpx;
 	}
 
 	.success-title {
-		font-size: 32rpx;
-		font-weight: 600;
+		font-size: 36rpx;
+		font-weight: bold;
 		color: #333;
 		display: block;
-		margin-bottom: 16rpx;
+		margin-bottom: 20rpx;
 	}
 
 	.success-desc {
-		font-size: 26rpx;
+		font-size: 28rpx;
 		color: #666;
 		line-height: 1.5;
 		display: block;
@@ -765,12 +712,11 @@
 	}
 
 	.confirm-btn {
-		width: 200rpx;
-		height: 72rpx;
 		background-color: #007aff;
 		color: white;
 		border: none;
-		border-radius: 36rpx;
+		border-radius: 50rpx;
+		padding: 20rpx 60rpx;
 		font-size: 28rpx;
 	}
 </style>

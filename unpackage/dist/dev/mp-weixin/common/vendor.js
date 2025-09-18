@@ -7284,7 +7284,7 @@ function isConsoleWritable() {
 function initRuntimeSocketService() {
   const hosts = "127.0.0.1,30.205.108.126";
   const port = "8090";
-  const id = "mp-weixin_NQzuj_";
+  const id = "mp-weixin_nZuY-4";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -11180,6 +11180,7 @@ var nr = tr;
 const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
   !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
 };
+const onShow = /* @__PURE__ */ createHook(ON_SHOW);
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
 const onReachBottom = /* @__PURE__ */ createHook(ON_REACH_BOTTOM);
 exports._export_sfc = _export_sfc;
@@ -11195,6 +11196,7 @@ exports.o = o$1;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
 exports.onReachBottom = onReachBottom;
+exports.onShow = onShow;
 exports.p = p$1;
 exports.reactive = reactive;
 exports.ref = ref;

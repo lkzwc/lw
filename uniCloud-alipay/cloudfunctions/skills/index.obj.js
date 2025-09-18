@@ -54,106 +54,72 @@ module.exports = {
 		}
 	},
 
+
 	/**
 	 * 获取技能列表
 	 * @param {Object} params 查询参数
-	 * @param {string} params.keyword 搜索关键词
-	 * @param {string} params.category 分类筛选
-	 * @param {number} params.page 页码，默认1
-	 * @param {number} params.pageSize 每页数量，默认10
 	 * @returns {Object} 技能列表数据
 	 */
 	async getSkillsList(params = {}) {
-		const callId = Date.now() + '_' + Math.random().toString(36).substring(2);
-		
 		try {
-			const { keyword = '', category = 'all', page = 1, pageSize = 10 } = params;
+			const { keyword, category, page = 1, pageSize = 10, userId } = params;
 			
-			// 参数验证
-			if (page < 1 || pageSize < 1 || pageSize > 50) {
-				console.log(`[调用ID: ${callId}] 参数验证失败`);
-				return {
-					errCode: 'INVALID_PARAMS',
-					errMsg: '分页参数无效'
-				};
-			}
-			
-			console.log(`[调用ID: ${callId}] 参数验证通过，开始构建查询条件`);
-			
-			// 构建查询条件
-			let whereCondition = {
+			// 获取数据库引用
+			const db = uniCloud.database();
+			let query = db.collection('skills').where({
 				status: 1 // 只查询已发布的技能
-			};
+			});
 			
-			// 分类筛选
+			// 按关键词搜索
+			if (keyword && keyword.trim()) {
+				query = query.where({
+					title: new RegExp(keyword.trim(), 'i')
+				});
+			}
+			
+			// 按分类筛选
 			if (category && category !== 'all') {
-				whereCondition.category = category;
+				query = query.where({
+					category: category
+				});
 			}
 			
-			console.log(`[调用ID: ${callId}] 基础查询条件:`, whereCondition);
-			
-			// 关键词搜索
-			if (keyword.trim()) {
-				console.log(`[调用ID: ${callId}] 添加关键词搜索:`, keyword.trim());
-				const keywordRegex = new RegExp(keyword.trim(), 'i');
-				whereCondition = dbCmd.and([
-					whereCondition,
-					dbCmd.or([
-						{ title: keywordRegex },
-						{ description: keywordRegex },
-						{ username: keywordRegex },
-						{ location: keywordRegex },
-						{ tags: dbCmd.elemMatch(keywordRegex) }
-					])
-				]);
+			// 按用户筛选
+			if (userId) {
+				query = query.where({
+					userId: userId
+				});
 			}
 			
-			// 分页计算
+			// 分页查询
 			const skip = (page - 1) * pageSize;
-			console.log(`[调用ID: ${callId}] 分页参数: skip=${skip}, limit=${pageSize}`);
-			
-			// 查询技能列表
-			console.log(`[调用ID: ${callId}] 开始查询技能列表`);
-			const skillsResult = await db.collection('skills')
-				.where(whereCondition)
-				.field({
-					password: false, // 排除敏感字段
-					phone: false,
-					wechat: false
-				})
+			const result = await query
 				.orderBy('createTime', 'desc')
 				.skip(skip)
 				.limit(pageSize)
 				.get();
 			
-			console.log(`[调用ID: ${callId}] 技能列表查询结果:`, skillsResult);
+			// 获取总数
+			const countResult = await query.count();
 			
-			// 查询总数
-			console.log(`[调用ID: ${callId}] 开始查询总数`);
-			const countResult = await db.collection('skills')
-				.where(whereCondition)
-				.count();
+			// 判断是否还有更多数据
+			const hasMore = (skip + result.data.length) < countResult.total;
 			
-			console.log(`[调用ID: ${callId}] 总数查询结果:`, countResult);
-			
-			const result = {
+			return {
 				errCode: 0,
 				errMsg: '获取成功',
 				data: {
-					list: skillsResult.data,
+					list: result.data,
 					total: countResult.total,
 					page: page,
 					pageSize: pageSize,
-					hasMore: skip + pageSize < countResult.total
+					hasMore: hasMore
 				}
 			};
 			
-			console.log(`[调用ID: ${callId}] 最终返回结果:`, result);
-			return result;
-			
 		} catch (error) {
-			console.error(`[调用ID: ${callId}] 云对象方法执行异常:`, error);
-			console.error(`[调用ID: ${callId}] 异常堆栈:`, error.stack);
+			console.error(`[调用ID: ${Date.now()}] 云对象方法执行异常:`, error);
+			console.error(`[调用ID: ${Date.now()}] 异常堆栈:`, error.stack);
 			return {
 				errCode: 'GET_SKILLS_FAILED',
 				errMsg: '获取技能列表失败: ' + error.message
@@ -401,14 +367,17 @@ module.exports = {
 	 */
 	async getCategories() {
 		try {
+			// 返回预定义的分类列表
 			const categories = [
 				{ label: '全部', value: 'all' },
-				{ label: '家政服务', value: 'housekeeping' },
-				{ label: '维修安装', value: 'repair' },
-				{ label: '教育培训', value: 'education' },
-				{ label: '美容美发', value: 'beauty' },
-				{ label: '健康护理', value: 'health' },
-				{ label: '其他服务', value: 'other' }
+				{ label: '编程开发', value: 'programming' },
+				{ label: '设计创意', value: 'design' },
+				{ label: '语言翻译', value: 'language' },
+				{ label: '音乐艺术', value: 'music' },
+				{ label: '体育健身', value: 'sports' },
+				{ label: '学习辅导', value: 'education' },
+				{ label: '生活服务', value: 'life' },
+				{ label: '其他技能', value: 'other' }
 			];
 			
 			return {
@@ -416,11 +385,12 @@ module.exports = {
 				errMsg: '获取成功',
 				data: categories
 			};
+			
 		} catch (error) {
-			console.error('获取分类列表失败:', error);
 			return {
-				errCode: 'GET_CATEGORIES_FAILED',
-				errMsg: '获取分类列表失败'
+				errCode: 'GET_CATEGORIES_ERROR',
+				errMsg: '获取分类列表时发生错误: ' + error.message,
+				data: null
 			};
 		}
 	},
@@ -436,6 +406,7 @@ module.exports = {
 		try {
 			// 验证用户登录状态
 			const userInfo = await this.getCurrentUser();
+			console.log('getCurrentUser:', userInfo);
 			if (!userInfo || userInfo.errCode !== 0) {
 				return {
 					errCode: 'UNAUTHORIZED',
@@ -999,5 +970,434 @@ module.exports = {
 				errMsg: '获取收藏列表失败'
 			};
 		}
-	}
+	},
+
+	/**
+	 * 添加技能
+	 * @param {Object} skillData 技能数据
+	 * @returns {Object} 返回结果
+	 */
+	async addSkill(skillData) {
+		try {
+			// 获取当前用户信息
+			const userInfo = this.getUniIdToken();
+			if (!userInfo || !userInfo.uid) {
+				return {
+					errCode: 'UNAUTHORIZED',
+					errMsg: '用户未登录',
+					data: null
+				};
+			}
+			
+			// 参数验证
+			if (!skillData.title || !skillData.category || !skillData.description || !skillData.contact) {
+				return {
+					errCode: 'PARAM_IS_NULL',
+					errMsg: '必填参数不能为空',
+					data: null
+				};
+			}
+			
+			// 获取数据库引用
+			const db = uniCloud.database();
+			const skillsCollection = db.collection('skills');
+			
+			// 准备插入数据
+			const insertData = {
+				title: skillData.title,
+				category: skillData.category,
+				description: skillData.description,
+				images: skillData.images || [],
+				contact: skillData.contact,
+				price: skillData.price || '',
+				availableTime: skillData.availableTime || '',
+				userId: userInfo.uid,
+				status: 1, // 1: 启用, 0: 草稿, -1: 已删除
+				createTime: new Date(),
+				updateTime: new Date()
+			};
+			
+			// 插入数据
+			const result = await skillsCollection.add(insertData);
+			
+			if (result.id) {
+				return {
+					errCode: 0,
+					errMsg: 'success',
+					data: {
+						skillId: result.id,
+						...insertData
+					}
+				};
+			} else {
+				return {
+					errCode: 'ADD_SKILL_FAILED',
+					errMsg: '技能添加失败',
+					data: null
+				};
+			}
+			
+		} catch (error) {
+			return {
+				errCode: 'ADD_SKILL_ERROR',
+				errMsg: '添加技能时发生错误: ' + error.message,
+				data: null
+			};
+		}
+	},
+	
+	/**
+	 * 获取技能详情
+	 * @param {string} skillId 技能ID
+	 * @returns {Object} 返回技能详情
+	 */
+	async getSkillDetail(skillId) {
+		try {
+			// 参数验证
+			if (!skillId) {
+				return {
+					errCode: 'PARAM_IS_NULL',
+					errMsg: '技能ID不能为空',
+					data: null
+				};
+			}
+			
+			// 获取数据库引用
+			const db = uniCloud.database();
+			const result = await db.collection('skills').doc(skillId).get();
+			
+			if (result.data && result.data.length > 0) {
+				return {
+					errCode: 0,
+					errMsg: 'success',
+					data: result.data[0]
+				};
+			} else {
+				return {
+					errCode: 'SKILL_NOT_FOUND',
+					errMsg: '技能不存在',
+					data: null
+				};
+			}
+			
+		} catch (error) {
+			return {
+				errCode: 'GET_SKILL_DETAIL_ERROR',
+				errMsg: '获取技能详情时发生错误: ' + error.message,
+				data: null
+			};
+		}
+	},
+	
+	/**
+	 * 更新技能
+	 * @param {string} skillId 技能ID
+	 * @param {Object} updateData 更新数据
+	 * @returns {Object} 返回结果
+	 */
+	async updateSkill(skillId, updateData) {
+		try {
+			// 获取当前用户信息
+			const userInfo = this.getUniIdToken();
+			if (!userInfo || !userInfo.uid) {
+				return {
+					errCode: 'UNAUTHORIZED',
+					errMsg: '用户未登录',
+					data: null
+				};
+			}
+			
+			// 参数验证
+			if (!skillId) {
+				return {
+					errCode: 'PARAM_IS_NULL',
+					errMsg: '技能ID不能为空',
+					data: null
+				};
+			}
+			
+			// 获取数据库引用
+			const db = uniCloud.database();
+			
+			// 检查技能是否存在且属于当前用户
+			const skillResult = await db.collection('skills').doc(skillId).get();
+			if (!skillResult.data || skillResult.data.length === 0) {
+				return {
+					errCode: 'SKILL_NOT_FOUND',
+					errMsg: '技能不存在',
+					data: null
+				};
+			}
+			
+			const skill = skillResult.data[0];
+			if (skill.userId !== userInfo.uid) {
+				return {
+					errCode: 'PERMISSION_DENIED',
+					errMsg: '无权限修改此技能',
+					data: null
+				};
+			}
+			
+			// 准备更新数据
+			const finalUpdateData = {
+				...updateData,
+				updateTime: new Date()
+			};
+			
+			// 更新数据
+			const result = await db.collection('skills').doc(skillId).update(finalUpdateData);
+			
+			if (result.updated > 0) {
+				return {
+					errCode: 0,
+					errMsg: 'success',
+					data: {
+						skillId: skillId,
+						updated: result.updated
+					}
+				};
+			} else {
+				return {
+					errCode: 'UPDATE_SKILL_FAILED',
+					errMsg: '技能更新失败',
+					data: null
+				};
+			}
+			
+		} catch (error) {
+			return {
+				errCode: 'UPDATE_SKILL_ERROR',
+				errMsg: '更新技能时发生错误: ' + error.message,
+				data: null
+			};
+		}
+	},
+	
+	/**
+	 * 删除技能（软删除）
+	 * @param {string} skillId 技能ID
+	 * @returns {Object} 返回结果
+	 */
+	async deleteSkill(skillId) {
+		try {
+			// 获取当前用户信息
+			const userInfo = this.getUniIdToken();
+			if (!userInfo || !userInfo.uid) {
+				return {
+					errCode: 'UNAUTHORIZED',
+					errMsg: '用户未登录',
+					data: null
+				};
+			}
+			
+			// 参数验证
+			if (!skillId) {
+				return {
+					errCode: 'PARAM_IS_NULL',
+					errMsg: '技能ID不能为空',
+					data: null
+				};
+			}
+			
+			// 获取数据库引用
+			const db = uniCloud.database();
+			
+			// 检查技能是否存在且属于当前用户
+			const skillResult = await db.collection('skills').doc(skillId).get();
+			if (!skillResult.data || skillResult.data.length === 0) {
+				return {
+					errCode: 'SKILL_NOT_FOUND',
+					errMsg: '技能不存在',
+					data: null
+				};
+			}
+			
+			const skill = skillResult.data[0];
+			if (skill.userId !== userInfo.uid) {
+				return {
+					errCode: 'PERMISSION_DENIED',
+					errMsg: '无权限删除此技能',
+					data: null
+				};
+			}
+			
+			// 软删除（更新状态为-1）
+			const result = await db.collection('skills').doc(skillId).update({
+				status: -1,
+				updateTime: new Date()
+			});
+			
+			if (result.updated > 0) {
+				return {
+					errCode: 0,
+					errMsg: 'success',
+					data: {
+						skillId: skillId,
+						deleted: true
+					}
+				};
+			} else {
+				return {
+					errCode: 'DELETE_SKILL_FAILED',
+					errMsg: '技能删除失败',
+					data: null
+				};
+			}
+			
+		} catch (error) {
+			return {
+				errCode: 'DELETE_SKILL_ERROR',
+				errMsg: '删除技能时发生错误: ' + error.message,
+				data: null
+			};
+		}
+	},
+
+	/**
+	 * 测试云对象连接
+	 * @returns {Object} 返回测试结果
+	 */
+	async test() {
+		try {
+			return {
+				errCode: 0,
+				errMsg: 'success',
+				data: {
+					message: '技能云对象连接正常',
+					timestamp: new Date().toISOString()
+				}
+			};
+		} catch (error) {
+			return {
+				errCode: 'TEST_ERROR',
+				errMsg: '测试失败: ' + error.message,
+				data: null
+			};
+		}
+	},
+	
+	/**
+	 * 获取模拟技能列表（用于测试）
+	 * @param {Object} params 查询参数
+	 * @returns {Object} 返回模拟技能列表
+	 */
+	async getMockSkillsList(params = {}) {
+		try {
+			// 模拟技能数据
+			const mockSkills = [
+				{
+					_id: 'mock_1',
+					title: 'Web前端开发',
+					category: '编程开发',
+					description: '精通HTML、CSS、JavaScript，熟悉Vue、React框架，有3年开发经验。',
+					images: ['https://via.placeholder.com/300x200/4facfe/FFFFFF?text=前端开发'],
+					contact: 'frontend_dev',
+					price: '100-200元/小时',
+					availableTime: '工作日晚上、周末',
+					userId: 'mock_user_1',
+					status: 1,
+					createTime: new Date('2024-01-15'),
+					updateTime: new Date('2024-01-15')
+				},
+				{
+					_id: 'mock_2',
+					title: 'UI/UX设计',
+					category: '设计创意',
+					description: '专业UI/UX设计师，擅长移动端界面设计，熟练使用Figma、Sketch等设计工具。',
+					images: ['https://via.placeholder.com/300x200/667eea/FFFFFF?text=UI设计'],
+					contact: 'ui_designer',
+					price: '80-150元/小时',
+					availableTime: '周一到周五',
+					userId: 'mock_user_2',
+					status: 1,
+					createTime: new Date('2024-01-14'),
+					updateTime: new Date('2024-01-14')
+				},
+				{
+					_id: 'mock_3',
+					title: '英语口语培训',
+					category: '语言翻译',
+					description: '英语专业八级，有海外留学经验，提供一对一英语口语培训服务。',
+					images: ['https://via.placeholder.com/300x200/f093fb/FFFFFF?text=英语培训'],
+					contact: 'english_teacher',
+					price: '60-100元/小时',
+					availableTime: '周末全天',
+					userId: 'mock_user_3',
+					status: 1,
+					createTime: new Date('2024-01-13'),
+					updateTime: new Date('2024-01-13')
+				},
+				{
+					_id: 'mock_4',
+					title: '钢琴教学',
+					category: '音乐艺术',
+					description: '音乐学院毕业，有10年钢琴教学经验，可教授古典、流行钢琴。',
+					images: ['https://via.placeholder.com/300x200/4ade80/FFFFFF?text=钢琴教学'],
+					contact: 'piano_teacher',
+					price: '120-200元/课时',
+					availableTime: '周二、周四、周六',
+					userId: 'mock_user_4',
+					status: 1,
+					createTime: new Date('2024-01-12'),
+					updateTime: new Date('2024-01-12')
+				},
+				{
+					_id: 'mock_5',
+					title: '健身私教',
+					category: '体育健身',
+					description: '国家认证健身教练，专业制定健身计划，帮助您达到理想身材。',
+					images: ['https://via.placeholder.com/300x200/f59e0b/FFFFFF?text=健身私教'],
+					contact: 'fitness_coach',
+					price: '150-300元/课时',
+					availableTime: '每天早上6-9点，晚上7-10点',
+					userId: 'mock_user_5',
+					status: 1,
+					createTime: new Date('2024-01-11'),
+					updateTime: new Date('2024-01-11')
+				}
+			];
+			
+			const { category, keyword, page = 1, pageSize = 10 } = params;
+			
+			// 筛选数据
+			let filteredSkills = mockSkills;
+			
+			if (category && category !== 'all') {
+				filteredSkills = filteredSkills.filter(skill => skill.category === category);
+			}
+			
+			if (keyword && keyword.trim()) {
+				const searchTerm = keyword.trim().toLowerCase();
+				filteredSkills = filteredSkills.filter(skill => 
+					skill.title.toLowerCase().includes(searchTerm) ||
+					skill.description.toLowerCase().includes(searchTerm)
+				);
+			}
+			
+			// 分页
+			const startIndex = (page - 1) * pageSize;
+			const endIndex = startIndex + pageSize;
+			const paginatedSkills = filteredSkills.slice(startIndex, endIndex);
+			const hasMore = endIndex < filteredSkills.length;
+			
+			return {
+				errCode: 0,
+				errMsg: 'success (mock data)',
+				data: {
+					list: paginatedSkills,
+					total: filteredSkills.length,
+					page: page,
+					pageSize: pageSize,
+					hasMore: hasMore
+				}
+			};
+			
+		} catch (error) {
+			return {
+				errCode: 'MOCK_ERROR',
+				errMsg: '获取模拟数据失败: ' + error.message,
+				data: null
+			};
+		}
+	},
 };
