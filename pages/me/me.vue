@@ -229,6 +229,8 @@
 			const openid = await login.getUniID(loginRes.code);
 			
 			console.log('获取到openid:', openid);
+			
+			uni.setStorageSync("user", loginRes.userData)
 
 			// 获取用户信息
 			const userProfile = await new Promise((resolve, reject) => {
@@ -238,6 +240,20 @@
 					fail: reject
 				});
 			});
+			
+			// uni.showModal({
+			// 	title: "登陆",
+			// 	content: "请完善用户信息",
+			// 	showCancel: false,
+			// 	success: () => {
+			// 		uni.navigateTo({
+			// 			url: '/pages/setUserInfo/setUserInfo',
+			// 			complete: () => {
+			// 				userInfo.value = uni.getStorageSync('user')
+			// 			}
+			// 		})
+			// 	}
+			// })
 
 			console.log('用户信息:', userProfile);
 
