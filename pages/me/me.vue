@@ -137,7 +137,7 @@
 				</view>
 				<view class="modal-content">
 					<view class="login-avatar">
-						<image src="https://via.placeholder.com/120x120/4A90E2/FFFFFF?text=Login" class="login-avatar-img"></image>
+						<image src="https://img1.baidu.com/it/u=415612546,1658488047&fm=253&fmt=auto&app=120&f=JPEG?w=667&h=500" class="login-avatar-img"></image>
 					</view>
 					<text class="login-desc">登录后可以发布帖子、评论互动</text>
 					<button class="wechat-login-btn" @tap="wechatLogin" :loading="isLogging">
@@ -222,24 +222,21 @@
 				});
 			});
 
-			console.log('微信登录结果:', loginRes);
 
 			// 调用云函数获取用户信息
 			const login = uniCloud.importObject('Login');
-			const openid = await login.getUniID(loginRes.code);
+			const userInfo = await login.getUserProfile(loginRes.code);
 			
-			console.log('获取到openid:', openid);
-			
-			uni.setStorageSync("user", loginRes.userData)
+			console.log('user:', userInfo);
 
 			// 获取用户信息
-			const userProfile = await new Promise((resolve, reject) => {
-				uni.getUserProfile({
-					desc: '用于完善用户资料',
-					success: resolve,
-					fail: reject
-				});
-			});
+			// const userProfile = await new Promise((resolve, reject) => {
+			// 	uni.getUserProfile({
+			// 		desc: '用于完善用户资料',
+			// 		success: resolve,
+			// 		fail: reject
+			// 	});
+			// });
 			
 			// uni.showModal({
 			// 	title: "登陆",
@@ -255,7 +252,6 @@
 			// 	}
 			// })
 
-			console.log('用户信息:', userProfile);
 
 			// 更新用户状态
 			userInfo.isLogin = true;
@@ -718,9 +714,9 @@
 	}
 
 	.login-avatar-img {
-		width: 120rpx;
-		height: 120rpx;
-		border-radius: 50%;
+		width: 70vw;
+		height: 30vh;
+		border-radius: 20%;
 	}
 
 	.login-desc {

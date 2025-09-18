@@ -1,7 +1,8 @@
 {
   "name": "Login",
   "dependencies": {
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "wxlogin": "file:../common/wxlogin"
   },
   "extensions": {
     "uni-cloud-jql": {}
