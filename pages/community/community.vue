@@ -116,7 +116,7 @@
 		{ id: 'us', name: '业主' },
 		{ id: 'entertainment', name: '举报' },
 		{ id: 'health', name: '畅玩' },
-		{ id: 'life', name: '失物' },
+		{ id: 'life', name: '跳蚤' },
 		{ id: 'study', name: '活动' },
 	]);
 
