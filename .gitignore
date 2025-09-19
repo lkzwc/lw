@@ -1,3 +1,174 @@
+
+# uni-app 相关
 uni_*
-unpackage*
+unpackage/dist/dev/*
+.hbuilderx/
+.DS_Store
+
+# uniCloud 相关
 uniCloud-alipay/cloudfunctions/common/wxlogin/node_*
+uniCloud-alipay/cloudfunctions/*/node_modules/
+uniCloud-alipay/cloudfunctions/*/package-lock.json
+uniCloud-alipay/cloudfunctions/*/yarn.lock
+uniCloud-alipay/cloudfunctions/*/.env
+uniCloud-alipay/cloudfunctions/*/logs/
+
+# 微信小程序相关
+uniCloud-tcb/
+
+# Node.js 相关
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.npm
+.yarn-integrity
+
+# 环境变量
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 日志文件
+logs/
+*.log
+lerna-debug.log*
+
+# 运行时数据
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# 覆盖率目录
+lib-cov/
+coverage/
+.nyc_output/
+
+# 依赖目录
+jspm_packages/
+
+# TypeScript 缓存
+*.tsbuildinfo
+
+# 可选的 npm 缓存目录
+.npm
+
+# 可选的 eslint 缓存
+.eslintcache
+
+# 微任务缓存
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# 可选的 REPL 历史
+.node_repl_history
+
+# Yarn Integrity 文件
+.yarn-integrity
+
+# dotenv 环境变量文件
+.env.test
+
+# parcel-bundler 缓存
+.cache
+.parcel-cache
+
+# Next.js 构建输出
+.next
+
+# Nuxt.js 构建/生成输出
+.nuxt
+dist
+
+# Gatsby 文件
+.cache/
+public
+
+# Storybook 构建输出
+.out
+.storybook-out
+
+# 临时文件夹
+tmp/
+temp/
+
+# 运行时数据
+*.tmp
+*.temp
+
+# 编辑器和 IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统生成的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# HBuilderX 相关
+.hbuilderx/
+.project
+
+# 微信开发者工具
+project.config.json
+project.private.config.json
+
+# 支付宝小程序
+mini.project.json
+
+# 百度小程序
+project.swan.json
+
+# 字节跳动小程序
+project.config.json
+
+# QQ 小程序
+project.config.json
+
+# 快应用
+manifest.json.bak
+
+# 构建产物
+build/
+dist/
+release/
+
+# 测试相关
+test-results/
+coverage/
+.nyc_output/
+
+# 备份文件
+*.bak
+*.backup
+*.orig
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+
+# 证书和密钥文件
+*.pem
+*.key
+*.crt
+*.p12
+*.keystore
+
+# 本地配置文件
+config.local.js
+config.local.json

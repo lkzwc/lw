@@ -1,276 +1,661 @@
 <template>
-	<view class="container">
-		<form @submit="submitPost">
-			<!-- 帖子标题 -->
-			<view class="form-group">
-				<text class="label">帖子标题 *</text>
-				<input 
-					class="input" 
-					v-model="postData.title" 
-					placeholder="请输入帖子标题"
-					maxlength="100"
-				/>
-			</view>
+  <view class="publish-container">
+    <!-- 发布内容区 -->
+    <view class="publish-content">
+      <!-- 用户头像和输入区 -->
+      <view class="compose-area">
+        <image 
+          class="user-avatar" 
+          :src="userInfo.avatar || '/static/default-avatar.png'"
+          mode="aspectFill"
+        ></image>
+        
+        <view class="input-area">
+          <!-- 文本输入框 -->
+          <textarea
+            v-model="postContent"
+            class="content-input"
+            placeholder="分享你的想法..."
+            :maxlength="280"
+            auto-height
+            :show-count="false"
+            @input="onContentInput"
+            @focus="onInputFocus"
+            @blur="onInputBlur"
+          ></textarea>
+          
+          <!-- 标签显示区 -->
+          <view v-if="selectedTags.length > 0" class="tags-display">
+            <view 
+              v-for="(tag, index) in selectedTags" 
+              :key="index"
+              class="tag-item"
+              @tap="removeTag(index)"
+            >
+              <text class="tag-text">#{{ tag }}</text>
+              <uni-icons type="clear" size="14" color="#999"></uni-icons>
+            </view>
+          </view>
 
-			<!-- 帖子内容 -->
-			<view class="form-group">
-				<text class="label">帖子内容 *</text>
-				<textarea 
-					class="textarea" 
-					v-model="postData.content" 
-					placeholder="分享你的想法、经验或问题..."
-					maxlength="2000"
-				></textarea>
-			</view>
+          <!-- 图片上传组件 -->
+          <ImageUploader
+            v-if="showImageUploader"
+            :max-count="9"
+            :size-limit="10"
+            @on-upload-success="onImageUploadSuccess"
+            @on-delete="onImageDelete"
+            class="image-uploader"
+          />
+        </view>
+      </view>
 
-			<!-- 帖子图片 -->
-			<view class="form-group">
-				<text class="label">添加图片</text>
-				<ImageUploader 
-					v-model="postData.images"
-					:max-count="9"
-					module="community"
-					@upload-success="onUploadSuccess"
-					@upload-error="onUploadError"
-				/>
-			</view>
+      <!-- 工具栏 -->
+      <view class="toolbar">
+        <view class="toolbar-left">
+          <view class="tool-item" @tap="toggleImageUploader">
+            <uni-icons type="image" size="20" color="#1DA1F2"></uni-icons>
+          </view>
+          <view class="tool-item" @tap="showTagSelector">
+            <uni-icons type="compose" size="20" color="#1DA1F2"></uni-icons>
+          </view>
+          <view class="tool-item" @tap="showAttachmentPicker">
+            <uni-icons type="paperclip" size="20" color="#1DA1F2"></uni-icons>
+          </view>
+        </view>
+        
+        <view class="toolbar-right">
+          <view class="char-count" :class="{ 'char-count-warning': charCount > 260 }">
+            {{ charCount }}/280
+          </view>
+          <button 
+            class="publish-btn" 
+            :class="{ 'publish-btn-active': canPublish }"
+            :disabled="!canPublish"
+            @tap="handlePublish"
+          >
+            {{ isPublishing ? '发布中...' : '发布' }}
+          </button>
+        </view>
+      </view>
+    </view>
 
-			<!-- 帖子分类 -->
-			<view class="form-group">
-				<text class="label">帖子分类</text>
-				<picker 
-					:value="categoryIndex" 
-					:range="categories" 
-					range-key="name"
-					@change="onCategoryChange"
-				>
-					<view class="picker">
-						{{ postData.category || '请选择帖子分类' }}
-					</view>
-				</picker>
-			</view>
 
-			<!-- 提交按钮 -->
-			<button 
-				class="submit-btn" 
-				:disabled="isSubmitting"
-				@tap="submitPost"
-			>
-				{{ isSubmitting ? '发布中...' : '发布帖子' }}
-			</button>
-		</form>
-	</view>
+    <!-- 标签选择弹窗 -->
+    <uni-popup ref="tagPopup" type="bottom" background-color="#fff">
+      <view class="tag-selector">
+        <view class="tag-selector-header">
+          <text class="tag-selector-title">选择标签 (最多3个)</text>
+          <view class="tag-selector-close" @tap="closeTagSelector">
+            <uni-icons type="clear" size="20" color="#666"></uni-icons>
+          </view>
+        </view>
+        
+        <view class="tag-input-area">
+          <input
+            v-model="tagInput"
+            class="tag-input"
+            placeholder="输入自定义标签"
+            @confirm="addCustomTag"
+          />
+          <button class="add-tag-btn" @tap="addCustomTag">添加</button>
+        </view>
+        
+        <view class="popular-tags">
+          <text class="popular-tags-title">热门标签</text>
+          <view class="tags-grid">
+            <view
+              v-for="(tag, index) in popularTags"
+              :key="index"
+              class="popular-tag-item"
+              :class="{ 'tag-selected': selectedTags.includes(tag) }"
+              @tap="toggleTag(tag)"
+            >
+              #{{ tag }}
+            </view>
+          </view>
+        </view>
+      </view>
+    </uni-popup>
+
+    <!-- 位置选择弹窗 -->
+    <uni-popup ref="locationPopup" type="bottom" background-color="#fff">
+      <view class="location-selector">
+        <view class="location-header">
+          <text class="location-title">添加位置</text>
+          <view class="location-close" @tap="closeLocationPicker">
+            <uni-icons type="clear" size="20" color="#666"></uni-icons>
+          </view>
+        </view>
+        <view class="location-content">
+          <text class="location-placeholder">位置功能开发中...</text>
+        </view>
+      </view>
+    </uni-popup>
+
+    <!-- 附件选择弹窗 -->
+    <uni-popup ref="attachmentPopup" type="bottom" background-color="#fff">
+      <view class="attachment-selector">
+        <view class="attachment-header">
+          <text class="attachment-title">选择附件</text>
+          <view class="attachment-close" @tap="closeAttachmentPicker">
+            <uni-icons type="clear" size="20" color="#666"></uni-icons>
+          </view>
+        </view>
+        <view class="attachment-options">
+          <view class="attachment-option" @tap="selectFile">
+            <uni-icons type="folder" size="24" color="#1DA1F2"></uni-icons>
+            <text class="attachment-option-text">选择文件</text>
+          </view>
+          <view class="attachment-option" @tap="selectDocument">
+            <uni-icons type="compose" size="24" color="#1DA1F2"></uni-icons>
+            <text class="attachment-option-text">选择文档</text>
+          </view>
+        </view>
+      </view>
+    </uni-popup>
+  </view>
 </template>
 
 <script setup>
-	import { ref, reactive } from 'vue';
-	import { onLoad } from '@dcloudio/uni-app';
-	import ImageUploader from '@/components/ImageUploader.vue';
+import { ref, computed, reactive, onMounted } from 'vue'
+import ImageUploader from '@/components/ImageUploader.vue'
 
-	// 响应式数据
-	const postData = reactive({
-		title: '',
-		content: '',
-		images: [],
-		category: '闲聊交流'
-	});
+// 响应式数据
+const postContent = ref('')
+const selectedTags = ref([])
+const uploadedImages = ref([])
+const isPublishing = ref(false)
+const showImageUploader = ref(false)
+const tagInput = ref('')
+const inputFocused = ref(false)
 
-	const isSubmitting = ref(false);
-	const categoryIndex = ref(0);
+// 用户信息
+const userInfo = reactive({
+  avatar: '/static/default-avatar.png',
+  nickname: '用户'
+})
 
-	// 帖子分类
-	const categories = ref([
-		{ name: '闲聊交流', value: 'chat' },
-		{ name: '技能分享', value: 'skill' },
-		{ name: '求助问答', value: 'help' },
-		{ name: '经验分享', value: 'experience' },
-		{ name: '资源分享', value: 'resource' },
-		{ name: '其他', value: 'other' }
-	]);
+// 热门标签
+const popularTags = ref([
+  '生活', '美食', '旅行', '摄影', '音乐', 
+  '电影', '读书', '运动', '科技', '时尚',
+  '宠物', '学习', '工作', '情感', '随想'
+])
 
-	// 云对象实例
-	let communityObj = null;
+// 计算属性
+const charCount = computed(() => postContent.value.length)
 
-	// 初始化云对象
-	const initCloudObj = () => {
-		try {
-			communityObj = uniCloud.importObject('community');
-		} catch (error) {
-			uni.showToast({
-				title: '服务初始化失败',
-				icon: 'none'
-			});
-		}
-	};
+const canPublish = computed(() => {
+  return postContent.value.trim().length > 0 && 
+         charCount.value <= 280 && 
+         !isPublishing.value
+})
 
-	// 分类选择
-	const onCategoryChange = (e) => {
-		categoryIndex.value = e.detail.value;
-		postData.category = categories.value[e.detail.value].name;
-	};
+// 弹窗引用
+const tagPopup = ref(null)
+const attachmentPopup = ref(null)
 
-	// 图片上传成功回调
-	const onUploadSuccess = (data) => {
-		// 图片上传成功，ImageUploader组件会自动更新postData.images
-	};
+// 方法
+const goBack = () => {
+  uni.navigateBack()
+}
 
-	// 图片上传失败回调
-	const onUploadError = (error) => {
-		// 图片上传失败处理
-	};
+const onContentInput = (e) => {
+  const value = e.detail.value
+  // 检测 # 标签输入
+  if (value.endsWith('#')) {
+    showTagSelector()
+  }
+}
 
-	// 表单验证
-	const validateForm = () => {
-		if (!postData.title.trim()) {
-			uni.showToast({
-				title: '请输入帖子标题',
-				icon: 'none'
-			});
-			return false;
-		}
+const onInputFocus = () => {
+  inputFocused.value = true
+}
 
-		if (!postData.content.trim()) {
-			uni.showToast({
-				title: '请输入帖子内容',
-				icon: 'none'
-			});
-			return false;
-		}
+const onInputBlur = () => {
+  inputFocused.value = false
+}
 
-		return true;
-	};
+const toggleImageUploader = () => {
+  showImageUploader.value = !showImageUploader.value
+}
 
-	// 提交帖子
-	const submitPost = async () => {
-		if (!validateForm()) {
-			return;
-		}
+const onImageUploadSuccess = (images) => {
+  uploadedImages.value = images
+}
 
-		if (isSubmitting.value) {
-			return;
-		}
+const onImageDelete = (images) => {
+  uploadedImages.value = images
+}
 
-		if (!communityObj) {
-			initCloudObj();
-			if (!communityObj) {
-				uni.showToast({
-					title: '服务不可用，请重试',
-					icon: 'none'
-				});
-				return;
-			}
-		}
+const showTagSelector = () => {
+  tagPopup.value?.open()
+}
 
-		try {
-			isSubmitting.value = true;
+const closeTagSelector = () => {
+  tagPopup.value?.close()
+  tagInput.value = ''
+}
 
-			// 准备提交数据
-			const submitData = {
-				title: postData.title.trim(),
-				content: postData.content.trim(),
-				images: postData.images,
-				category: postData.category
-			};
+const addCustomTag = () => {
+  const tag = tagInput.value.trim()
+  if (tag && !selectedTags.value.includes(tag)) {
+    if (selectedTags.value.length >= 3) {
+      // 超过3个标签时，替换最后一个
+      selectedTags.value[2] = tag
+    } else {
+      selectedTags.value.push(tag)
+    }
+    tagInput.value = ''
+  }
+}
 
-			// 调用云对象提交帖子
-			const result = await communityObj.addPost(submitData);
+const toggleTag = (tag) => {
+  const index = selectedTags.value.indexOf(tag)
+  if (index > -1) {
+    selectedTags.value.splice(index, 1)
+  } else {
+    if (selectedTags.value.length >= 3) {
+      // 超过3个标签时，替换最后一个
+      selectedTags.value[2] = tag
+    } else {
+      selectedTags.value.push(tag)
+    }
+  }
+}
 
-			if (result.errCode === 0) {
-				uni.showToast({
-					title: '帖子发布成功',
-					icon: 'success'
-				});
+const removeTag = (index) => {
+  selectedTags.value.splice(index, 1)
+}
 
-				// 返回社区页面
-				setTimeout(() => {
-					uni.navigateBack();
-				}, 1500);
-			} else {
-				uni.showToast({
-					title: result.errMsg || '发布失败',
-					icon: 'none'
-				});
-			}
-		} catch (error) {
-			uni.showToast({
-				title: '网络错误，请重试',
-				icon: 'none'
-			});
-		} finally {
-			isSubmitting.value = false;
-		}
-	};
+const showAttachmentPicker = () => {
+  attachmentPopup.value?.open()
+}
 
-	onLoad(() => {
-		initCloudObj();
-	});
+const closeAttachmentPicker = () => {
+  attachmentPopup.value?.close()
+}
+
+const selectFile = () => {
+  uni.chooseFile({
+    count: 1,
+    extension: ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt'],
+    success: (res) => {
+      console.log('选择文件成功:', res)
+      uni.showToast({
+        title: '文件选择成功',
+        icon: 'success'
+      })
+      closeAttachmentPicker()
+    },
+    fail: (err) => {
+      console.error('选择文件失败:', err)
+      uni.showToast({
+        title: '文件选择失败',
+        icon: 'none'
+      })
+    }
+  })
+}
+
+const selectDocument = () => {
+  uni.chooseMessageFile({
+    count: 1,
+    type: 'file',
+    success: (res) => {
+      console.log('选择文档成功:', res)
+      uni.showToast({
+        title: '文档选择成功',
+        icon: 'success'
+      })
+      closeAttachmentPicker()
+    },
+    fail: (err) => {
+      console.error('选择文档失败:', err)
+      uni.showToast({
+        title: '文档选择失败',
+        icon: 'none'
+      })
+    }
+  })
+}
+
+const handlePublish = async () => {
+  if (!canPublish.value) return
+  
+  try {
+    isPublishing.value = true
+    
+    // 构建发布数据
+    const publishData = {
+      content: postContent.value.trim(),
+      tags: selectedTags.value,
+      images: uploadedImages.value,
+      createTime: Date.now()
+    }
+    
+    // 这里应该调用发布接口
+    console.log('发布数据:', publishData)
+    
+    // 模拟发布延迟
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    uni.showToast({
+      title: '发布成功',
+      icon: 'success'
+    })
+    
+    // 发布成功后返回
+    setTimeout(() => {
+      uni.navigateBack()
+    }, 1000)
+    
+  } catch (error) {
+    console.error('发布失败:', error)
+    uni.showToast({
+      title: '发布失败，请重试',
+      icon: 'none'
+    })
+  } finally {
+    isPublishing.value = false
+  }
+}
+
+onMounted(() => {
+  // 初始化用户信息
+  // 这里可以从缓存或接口获取用户信息
+})
 </script>
 
 <style scoped>
-	.container {
-		padding: 30rpx;
-		background: #f8f9fa;
-		min-height: 100vh;
-	}
+.publish-container {
+  min-height: 100vh;
+  background: #fff;
+}
 
-	.form-group {
-		background: white;
-		border-radius: 16rpx;
-		padding: 30rpx;
-		margin-bottom: 20rpx;
-		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
-	}
+/* 发布内容区 */
+.publish-content {
+  padding: 20rpx 24rpx; /* 减少padding */
+}
 
-	.label {
-		display: block;
-		font-size: 28rpx;
-		font-weight: bold;
-		color: #333;
-		margin-bottom: 20rpx;
-	}
+.compose-area {
+  display: flex;
+  gap: 20rpx; /* 减少间距 */
+  margin-bottom: 24rpx;
+}
 
-	.input, .textarea, .picker {
-		width: 100%;
-		padding: 20rpx;
-		border: 1rpx solid #e5e5e5;
-		border-radius: 12rpx;
-		font-size: 28rpx;
-		color: #333;
-		background: #fafafa;
-	}
+.user-avatar {
+  width: 72rpx; /* 稍微减小头像 */
+  height: 72rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 
-	.textarea {
-		height: 300rpx;
-		resize: none;
-	}
+.input-area {
+  flex: 1;
+}
 
-	.picker {
-		display: flex;
-		align-items: center;
-		height: 80rpx;
-		color: #666;
-	}
+.content-input {
+  width: 100%;
+  min-height: 260rpx; /* 减少最小高度 */
+  font-size: 30rpx; /* 稍微减小字体 */
+  line-height: 1.5;
+  color: #333;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 0; /* 移除内边距 */
+}
 
-	.submit-btn {
-		width: 100%;
-		height: 88rpx;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		border: none;
-		border-radius: 16rpx;
-		font-size: 32rpx;
-		font-weight: bold;
-		margin-top: 40rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
+.tags-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx; /* 减少间距 */
+  margin-top: 12rpx; /* 减少间距 */
+}
 
-	.submit-btn:disabled {
-		opacity: 0.6;
-	}
+.tag-item {
+  display: flex;
+  align-items: center;
+  gap: 6rpx; /* 减少间距 */
+  padding: 6rpx 12rpx; /* 减少内边距 */
+  background: #f0f8ff;
+  border-radius: 16rpx; /* 减少圆角 */
+  border: 1rpx solid #1DA1F2;
+}
 
-	.submit-btn:active:not(:disabled) {
-		transform: scale(0.98);
-	}
+.tag-text {
+  font-size: 22rpx; /* 减小字体 */
+  color: #1DA1F2;
+}
+
+.image-uploader {
+  margin-top: 16rpx; /* 减少间距 */
+}
+
+/* 工具栏 */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0; /* 减少内边距 */
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 24rpx; /* 减少间距 */
+}
+
+.tool-item {
+  padding: 12rpx; /* 减少内边距 */
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.tool-item:active {
+  background: #f0f8ff;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16rpx; /* 添加间距 */
+}
+
+.char-count {
+  font-size: 22rpx; /* 减小字体 */
+  color: #666;
+}
+
+.char-count-warning {
+  color: #ff4757;
+}
+
+/* 右下角发布按钮 */
+.floating-publish-btn {
+  position: fixed;
+  right: 32rpx;
+  bottom: 32rpx;
+  z-index: 999;
+}
+
+.publish-btn {
+  border-radius: 50rpx; /* 更圆润的圆角 */
+  font-size: 26rpx;
+  font-weight: 600;
+  background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%); /* 渐变背景 */
+  color: #999;
+  border: none;
+  transition: all 0.3s ease; /* 更流畅的过渡 */
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1); /* 添加阴影 */
+  min-width: 120rpx; /* 最小宽度 */
+  text-align: center;
+}
+
+.publish-btn-active {
+  background: linear-gradient(135deg, #1DA1F2 0%, #0d8bd9 100%); /* Twitter蓝渐变 */
+  color: #fff;
+  transform: translateY(-2rpx); /* 轻微上浮效果 */
+  box-shadow: 0 8rpx 20rpx rgba(29, 161, 242, 0.3); /* 蓝色阴影 */
+}
+
+.publish-btn:disabled {
+  opacity: 0.6;
+  transform: none;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 标签选择器 */
+.tag-selector {
+  padding: 24rpx; /* 减少内边距 */
+}
+
+.tag-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx; /* 减少间距 */
+}
+
+.tag-selector-title {
+  font-size: 30rpx; /* 减小字体 */
+  font-weight: 600;
+  color: #333;
+}
+
+.tag-selector-close {
+  padding: 8rpx;
+}
+
+.tag-input-area {
+  display: flex;
+  gap: 12rpx; /* 减少间距 */
+  margin-bottom: 24rpx; /* 减少间距 */
+}
+
+.tag-input {
+  flex: 1;
+  padding: 12rpx 16rpx; /* 减少内边距 */
+  border: 1rpx solid #e0e0e0;
+  border-radius: 6rpx; /* 减少圆角 */
+  font-size: 26rpx; /* 减小字体 */
+}
+
+.add-tag-btn {
+  padding: 5rpx; /* 减少内边距 */
+  background: #1DA1F2;
+  color: #fff;
+  border: none;
+  border-radius: 6rpx; /* 减少圆角 */
+  font-size: 26rpx; /* 减小字体 */
+}
+
+.popular-tags-title {
+  font-size: 26rpx; /* 减小字体 */
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16rpx; /* 减少间距 */
+  display: block;
+}
+
+.tags-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx; /* 减少间距 */
+}
+
+.popular-tag-item {
+  padding: 10rpx 16rpx; /* 减少内边距 */
+  background: #f5f5f5;
+  border-radius: 16rpx; /* 减少圆角 */
+  font-size: 24rpx; /* 减小字体 */
+  color: #666;
+  transition: all 0.2s;
+}
+
+.tag-selected {
+  background: #1DA1F2;
+  color: #fff;
+}
+
+/* 位置选择器 */
+.location-selector {
+  padding: 24rpx; /* 减少内边距 */
+}
+
+.location-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx; /* 减少间距 */
+}
+
+.location-title {
+  font-size: 30rpx; /* 减小字体 */
+  font-weight: 600;
+  color: #333;
+}
+
+.location-close {
+  padding: 8rpx;
+}
+
+.location-content {
+  padding: 60rpx 0; /* 减少内边距 */
+  text-align: center;
+}
+
+.location-placeholder {
+  font-size: 26rpx; /* 减小字体 */
+  color: #999;
+}
+
+/* 附件选择器 */
+.attachment-selector {
+  padding: 24rpx; /* 减少内边距 */
+}
+
+.attachment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx; /* 减少间距 */
+}
+
+.attachment-title {
+  font-size: 30rpx; /* 减小字体 */
+  font-weight: 600;
+  color: #333;
+}
+
+.attachment-close {
+  padding: 8rpx;
+}
+
+.attachment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.attachment-option {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx;
+  background: #f8f9fc;
+  border-radius: 12rpx;
+  transition: background-color 0.2s;
+}
+
+.attachment-option:active {
+  background: #f0f8ff;
+}
+
+.attachment-option-text {
+  font-size: 28rpx;
+  color: #333;
+}
 </style>

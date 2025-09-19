@@ -1,0 +1,29 @@
+[
+  {
+    "_id": "announcement_001",
+    "title": "欢迎使用hxzyL社区平台",
+    "content": "亲爱的用户，欢迎来到hxzyL社区平台！这里汇聚了各行各业的技能达人，您可以在这里发布自己的技能服务，也可以寻找需要的服务。我们致力于打造一个互助共赢的技能分享社区。\n\n平台主要功能：\n1. 技能发布与展示\n2. 社区互动交流\n3. 违停举报等便民服务\n4. 实时天气查询\n\n如有任何问题，请随时联系我们的客服团队。祝您使用愉快！",
+    "image": "https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=400,height=400/event-covers/ra/df54811d-c411-46d6-acfd-ad99ce850d55.png",
+    "tag": ["announcement"],
+    "status": 1,
+    "createTime": 1726718400000
+  },
+  {
+    "_id": "announcement_002", 
+    "title": "新功能上线：随手拍违停举报",
+    "content": "为了营造更好的城市环境，我们新推出了随手拍违停举报功能！\n\n功能特点：\n• 一键拍照上传违停车辆\n• 自动获取GPS位置信息\n• 快速提交举报信息\n• 实时查看举报处理进度\n\n使用方法：\n1. 点击首页功能\n2. 对准违停车辆拍照\n3. 填写相关信息并提交\n4. 等待相关部门处理\n\n让我们共同维护城市秩序，从身边小事做起！",
+    "image": "https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=400,height=400/event-covers/ra/df54811d-c411-46d6-acfd-ad99ce850d55.png",
+    "tag": ["announcement"],
+    "status": 1,
+    "createTime": 1726632000000
+  },
+  {
+    "_id": "announcement_003",
+    "title": "物业通知：电梯维护保养",
+    "content": "尊敬的业主：\n\n为确保电梯安全运行，物业将于本周末对小区所有电梯进行定期维护保养。\n\n维护时间：\n• 1号楼：周六上午9:00-12:00\n• 2号楼：周六下午14:00-17:00\n• 3号楼：周日上午9:00-12:00\n• 4号楼：周日下午14:00-17:00\n\n维护期间电梯将暂停使用，请业主们合理安排出行时间，给您带来的不便敬请谅解。\n\n如有紧急情况，请联系物业服务中心：400-123-4567\n\n感谢您的理解与配合！",
+    "image": "https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=400,height=400/event-covers/ra/df54811d-c411-46d6-acfd-ad99ce850d55.png",
+    "tag": ["property"], 
+    "status": 1,
+    "createTime": 1726545600000
+  }
+]

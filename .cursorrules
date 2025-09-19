@@ -1,7 +1,7 @@
 # Cursor Rules for hxzyL - uni-app + uniCloud 项目
 
 ## 项目概述
-这是一个基于 uni-app + uniCloud 的社区技能分享平台项目。
+这是一个基于 uni-app + uniCloud 的社区小程序项目。
 
 ## 技术栈
 - **前端**: uni-app (Vue 3 + Composition API)

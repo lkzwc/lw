@@ -1,6 +1,6 @@
 <template>
 	<view class="container">
-		<!-- 轮播图区域 -->
+		<!-- 顶部 Banner -->
 		<view class="banner-section">
 			<uni-swiper-dot :info="bannerList" :current="current" field="content" mode="round">
 				<swiper class="swiper-box" @change="change" :current="swiperCurrent">
@@ -14,687 +14,857 @@
 			</uni-swiper-dot>
 		</view>
 
-		<!-- 个性化菜单区域 -->
-		<view class="creative-menu-section">
-			<view class="menu-grid">
-				<!-- 大卡片 - 每日热榜 -->
-				<view class="menu-card large-card news-card" @tap="clickMenuItem(menuList[0])">
-					<view class="card-content">
-						<view class="card-icon">
-							<uni-icons :type="menuList[0].icon" :size="40" color="white"></uni-icons>
+		<!-- 功能拼图区域（重构） -->
+		<view class="feature-mosaic">
+			<!-- 每日热榜（横向扁平，跨两列） -->
+			<view class="card news-hero" @tap="clickMenuItem(menuList[0])">
+				<view class="news-hero-left">
+					<view class="icon-chip primary">
+						<uni-icons :type="menuList[0].icon" :size="22" color="#fff"></uni-icons>
+					</view>
+					<view class="news-info">
+						<text class="news-title">每日热榜</text>
+						<text class="news-sub">60s 读懂全球新闻与 AI 热点</text>
+					</view>
+				</view>
+				<view class="badge-hot">HOT</view>
+			</view>
+
+			<!-- 紧凑卡片两列：天气 + 学习 -->
+			<view class="mosaic-grid">
+				<!-- 天气卡片 -->
+				<view class="card small-card" @tap="clickMenuItem(menuList[1])">
+					<view v-if="weatherLoading" class="loading-row">
+						<view class="spinner"></view>
+						<text class="loading-text">天气获取中</text>
+					</view>
+					<view v-else class="weather-wrap">
+						<view class="row">
+							<view class="icon-circle soft-blue">
+								<uni-icons :type="getWeatherIcon(weatherData.weather)" :size="20" color="#fff"></uni-icons>
+							</view>
+							<text class="temp">{{ weatherData.temperature }}°</text>
+							<text class="wx">{{ weatherData.weather }}</text>
 						</view>
-						<view class="card-info">
-							<text class="card-title">{{ menuList[0].name }}</text>
-							<text class="card-desc">60s读懂全球新闻和AI热点</text>
+						<view class="meta">
+							<text class="meta-text">{{ weatherData.city }}</text>
+							<text class="dot">·</text>
+							<text class="meta-text">{{ weatherData.winddirection }}风 {{ weatherData.windpower }}级</text>
 						</view>
 					</view>
 				</view>
 
-				<!-- 中等卡片 - 天气 -->
-				<view class="menu-card medium-card weather-card" @tap="clickMenuItem(menuList[1])">
-					<view class="card-content">
-						<view class="weather-loading" v-if="weatherLoading">
-							<uni-icons type="spinner-cycle" :size="24" color="white"></uni-icons>
-							<text class="loading-text">加载中...</text>
+				<!-- 学习进度卡片 -->
+				<view class="card small-card" @tap="clickMenuItem(menuList[6])">
+					<view class="study-wrap">
+						<view class="row">
+							<view class="icon-circle soft-orange">
+								<uni-icons :type="menuList[6].icon" :size="20" color="#fff"></uni-icons>
+							</view>
+							<text class="study-title-text">学习</text>
+							<text class="study-sub">今日进度</text>
 						</view>
-						<view class="weather-info" v-else>
-							<view class="weather-main">
-								<view class="weather-icon">
-									<uni-icons :type="getWeatherIcon(weatherData.weather)" :size="36" color="white"></uni-icons>
-								</view>
-								<view class="weather-primary">
-									<text class="temperature">{{ weatherData.temperature }}°C</text>
-									<text class="weather-desc">{{ weatherData.weather }}</text>
-								</view>
-							</view>
-							<view class="weather-details">
-								<view class="detail-item">
-									<uni-icons type="navigate" :size="14" color="rgba(255,255,255,0.8)"></uni-icons>
-									<text class="detail-text">{{ weatherData.winddirection }}风 {{ weatherData.windpower }}级</text>
-								</view>
-								<view class="detail-item">
-									<uni-icons type="water" :size="14" color="rgba(255,255,255,0.8)"></uni-icons>
-									<text class="detail-text">湿度 {{ weatherData.humidity }}%</text>
-								</view>
-							</view>
+						<view class="progress">
+							<view class="progress-fill" style="width: 60%"></view>
 						</view>
-					</view>
-				</view>
-
-				<!-- 小卡片组 -->
-				<view class="small-cards-group">
-					<view class="menu-card small-card" 
-						v-for="(item, index) in menuList.slice(2, 6)" 
-						:key="index" 
-						@tap="clickMenuItem(item)"
-						:class="'card-' + (index + 1)">
-						<view class="card-content">
-							<view class="card-icon">
-								<uni-icons :type="item.icon" :size="24" color="white"></uni-icons>
-							</view>
-							<text class="card-title">{{ item.name }}</text>
-						</view>
-					</view>
-				</view>
-
-				<!-- 横向长卡片 - 学习 -->
-				<view class="menu-card wide-card learning-card" @tap="clickMenuItem(menuList[6])">
-					<view class="card-content">
-						<view class="card-left">
-							<view class="card-icon">
-								<uni-icons :type="menuList[6].icon" :size="28" color="#333"></uni-icons>
-							</view>
-							<view class="card-info">
-								<text class="card-title">{{ menuList[6].name }}</text>
-								<text class="card-desc">今日学习进度</text>
-							</view>
-						</view>
-						<view class="card-right">
-							<text class="progress-text">60%</text>
-							<view class="progress-bar">
-								<view class="progress-fill" style="width: 60%"></view>
-							</view>
-						</view>
+						<text class="progress-num">60%</text>
 					</view>
 				</view>
 			</view>
+			
+			<!-- 快捷功能区域 -->
+			<view class="card quick-actions">
+				<view class="qa-header">
+					<text class="qa-title">快捷功能</text>
+				</view>
+				<view class="qa-grid">
+					<view
+						class="qa-item"
+						v-for="(item, index) in menuList.slice(2, 6)"
+						:key="index"
+						@tap="clickMenuItem(item)"
+					>
+						<view class="qa-icon" :style="{ background: getFunctionGradient(index) }">
+							<uni-icons :type="item.icon" :size="18" color="#fff"></uni-icons>
+						</view>
+						<text class="qa-name">{{ item.name }}</text>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<!-- 公告模块 -->
+		<view class="card section">
+			<view class="section-header">
+				<text class="section-title">📢 最新公告</text>
+				<!-- <text class="section-more" @tap="goToAnnouncementList">查看全部</text> -->
+			</view>
+			<unicloud-db 
+				v-slot:default="{data, loading, error}" 
+				collection="announcements" 
+				where="status == 1"
+				field="title,createTime,tag,image,_id"
+				orderby="createTime desc"
+				:page-size="3"
+			>
+				<!-- 加载状态 -->
+				<view v-if="loading" class="announcement-loading">
+					<view class="loading-item" v-for="i in 3" :key="i">
+						<view class="loading-avatar"></view>
+						<view class="loading-content">
+							<view class="loading-title"></view>
+							<view class="loading-meta"></view>
+						</view>
+					</view>
+				</view>
+				
+				<!-- 错误状态 -->
+				<view v-else-if="error" class="announcement-error">
+					<uni-icons type="info-filled" size="32" color="#ff6b6b"></uni-icons>
+					<text class="error-text">公告加载失败</text>
+				</view>
+				
+				<!-- 公告列表（使用图片缩略图 + 紧凑布局，并支持 tag 数组） -->
+				<view v-else-if="data && data.length > 0" class="announcements-list">
+					<view 
+						class="announcement-item" 
+						v-for="(item, index) in data" 
+						:key="item._id"
+						@tap="goToAnnouncementDetail(item._id)"
+					>
+						<!-- 左侧图片缩略图；若无图片使用默认占位 -->
+						<image 
+							:src="item.image || '/static/default-announcement.png'"
+							class="announcement-image"
+							mode="aspectFill"
+						></image>
+
+						<!-- 右侧内容 -->
+						<view class="announcement-content">
+							<view class="announcement-header">
+								<view class="tags-row">
+									<view
+										v-for="(t, i) in normalizeTag(item.tag).slice(0, 2)"
+										:key="i"
+										class="announcement-tag"
+										:class="getAnnouncementTagClass(t)"
+									>
+										{{ getAnnouncementTagText(t) }}
+									</view>
+								</view>
+								<text class="announcement-date">{{ formatAnnouncementDate(item.createTime) }}</text>
+							</view>
+							<text class="announcement-title">{{ item.title }}</text>
+						</view>
+
+						<view class="announcement-arrow">
+							<uni-icons type="right" size="14" color="#c0c4cc"></uni-icons>
+						</view>
+					</view>
+				</view>
+				
+				<!-- 空状态 -->
+				<view v-else class="announcement-empty">
+					<uni-icons type="chat" size="48" color="#ddd"></uni-icons>
+					<text class="empty-text">暂无公告</text>
+				</view>
+			</unicloud-db>
+		</view>
+
+		<!-- 热门技能 -->
+		<view class="card section">
+			<view class="section-header">
+				<text class="section-title">热门技能</text>
+				<text class="section-more" @tap="goToSkills">查看全部</text>
+			</view>
+			<scroll-view class="skills-scroll" scroll-x="true" show-scrollbar="false">
+				<view class="skills-list">
+					<view
+						class="skill-card"
+						v-for="(skill, index) in hotSkills"
+						:key="index"
+						@tap="goToSkillDetail(skill)"
+					>
+						<image :src="skill.userAvatar || '/static/default-avatar.png'" class="skill-avatar" />
+						<view class="skill-info">
+							<text class="skill-title">{{ skill.title }}</text>
+							<text class="skill-price">¥{{ skill.price }}/{{ skill.priceUnit }}</text>
+							<view class="skill-rating">
+								<uni-icons type="star-filled" :size="12" color="#FFD700"></uni-icons>
+								<text class="rating-text">{{ skill.rating }}</text>
+							</view>
+                        </view>
+					</view>
+				</view>
+			</scroll-view>
+		</view>
+
+		<!-- 今日数据 -->
+		<view class="card section">
+			<view class="section-header">
+				<text class="section-title">今日数据</text>
+			</view>
+			<div class="stats-grid">
+				<div class="stat-card" v-for="(stat, index) in todayStats" :key="index">
+					<div class="stat-icon" :style="{ backgroundColor: stat.color }">
+						<uni-icons :type="stat.icon" :size="18" color="#fff"></uni-icons>
+					</div>
+					<div class="stat-info">
+						<text class="stat-number">{{ stat.value }}</text>
+						<text class="stat-label">{{ stat.label }}</text>
+					</div>
+				</div>
+			</div>
 		</view>
 	</view>
 </template>
 
 <script setup>
-	import {
-		onMounted,
-		reactive,
-		ref
-	} from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 
-	const current = ref(0);
-	const swiperCurrent = ref(0);
-	const weatherLoading = ref(true);
-	const isGettingWeather = ref(false); // 添加防重复调用标志
-	const weatherData = reactive({
-		city: '天气',
-		weather: '晴',
-		temperature: '25',
-		winddirection: '东南',
-		windpower: '≤3',
-		humidity: '65'
-	});
+const current = ref(0);
+const swiperCurrent = ref(0);
+const weatherLoading = ref(true);
+const isGettingWeather = ref(false);
+const weatherData = reactive({
+  city: '天气',
+  weather: '晴',
+  temperature: '25',
+  winddirection: '东南',
+  windpower: '≤3',
+  humidity: '65'
+});
 
-	// 云对象实例
-	let utilObj = null;
+// 云对象实例
+let utilObj = null;
 
-	// 轮播图数据
-	const bannerList = reactive([
-		{
-			image: 'https://via.placeholder.com/750x300/667eea/FFFFFF?text=欢迎使用hxzyL',
-			title: '欢迎使用hxzyL',
-			content: '发现更多精彩内容'
-		},
-		{
-			image: 'https://via.placeholder.com/750x300/764ba2/FFFFFF?text=社区互动',
-			title: '社区互动',
-			content: '与朋友分享生活点滴'
-		},
-		{
-			image: 'https://via.placeholder.com/750x300/f093fb/FFFFFF?text=技能提升',
-			title: '技能提升',
-			content: '学习新技能，提升自己'
-		}
-	]);
+// 轮播图
+const bannerList = reactive([
+  { image: 'https://via.placeholder.com/750x300/667eea/FFFFFF?text=欢迎使用hxzyL', title: '欢迎使用hxzyL', content: '发现更多精彩内容' },
+  { image: 'https://via.placeholder.com/750x300/764ba2/FFFFFF?text=社区互动', title: '社区互动', content: '与朋友分享生活点滴' },
+  { image: 'https://via.placeholder.com/750x300/f093fb/FFFFFF?text=技能提升', title: '技能提升', content: '学习新技能，提升自己' }
+]);
 
-	// 菜单数据
-	const menuList = reactive([
-		{
-			name: '每日热榜',
-			icon: 'star',
-			color: '#667eea',
-			type: 'news'
-		},
-		{
-			name: '天气',
-			icon: 'cloud',
-			color: '#764ba2',
-			type: 'weather'
-		},
-		{
-			name: '随手拍',
-			icon: 'camera',
-			color: '#4facfe',
-			type: 'tools'
-		},
-		{
-			name: '技能台',
-			icon: 'gear',
-			color: '#43e97b',
-			type: 'skills'
-		},
-		{
-			name: '健康',
-			icon: 'heart',
-			color: '#fa709a',
-			type: 'health'
-		},
-		{
-			name: '购物',
-			icon: 'cart',
-			color: '#ffeaa7',
-			type: 'shopping'
-		},
-		{
-			name: '学习',
-			icon: 'book',
-			color: '#ffecd2',
-			type: 'study'
-		}
-	]);
+// 菜单数据
+const menuList = reactive([
+  { name: '每日热榜', icon: 'star', color: '#667eea', type: 'news' },
+  { name: '天气', icon: 'cloud', color: '#764ba2', type: 'weather' },
+  { name: '随手拍', icon: 'camera', color: '#4facfe', type: 'tools' },
+  { name: '技能台', icon: 'gear', color: '#43e97b', type: 'skills' },
+  { name: '健康', icon: 'heart', color: '#fa709a', type: 'health' },
+  { name: '购物', icon: 'cart', color: '#ffeaa7', type: 'shopping' },
+  { name: '学习', icon: 'book', color: '#ffecd2', type: 'study' }
+]);
 
-	// 初始化云对象
-	const initCloudObj = () => {
-		try {
-			utilObj = uniCloud.importObject('util');
-		} catch (error) {
-			uni.showToast({
-				title: '云对象初始化失败',
-				icon: 'none'
-			});
-		}
-	};
+// 热门技能
+const hotSkills = reactive([
+  { id: '1', title: '专业家电维修', price: 50, priceUnit: '小时', rating: 4.8, userAvatar: '/static/avatar1.jpg' },
+  { id: '2', title: '家政清洁服务', price: 30, priceUnit: '小时', rating: 4.9, userAvatar: '/static/avatar2.jpg' },
+  { id: '3', title: '小学数学辅导', price: 80, priceUnit: '课时', rating: 4.7, userAvatar: '/static/avatar3.jpg' },
+  { id: '4', title: '上门美甲服务', price: 60, priceUnit: '次', rating: 4.6, userAvatar: '/static/avatar4.jpg' }
+]);
 
-	// 获取天气数据
-	const getWeatherData = async () => {
-		// 防止重复调用
-		if (isGettingWeather.value) {
-			return;
-		}
-		
-		if (!utilObj) {
-			weatherLoading.value = false;
-			uni.showToast({
-				title: '云对象未初始化',
-				icon: 'none'
-			});
-			return;
-		}
+// 今日数据
+const todayStats = reactive([
+  { label: '违停举报', value: '23', icon: 'camera', color: '#ff6b6b' },
+  { label: '技能发布', value: '8', icon: 'gear', color: '#4ecdc4' },
+  { label: '社区帖子', value: '15', icon: 'chatbubble', color: '#45b7d1' },
+  { label: '活跃用户', value: '156', icon: 'person', color: '#96ceb4' }
+]);
 
-		try {
-			isGettingWeather.value = true;
-			weatherLoading.value = true;
-			
-			// 调用云对象的天气查询方法
-			const result = await utilObj.getWeatherByCityName();
-			
-			if (result && result.errCode === 0 && result.data) {
-				// 更新天气数据
-				Object.assign(weatherData, {
-					city: result.data.city,
-					weather: result.data.weather,
-					temperature: result.data.temperature,
-					winddirection: result.data.winddirection,
-					windpower: result.data.windpower,
-					humidity: result.data.humidity
-				});
-				
-				uni.showToast({
-					title: '天气数据加载成功',
-					icon: 'success',
-					duration: 1500
-				});
-			} else {
-				uni.showToast({
-					title: result?.errMsg || '天气数据获取失败',
-					icon: 'none'
-				});
-			}
-			
-		} catch (error) {
-			// 使用MOCK数据
-			Object.assign(weatherData, {
-				city: '西安市',
-				weather: '晴',
-				temperature: '22',
-				winddirection: '东南',
-				windpower: '≤3',
-				humidity: '60'
-			});
-			
-			uni.showToast({
-				title: '使用本地数据',
-				icon: 'none'
-			});
-		} finally {
-			weatherLoading.value = false;
-			isGettingWeather.value = false;
-		}
-	};
+// 快捷功能图标渐变
+const getFunctionGradient = (index) => {
+  const gradients = [
+    'linear-gradient(135deg, #9face6 0%, #74ebd5 100%)',
+    'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
+    'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)',
+    'linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)'
+  ];
+  return gradients[index] || gradients[0];
+};
 
-	// 根据天气状况返回对应图标
-	const getWeatherIcon = (weather) => {
-		const weatherIconMap = {
-			'晴': 'color',
-			'晴天': 'color',
-			'多云': 'cloud',
-			'少云': 'cloud',
-			'阴': 'cloud-filled',
-			'阴天': 'cloud-filled',
-			'小雨': 'cloud-drizzle',
-			'中雨': 'cloud-rain',
-			'大雨': 'cloud-rain-filled',
-			'暴雨': 'cloud-rain-filled',
-			'雷阵雨': 'cloud-lightning',
-			'雷雨': 'cloud-lightning',
-			'雪': 'cloud-snow',
-			'小雪': 'cloud-snow',
-			'中雪': 'cloud-snow',
-			'大雪': 'cloud-snow',
-			'雾': 'eye-slash',
-			'霾': 'eye-slash-filled',
-			'沙尘暴': 'eye-slash-filled',
-			'浮尘': 'eye-slash',
-			'扬沙': 'eye-slash'
-		};
-		
-		return weatherIconMap[weather] || 'cloud';
-	};
+// 初始化云对象
+const initCloudObj = () => {
+  try {
+    utilObj = uniCloud.importObject('util');
+  } catch (error) {
+    uni.showToast({ title: '云对象初始化失败', icon: 'none' });
+  }
+};
 
-	// 轮播图切换事件
-	const change = (e) => {
-		current.value = e.detail.current;
-		swiperCurrent.value = e.detail.current;
-	};
+// 获取天气
+const getWeatherData = async () => {
+  if (isGettingWeather.value) return;
 
-	// 点击轮播图
-	const clickBannerItem = (item) => {
-		uni.showToast({
-			title: item.title,
-			icon: 'none'
-		});
-	};
+  if (!utilObj) {
+    weatherLoading.value = false;
+    uni.showToast({ title: '云对象未初始化', icon: 'none' });
+    return;
+  }
 
-	// 点击菜单项
-	const clickMenuItem = (item) => {
-		switch (item.type) {
-			case 'news':
-				uni.navigateTo({
-					url: '/pages/news/news'
-				});
-				break;
-			case 'weather':
-				// 重新获取天气数据
-				if (isGettingWeather.value) {
-					uni.showToast({
-						title: '天气数据获取中...',
-						icon: 'loading'
-					});
-				} else {
-					getWeatherData();
-				}
-				break;
-			case 'tools':
-				uni.navigateTo({
-					url: '/pages/camera/camera'
-				});
-				break;
-			case 'skills':
-				uni.navigateTo({
-					url: '/pages/skills/skills'
-				});
-				break;
-			case 'health':
-				uni.showToast({
-					title: '健康功能开发中',
-					icon: 'none'
-				});
-				break;
-			case 'shopping':
-				uni.showToast({
-					title: '购物功能开发中',
-					icon: 'none'
-				});
-				break;
-			case 'study':
-				uni.showToast({
-					title: '学习功能开发中',
-					icon: 'none'
-				});
-				break;
-			default:
-				uni.showToast({
-					title: `${item.name}功能开发中`,
-					icon: 'none'
-				});
-		}
-	};
+  try {
+    isGettingWeather.value = true;
+    weatherLoading.value = true;
+    const result = await utilObj.getWeatherByCityName();
+    if (result && result.errCode === 0 && result.data) {
+      Object.assign(weatherData, {
+        city: result.data.city,
+        weather: result.data.weather,
+        temperature: result.data.temperature,
+        winddirection: result.data.winddirection,
+        windpower: result.data.windpower,
+        humidity: result.data.humidity
+      });
+    } else {
+      uni.showToast({ title: result?.errMsg || '天气数据获取失败', icon: 'none' });
+    }
+  } catch (e) {
+    console.error('获取天气数据失败:', e);
+    uni.showToast({ title: '天气数据获取失败', icon: 'none' });
+  } finally {
+    weatherLoading.value = false;
+    isGettingWeather.value = false;
+  }
+};
 
-	onMounted(() => {
-		console.log('首页加载完成');
-		// 初始化云对象
-		initCloudObj();
-		// 获取天气数据
-		setTimeout(() => {
-			getWeatherData();
-		}, 500); // 延迟500ms确保云对象初始化完成
-	});
+// 事件
+const change = (e) => {
+  current.value = e.detail.current;
+};
+const clickBannerItem = (item) => {
+  console.log('点击轮播图:', item);
+};
+const clickMenuItem = (item) => {
+  switch (item.type) {
+    case 'news':
+      uni.navigateTo({ url: '/pages/news/news' });
+      break;
+    case 'weather':
+      getWeatherData();
+      break;
+    case 'tools':
+      uni.navigateTo({ url: '/pages/camera/camera' });
+      break;
+    case 'skills':
+      uni.navigateTo({ url: '/pages/skills/skills' });
+      break;
+    default:
+      uni.showToast({ title: `${item.name}功能开发中`, icon: 'none' });
+  }
+};
+const goToSkills = () => {
+  uni.navigateTo({ url: '/pages/skills/skills' });
+};
+const goToSkillDetail = (skill) => {
+  uni.navigateTo({ url: `/pages/skills/skill-detail?id=${skill.id}` });
+};
+const getWeatherIcon = (weather) => {
+  const iconMap = { 晴: 'sunny', 多云: 'cloud', 阴: 'cloudy', 雨: 'rain', 雪: 'snow' };
+  return iconMap[weather] || 'cloud';
+};
+
+// 跳转到公告详情
+const goToAnnouncementDetail = (id) => {
+  uni.navigateTo({
+    url: `/pages/announcement/announcement-detail?id=${id}`
+  });
+};
+
+
+// 获取公告头像样式类
+const getAnnouncementAvatarClass = (tag) => {
+  const avatarClasses = {
+    'announcement': 'avatar-announcement',
+    'property': 'avatar-property'
+  };
+  return avatarClasses[tag] || 'avatar-default';
+};
+
+// 获取公告图标
+const getAnnouncementIcon = (tag) => {
+  const iconMap = {
+    'announcement': 'sound',
+    'property': 'home'
+  };
+  return iconMap[tag] || 'chat';
+};
+
+// 获取公告标签样式类
+const getAnnouncementTagClass = (tag) => {
+  const tagClasses = {
+    'announcement': 'tag-announcement',
+    'property': 'tag-property'
+  };
+  return tagClasses[tag] || 'tag-default';
+};
+
+// 获取公告标签文本
+const getAnnouncementTagText = (tag) => {
+  const tagTexts = {
+    'announcement': '公告',
+    'property': '物业通知'
+  };
+  return tagTexts[tag] || '公告';
+};
+
+// 格式化公告日期
+const formatAnnouncementDate = (timestamp) => {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  if (days === 0) {
+    return '今天';
+  } else if (days === 1) {
+    return '昨天';
+  } else if (days < 7) {
+    return `${days}天前`;
+  } else {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${month}-${day}`;
+  }
+};
+
+// 跳转到公告列表
+const goToAnnouncementList = () => {
+  uni.navigateTo({
+    url: '/pages/announcement/announcement'
+  });
+};
+
+// 兼容 tag 为数组或字符串的工具函数
+const normalizeTag = (tag) => {
+  if (Array.isArray(tag)) return tag.filter(Boolean);
+  return tag ? [tag] : [];
+};
+
+onMounted(() => {
+  initCloudObj();
+  setTimeout(() => getWeatherData(), 500);
+});
 </script>
 
 <style scoped>
-	.container {
-		background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
-		min-height: 100vh;
-		padding-bottom: 60rpx;
-	}
+/* 基础 */
+.container {
+  background: #f6f7fb;
+  min-height: 100vh;
+  padding-bottom: 24rpx;
+}
 
-	/* 轮播图样式 */
-	.banner-section {
-		margin: 20rpx 20rpx 24rpx 20rpx;
-		border-radius: 20rpx;
-		overflow: hidden;
-		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
-	}
+/* Banner */
+.banner-section {
+  margin: 20rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+.swiper-box { height: 300rpx; }
+.swiper-item { position: relative; height: 100%; }
+.swiper-item image { width: 100%; height: 100%; }
+.banner-title {
+  position: absolute; bottom: 20rpx; left: 20rpx;
+  color: #fff; font-size: 30rpx; font-weight: 600;
+  text-shadow: 0 2rpx 6rpx rgba(0,0,0,0.3);
+}
 
-	.swiper-box {
-		height: 320rpx;
-	}
+/* 通用卡片 */
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 6rpx 20rpx rgba(28, 39, 60, 0.06);
+}
+.section { margin: 20rpx; padding: 24rpx; }
 
-	.swiper-item {
-		position: relative;
-		height: 100%;
-		border-radius: 20rpx;
-		overflow: hidden;
-	}
+/* 功能拼图 */
+.feature-mosaic { margin: 20rpx; display: flex; flex-direction: column; gap: 16rpx; }
 
-	.swiper-item image {
-		width: 100%;
-		height: 100%;
-		border-radius: 20rpx;
-	}
+/* 每日热榜横向扁平 */
+.news-hero {
+  height: 120rpx; padding: 0 20rpx;
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, #7f7fd5 0%, #86a8e7 50%, #91eae4 100%);
+  color: #fff;
+}
+.news-hero-left { display: flex; align-items: center; gap: 16rpx; }
+.icon-chip {
+  width: 56rpx; height: 56rpx; border-radius: 14rpx;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.22);
+}
+.primary { background: rgba(255,255,255,0.22); }
+.news-info { display: flex; flex-direction: column; }
+.news-title { font-size: 28rpx; font-weight: 700; }
+.news-sub { font-size: 22rpx; opacity: 0.9; }
+.badge-hot {
+  padding: 8rpx 16rpx; border-radius: 999rpx; font-size: 20rpx; font-weight: 700;
+  background: rgba(255,255,255,0.22); color: #fff;
+}
 
-	.banner-title {
-		position: absolute;
-		bottom: 20rpx;
-		left: 20rpx;
-		color: white;
-		font-size: 32rpx;
-		font-weight: bold;
-		text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
-	}
+/* 两列紧凑卡片 */
+.mosaic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16rpx; }
+.small-card { padding: 16rpx; min-height: 140rpx; }
 
-	/* 菜单网格样式 */
-	.creative-menu-section {
-		margin: 0 20rpx;
-	}
+/* 天气 */
+.loading-row { height: 108rpx; display: flex; align-items: center; justify-content: center; gap: 10rpx; }
+.spinner {
+  width: 28rpx; height: 28rpx; border-radius: 50%;
+  border: 3rpx solid rgba(0,0,0,0.1); border-top-color: #7f7fd5; animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 22rpx; color: #666; }
+.weather-wrap { display: flex; flex-direction: column; gap: 10rpx; }
+.row { display: flex; align-items: center; gap: 10rpx; }
+.icon-circle {
+  width: 48rpx; height: 48rpx; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+}
+.soft-blue { background: linear-gradient(135deg, #74ebd5, #9face6); }
+.soft-orange { background: linear-gradient(135deg, #f6d365, #fda085); }
+.temp { font-size: 34rpx; font-weight: 700; color: #333; }
+.wx { font-size: 22rpx; color: #666; }
+.meta { display: flex; align-items: center; gap: 8rpx; }
+.meta-text { font-size: 20rpx; color: #888; }
+.dot { color: #ddd; }
 
-	.menu-grid {
-		display: grid;
-		grid-template-columns: 2fr 1fr;
-		grid-template-rows: auto auto auto;
-		gap: 16rpx;
-		grid-template-areas:
-			"news weather"
-			"small-cards small-cards"
-			"learning learning";
-	}
+/* 学习进度 */
+.study-wrap { display: flex; flex-direction: column; gap: 12rpx; }
+.study-title-text { font-size: 26rpx; font-weight: 700; color: #333; }
+.study-sub { font-size: 22rpx; color: #888; }
+.progress {
+  width: 100%; height: 10rpx; background: #f0f2f5; border-radius: 999rpx; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, #7f7fd5, #86a8e7);
+}
 
-	.menu-card {
-		border-radius: 20rpx;
-		overflow: hidden;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
-		transition: all 0.3s ease;
-		cursor: pointer;
-	}
+/* 快捷功能 */
+.quick-actions { padding: 20rpx; }
+.qa-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12rpx; }
+.qa-title { font-size: 28rpx; font-weight: 700; color: #333; }
+.qa-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16rpx; }
+.qa-item { display: flex; flex-direction: column; align-items: center; gap: 8rpx; }
+.qa-icon {
+  width: 64rpx; height: 64rpx; border-radius: 16rpx;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  box-shadow: 0 4rpx 14rpx rgba(0,0,0,0.08);
+}
+.qa-name { font-size: 22rpx; color: #333; }
 
-	.menu-card:active {
-		transform: scale(0.98);
-		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.12);
-	}
+/* 公告 */
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
+.section-title { font-size: 30rpx; font-weight: 700; color: #333; }
+.announcement-loading,
+.announcement-error,
+.announcements-list,
+.announcement-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.loading-item,
+.loading-tag,
+.loading-title,
+.loading-date,
+.error-text,
+.empty-text {
+  height: 48rpx;
+}
+.loading-item {
+  display: flex; align-items: center; gap: 16rpx;
+}
+.loading-tag,
+.loading-title,
+.loading-date {
+  width: 100%;
+}
+.loading-tag {
+  background: #eee;
+}
+.loading-title {
+  background: #f8f8f8;
+}
+.loading-date {
+  background: #f1f1f1;
+}
+.error-text,
+.empty-text {
+  font-size: 24rpx;
+}
+.announcements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0 -24rpx; /* 抵消父容器的左右padding */
+}
+.announcement-item {
+  width: 100% !important;
+  display: flex;
+  align-items: center;
+  padding: 16rpx !important; /* 减少左右内边距从24rpx到16rpx */
+  gap: 12rpx;
+  transition: background-color 0.2s;
+}
+.announcement-item:active {
+  background-color: #f8f9fc;
+}
+.announcement-item:not(:last-child) {
+  border-bottom: 1rpx solid #f0f2f5;
+}
+.announcement-image {
+  margin:0rpx 20rpx;
+  width: 120rpx;
+  height: 80rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+}
+.announcement-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  min-width: 0;
+}
+.announcement-tag {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  font-size: 20rpx;
+  font-weight: 500;
+  width: fit-content;
+}
+.tag-announcement {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+.tag-property {
+  background: #fff3e0;
+  color: #f57c00;
+}
+.tag-default {
+  background: #f5f5f5;
+  color: #666;
+}
+.announcement-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #303133;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  word-break: break-all;
+}
+.announcement-date {
+  font-size: 20rpx;
+  color: #909399;
+  flex-shrink: 0;
+}
+.announcement-arrow {
+  margin-left: 16rpx;
+}
+.announcement-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0 -24rpx; /* 抵消父容器的左右padding */
+}
+.loading-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx 16rpx; /* 减少左右内边距从24rpx到16rpx */
+}
+.loading-tag {
+  width: 80rpx;
+  height: 32rpx;
+  background: #f0f0f0;
+  border-radius: 6rpx;
+  animation: skeleton 1.5s ease-in-out infinite;
+}
+.loading-title {
+  width: 100%;
+  height: 36rpx;
+  background: #f0f0f0;
+  border-radius: 4rpx;
+  animation: skeleton 1.5s ease-in-out infinite;
+}
+.loading-date {
+  width: 120rpx;
+  height: 28rpx;
+  background: #f0f0f0;
+  border-radius: 4rpx;
+  animation: skeleton 1.5s ease-in-out infinite;
+}
+@keyframes skeleton {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.announcement-error {
+  padding: 40rpx 0;
+  text-align: center;
+}
+.error-text {
+  font-size: 24rpx;
+  color: #999;
+}
+.announcement-empty {
+  padding: 40rpx 0;
+  text-align: center;
+}
+.empty-text {
+  font-size: 24rpx;
+  color: #999;
+}
+/* 热门技能 */
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
+.section-title { font-size: 30rpx; font-weight: 700; color: #333; }
+.section-more { font-size: 24rpx; color: #007aff; }
+.skills-scroll { white-space: nowrap; }
+.skills-list { display: flex; gap: 16rpx; }
+.skill-card {
+  flex-shrink: 0; width: 200rpx; padding: 20rpx; border-radius: 14rpx;
+  background: #f8f9fc; box-shadow: inset 0 0 0 1rpx #eef0f6;
+}
+.skill-avatar { width: 56rpx; height: 56rpx; border-radius: 50%; margin-bottom: 12rpx; }
+.skill-info { display: flex; flex-direction: column; gap: 8rpx; }
+.skill-title { font-size: 24rpx; font-weight: 700; color: #333; }
+.skill-price { font-size: 22rpx; color: #ff6b35; font-weight: 700; }
+.skill-rating { display: flex; align-items: center; gap: 6rpx; justify-content: center; }
+.rating-text { font-size: 20rpx; color: #666; }
 
-	/* 大卡片 - 每日热榜 */
-	.large-card {
-		grid-area: news;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		height: 160rpx;
-	}
+/* 今日数据 */
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12rpx; }
+.stat-card {
+  display: flex; align-items: center; gap: 12rpx; padding: 18rpx; border-radius: 14rpx;
+  background: #f8f9fc; box-shadow: inset 0 0 0 1rpx #eef0f6;
+}
+.stat-icon {
+  width: 52rpx; height: 52rpx; border-radius: 12rpx; display: flex; align-items: center; justify-content: center; color: #fff;
+}
+.stat-info { display: flex; flex-direction: column; }
+.stat-number { font-size: 30rpx; font-weight: 700; color: #333; }
+.stat-label { font-size: 22rpx; color: #666; }
 
-	.news-card .card-content {
-		display: flex;
-		align-items: center;
-		padding: 24rpx;
-		height: 100%;
-	}
+/* 公告模块样式：图片缩略图 + 紧凑布局 + tag 数组展示 */
+.announcements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0 -24rpx; /* 占满卡片宽度 */
+}
 
-	.news-card .card-icon {
-		margin-right: 20rpx;
-	}
+.announcement-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 16rpx;
+  gap: 12rpx;
+  transition: background-color 0.2s;
+}
 
-	.news-card .card-info {
-		flex: 1;
-	}
+.announcement-item:active {
+  background-color: #f8f9fc;
+}
 
-	.news-card .card-title {
-		display: block;
-		color: white;
-		font-size: 28rpx;
-		font-weight: bold;
-		margin-bottom: 8rpx;
-	}
+.announcement-item:not(:last-child) {
+  border-bottom: 1rpx solid #f0f2f5;
+}
 
-	.news-card .card-desc {
-		display: block;
-		color: rgba(255, 255, 255, 0.8);
-		font-size: 24rpx;
-	}
+/* 左侧图片缩略图（更紧凑） */
+.announcement-image {
+  width: 96rpx;
+  height: 64rpx;
+  border-radius: 10rpx;
+  flex-shrink: 0;
+}
 
-	/* 中等卡片 - 天气 */
-	.medium-card {
-		grid-area: weather;
-		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-		height: 160rpx;
-	}
+/* 右侧内容 */
+.announcement-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  min-width: 0;
+}
 
-	.weather-card .card-content {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		padding: 20rpx;
-		height: 100%;
-	}
+.announcement-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+}
 
-	.weather-loading {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		height: 100%;
-		gap: 8rpx;
-	}
+.tags-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  max-width: 70%;
+  overflow: hidden;
+}
 
-	.loading-text {
-		color: white;
-		font-size: 20rpx;
-	}
+.announcement-tag {
+  display: inline-block;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  font-size: 18rpx;
+  font-weight: 500;
+  flex-shrink: 0;
+}
 
-	.weather-info {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		height: 100%;
-	}
+.tag-announcement {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+}
 
-	.weather-main {
-		display: flex;
-		align-items: center;
-		gap: 12rpx;
-	}
+.tag-property {
+  background: rgba(245, 87, 108, 0.1);
+  color: #f5576c;
+}
 
-	.weather-icon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
+.tag-default {
+  background: #f5f5f5;
+  color: #666;
+}
 
-	.weather-primary {
-		display: flex;
-		flex-direction: column;
-		gap: 4rpx;
-	}
+.announcement-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #303133;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  word-break: break-all;
+}
 
-	.temperature {
-		color: white;
-		font-size: 28rpx;
-		font-weight: bold;
-		line-height: 1;
-	}
+.announcement-date {
+  font-size: 20rpx;
+  color: #909399;
+  flex-shrink: 0;
+}
 
-	.weather-desc {
-		color: rgba(255, 255, 255, 0.9);
-		font-size: 20rpx;
-	}
+.announcement-arrow {
+  flex-shrink: 0;
+  padding: 8rpx;
+  margin: -8rpx;
+}
 
-	.weather-details {
-		display: flex;
-		flex-direction: column;
-		gap: 6rpx;
-		margin-top: 8rpx;
-	}
+/* 加载骨架占位（匹配缩略图尺寸） */
+.loading-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 16rpx;
+  gap: 12rpx;
+}
 
-	.detail-item {
-		display: flex;
-		align-items: center;
-		gap: 6rpx;
-	}
-
-	.detail-text {
-		color: rgba(255, 255, 255, 0.8);
-		font-size: 18rpx;
-		line-height: 1;
-	}
-
-	/* 小卡片组 */
-	.small-cards-group {
-		grid-area: small-cards;
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 12rpx;
-	}
-
-	.small-card {
-		height: 120rpx;
-	}
-
-	.small-card .card-content {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		padding: 16rpx;
-		height: 100%;
-		text-align: center;
-	}
-
-	.small-card .card-title {
-		color: white;
-		font-size: 20rpx;
-		font-weight: bold;
-		margin-top: 8rpx;
-	}
-
-	/* 小卡片颜色 */
-	.card-1 {
-		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-	}
-
-	.card-2 {
-		background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-	}
-
-	.card-3 {
-		background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-	}
-
-	.card-4 {
-		background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-	}
-
-	/* 横向长卡片 - 学习 */
-	.wide-card {
-		grid-area: learning;
-		background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-		height: 100rpx;
-	}
-
-	.learning-card .card-content {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 20rpx 24rpx;
-		height: 100%;
-	}
-
-	.card-left {
-		display: flex;
-		align-items: center;
-	}
-
-	.learning-card .card-icon {
-		margin-right: 16rpx;
-	}
-
-	.learning-card .card-title {
-		display: block;
-		color: #333;
-		font-size: 26rpx;
-		font-weight: bold;
-		margin-bottom: 4rpx;
-	}
-
-	.learning-card .card-desc {
-		display: block;
-		color: #666;
-		font-size: 22rpx;
-	}
-
-	.card-right {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
-	}
-
-	.progress-text {
-		color: #333;
-		font-size: 24rpx;
-		font-weight: bold;
-		margin-bottom: 8rpx;
-	}
-
-	.progress-bar {
-		width: 120rpx;
-		height: 8rpx;
-		background-color: rgba(255, 255, 255, 0.3);
-		border-radius: 4rpx;
-		overflow: hidden;
-	}
-
-	.progress-fill {
-		height: 100%;
-		background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-		border-radius: 4rpx;
-		transition: width 0.3s ease;
-	}
-
-	/* 响应式调整 */
-	@media screen and (max-width: 750rpx) {
-		.menu-grid {
-			grid-template-columns: 1fr;
-			grid-template-areas:
-				"news"
-				"weather"
-				"small-cards"
-				"learning";
-		}
-
-		.medium-card {
-			height: 120rpx;
-		}
-	}
+.loading-avatar {
+  width: 96rpx;
+  height: 64rpx;
+  background: #f0f0f0;
+  border-radius: 10rpx;
+  animation: skeleton 1.5s ease-in-out infinite;
+}
 </style>

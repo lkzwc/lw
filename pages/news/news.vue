@@ -3,12 +3,33 @@
 		<!-- 头部标题 -->
 		<view class="header">
 			<view class="header-content">
-				<text class="header-title">{{ newsData.head || '每日60秒读懂世界' }}</text>
-				<text class="header-date">{{ formatDate(newsData.date) }}</text>
+				<text class="header-title">{{ getCurrentNewsData().head || '每日60秒读懂世界' }}</text>
+				<text class="header-date">{{ formatDate(getCurrentNewsData().date) }}</text>
 			</view>
 			<view class="refresh-btn" @tap="refreshNews">
 				<uni-icons type="refresh" :size="24" :color="isLoading ? '#ccc' : '#667eea'"></uni-icons>
 			</view>
+		</view>
+
+		<!-- TAB切换 -->
+		<view class="tab-container">
+			<view class="tab-list">
+				<view 
+					class="tab-item" 
+					:class="{ active: currentTab === 'daily' }"
+					@tap="switchTab('daily')"
+				>
+					<text class="tab-text">每日热榜</text>
+				</view>
+				<view 
+					class="tab-item" 
+					:class="{ active: currentTab === 'ai' }"
+					@tap="switchTab('ai')"
+				>
+					<text class="tab-text">AI快讯</text>
+				</view>
+			</view>
+			<view class="tab-indicator" :style="{ left: tabIndicatorLeft }"></view>
 		</view>
 
 		<!-- 加载状态 -->
@@ -20,15 +41,15 @@
 		<!-- 新闻内容 -->
 		<view class="news-content" v-else>
 			<!-- 新闻图片 -->
-			<view class="news-image" v-if="newsData.image">
-				<image :src="newsData.image" mode="aspectFill" class="image"></image>
+			<view class="news-image" v-if="getCurrentNewsData().image">
+				<image :src="getCurrentNewsData().image" mode="aspectFill" class="image"></image>
 			</view>
 
 			<!-- 新闻列表 -->
 			<view class="news-list">
 				<view 
 					class="news-item" 
-					v-for="(item, index) in newsData.news" 
+					v-for="(item, index) in getCurrentNewsData().news" 
 					:key="index"
 					@tap="copyNewsItem(item)"
 				>
@@ -41,17 +62,17 @@
 			</view>
 
 			<!-- 温馨提示 -->
-			<view class="tip-section" v-if="newsData.tip">
+			<view class="tip-section" v-if="getCurrentNewsData().tip">
 				<view class="tip-header">
 					<uni-icons type="info" :size="18" color="#667eea"></uni-icons>
 					<text class="tip-title">温馨提示</text>
 				</view>
-				<text class="tip-content">{{ newsData.tip }}</text>
+				<text class="tip-content">{{ getCurrentNewsData().tip }}</text>
 			</view>
 
 			<!-- 更新时间 -->
 			<view class="update-info">
-				<text class="update-text">更新时间：{{ formatDateTime(newsData.updated) }}</text>
+				<text class="update-text">更新时间：{{ formatDateTime(getCurrentNewsData().updated) }}</text>
 			</view>
 		</view>
 
@@ -73,13 +94,35 @@
 	import {
 		onMounted,
 		reactive,
-		ref
+		ref,
+		computed
 	} from 'vue';
 
 	const isLoading = ref(true);
-	const newsData = reactive({
+	const currentTab = ref('daily'); // 当前选中的tab: daily, global, ai
+	
+	// 三个不同类型的新闻数据
+	const dailyNewsData = reactive({
 		date: '',
 		head: '每日60秒读懂世界',
+		news: [],
+		tip: '',
+		image: '',
+		updated: ''
+	});
+	
+	const globalNewsData = reactive({
+		date: '',
+		head: '全球热点',
+		news: [],
+		tip: '',
+		image: '',
+		updated: ''
+	});
+	
+	const aiNewsData = reactive({
+		date: '',
+		head: 'AI快讯',
 		news: [],
 		tip: '',
 		image: '',
@@ -89,6 +132,26 @@
 	// 云对象实例
 	let utilObj = null;
 
+	// 计算当前显示的新闻数据
+	const getCurrentNewsData = () => {
+		switch (currentTab.value) {
+			case 'daily':
+				return dailyNewsData;
+			case 'global':
+				return globalNewsData;
+			case 'ai':
+				return aiNewsData;
+			default:
+				return dailyNewsData;
+		}
+	};
+
+	// 计算tab指示器位置
+	const tabIndicatorLeft = computed(() => {
+		const tabIndex = currentTab.value === 'daily' ? 0 : currentTab.value === 'global' ? 1 : 2;
+		return `${tabIndex * 33.33}%`;
+	});
+
 	// 初始化云对象
 	const initCloudObj = () => {
 		try {
@@ -96,6 +159,81 @@
 		} catch (error) {
 			uni.showToast({
 				title: '云对象初始化失败',
+				icon: 'none'
+			});
+		}
+	};
+
+	// 获取每日新闻数据
+	const getDailyNewsData = async (forceUpdate = false) => {
+		if (!utilObj) return;
+
+		try {
+			const result = await utilObj.getDailyNews('', forceUpdate);
+			
+			if (result && result.errCode === 0 && result.data) {
+				Object.assign(dailyNewsData, {
+					date: result.data.date,
+					head: result.data.head,
+					news: result.data.news || [],
+					tip: result.data.tip,
+					image: result.data.image,
+					updated: result.data.updated
+				});
+			}
+		} catch (error) {
+			uni.showToast({
+				title: '每日新闻获取失败',
+				icon: 'none'
+			});
+		}
+	};
+
+	// 获取全球热点数据（使用每日新闻接口）
+	const getGlobalNewsData = async (forceUpdate = false) => {
+		if (!utilObj) return;
+
+		try {
+			const result = await utilObj.getDailyNews('', forceUpdate);
+			
+			if (result && result.errCode === 0 && result.data) {
+				Object.assign(globalNewsData, {
+					date: result.data.date,
+					head: '全球热点',
+					news: result.data.news || [],
+					tip: '了解全球重要事件，拓展国际视野。',
+					image: result.data.image,
+					updated: result.data.updated
+				});
+			}
+		} catch (error) {
+			uni.showToast({
+				title: '全球热点获取失败',
+				icon: 'none'
+			});
+		}
+	};
+
+	// 获取AI新闻数据
+	const getAINewsData = async (forceUpdate = false) => {
+		if (!utilObj) return;
+
+		try {
+			const result = await utilObj.getAINews('', forceUpdate);
+			
+			if (result && result.errCode === 0 && result.data) {
+				Object.assign(aiNewsData, {
+					date: result.data.date,
+					head: result.data.head,
+					news: result.data.news || [],
+					tip: result.data.tip,
+					image: result.data.image,
+					updated: result.data.updated
+				});
+			}
+		} catch (error) {
+			uni.showToast({
+				title: 'AI快讯获取失败',
 				icon: 'none'
 			});
 		}
@@ -111,30 +249,24 @@
 		try {
 			isLoading.value = true;
 			
-			const result = await utilObj.getDailyNews('', forceUpdate);
+			// 根据当前tab获取对应数据
+			switch (currentTab.value) {
+				case 'daily':
+					await getDailyNewsData(forceUpdate);
+					break;
+				case 'global':
+					await getGlobalNewsData(forceUpdate);
+					break;
+				case 'ai':
+					await getAINewsData(forceUpdate);
+					break;
+			}
 			
-			if (result && result.errCode === 0 && result.data) {
-				// 更新新闻数据
-				Object.assign(newsData, {
-					date: result.data.date,
-					head: result.data.head,
-					news: result.data.news || [],
-					tip: result.data.tip,
-					image: result.data.image,
-					updated: result.data.updated
-				});
-				
-				if (!forceUpdate) {
-					uni.showToast({
-						title: '新闻加载成功',
-						icon: 'success',
-						duration: 1500
-					});
-				}
-			} else {
+			if (!forceUpdate) {
 				uni.showToast({
-					title: result?.errMsg || '新闻数据获取失败',
-					icon: 'none'
+					title: '新闻加载成功',
+					icon: 'success',
+					duration: 1500
 				});
 			}
 		} catch (error) {
@@ -144,6 +276,19 @@
 			});
 		} finally {
 			isLoading.value = false;
+		}
+	};
+
+	// 切换tab
+	const switchTab = async (tab) => {
+		if (currentTab.value === tab) return;
+		
+		currentTab.value = tab;
+		
+		// 检查当前tab的数据是否已加载
+		const currentData = getCurrentNewsData();
+		if (!currentData.news || currentData.news.length === 0) {
+			await getNewsData();
 		}
 	};
 
@@ -215,7 +360,8 @@
 
 	// 复制全部新闻
 	const copyAllNews = () => {
-		if (!newsData.news || newsData.news.length === 0) {
+		const currentData = getCurrentNewsData();
+		if (!currentData.news || currentData.news.length === 0) {
 			uni.showToast({
 				title: '暂无新闻内容',
 				icon: 'none'
@@ -223,7 +369,7 @@
 			return;
 		}
 
-		const allNews = `${newsData.head}\n${formatDate(newsData.date)}\n\n${newsData.news.join('\n\n')}\n\n${newsData.tip || ''}`;
+		const allNews = `${currentData.head}\n${formatDate(currentData.date)}\n\n${currentData.news.join('\n\n')}\n\n${currentData.tip || ''}`;
 		
 		uni.setClipboardData({
 			data: allNews,
@@ -245,7 +391,8 @@
 
 	// 分享新闻
 	const shareNews = () => {
-		if (!newsData.news || newsData.news.length === 0) {
+		const currentData = getCurrentNewsData();
+		if (!currentData.news || currentData.news.length === 0) {
 			uni.showToast({
 				title: '暂无新闻内容',
 				icon: 'none'
@@ -253,7 +400,7 @@
 			return;
 		}
 
-		const shareContent = `${newsData.head}\n${formatDate(newsData.date)}\n\n${newsData.news.slice(0, 3).join('\n\n')}...`;
+		const shareContent = `${currentData.head}\n${formatDate(currentData.date)}\n\n${currentData.news.slice(0, 3).join('\n\n')}...`;
 		
 		uni.share({
 			provider: 'weixin',
@@ -274,7 +421,6 @@
 	};
 
 	onMounted(() => {
-		console.log('新闻页面加载完成');
 		// 初始化云对象
 		initCloudObj();
 		// 获取新闻数据
@@ -303,6 +449,9 @@
 
 	.header-content {
 		flex: 1;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
 	}
 
 	.header-title {
@@ -328,6 +477,50 @@
 	.refresh-btn:active {
 		transform: scale(0.95);
 		background: #e5e5e5;
+	}
+
+	/* TAB样式 */
+	.tab-container {
+		position: relative;
+		background: white;
+		margin: 0 30rpx 20rpx;
+		border-radius: 16rpx;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+		overflow: hidden;
+	}
+
+	.tab-list {
+		display: flex;
+		position: relative;
+	}
+
+	.tab-item {
+		flex: 1;
+		padding: 24rpx 0;
+		text-align: center;
+		transition: all 0.3s ease;
+		cursor: pointer;
+	}
+
+	.tab-item.active .tab-text {
+		color: #667eea;
+		font-weight: bold;
+	}
+
+	.tab-text {
+		font-size: 28rpx;
+		color: #666;
+		transition: all 0.3s ease;
+	}
+
+	.tab-indicator {
+		position: absolute;
+		bottom: 0;
+		width: 33.33%;
+		height: 4rpx;
+		background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+		border-radius: 2rpx;
+		transition: left 0.3s ease;
 	}
 
 	/* 加载状态 */
@@ -501,6 +694,10 @@
 	@media screen and (max-width: 750rpx) {
 		.header {
 			padding: 30rpx 20rpx 15rpx;
+		}
+
+		.tab-container {
+			margin: 0 20rpx 15rpx;
 		}
 
 		.news-content {
