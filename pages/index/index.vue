@@ -663,7 +663,7 @@ onMounted(() => {
   flex-shrink: 0;
 }
 .announcement-arrow {
-  margin-left: 16rpx;
+  margin-right: 16rpx !important;
 }
 .announcement-loading {
   display: flex;

@@ -17,28 +17,18 @@ module.exports = {
 
 		const res = await uniCloud.httpclient.request(`https://api.weixin.qq.com/sns/jscode2session?appid=${APPID}&secret=${APP_SECRET}&js_code=${params}&grant_type=authorization_code`)
 		
-		// const result = JSON.parse(res?.data?.toString('utf8')).openid
+		const result = JSON.parse(res?.data?.toString('utf8')).openid
 		
 		let userData = {
-			openid: res.data.openid,
-			nickName: `微信${res.data.openid.slice(0,6)}`,
+			openid: result,
+			nickName: `微信${result?.slice(0,6)}`,
 		}
 		
-		// let dbRes = await db.collection("users").where({
-		// 	openid: res.data.openid
-		// }).get()
-		
-		// if(dbRes.affectedDocs <= 0){
-		// 	await db.collection("users").add(userData)
-		// }else{
-		// 	userData = dbRes.data[0]
-		// }
-		userData['token'] = getToken(res.data.openid)
-		delete userData['openid']
+		userData['token'] = getToken(result)
 		
 		// 返回结果
 		return {
-			userData //请根据实际需要返回值
+			...userData //请根据实际需要返回值
 		}
 	},
 	async update(params){
