@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "添加技能",
-  "usingComponents": {
-    "image-uploader": "../../components/ImageUploader"
-  }
-}

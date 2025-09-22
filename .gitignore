@@ -1,9 +1,30 @@
 
 # uni-app 相关
 uni_*
-unpackage/dist/dev/*
+unpackage/
 .hbuilderx/
 .DS_Store
+
+# HBuilderX 生成的文件
+.project
+.gitignore
+
+# 小程序开发工具生成的文件
+project.config.json
+project.private.config.json
+sitemap.json
+
+# 支付宝小程序
+mini.project.json
+
+# 百度小程序
+project.swan.json
+
+# 字节跳动小程序
+project.tt.json
+
+# QQ 小程序
+project.qq.json
 
 # uniCloud 相关
 uniCloud-alipay/cloudfunctions/common/wxlogin/node_*
@@ -123,21 +144,7 @@ Thumbs.db
 .hbuilderx/
 .project
 
-# 微信开发者工具
-project.config.json
-project.private.config.json
 
-# 支付宝小程序
-mini.project.json
-
-# 百度小程序
-project.swan.json
-
-# 字节跳动小程序
-project.config.json
-
-# QQ 小程序
-project.config.json
 
 # 快应用
 manifest.json.bak
