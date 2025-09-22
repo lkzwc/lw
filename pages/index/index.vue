@@ -185,7 +185,7 @@
 						:key="index"
 						@tap="goToSkillDetail(skill)"
 					>
-						<image :src="skill.userAvatar || '/static/default-avatar.png'" class="skill-avatar" />
+						<image :src="skill.userAvatar || '/static/default.png'" class="skill-avatar" />
 						<view class="skill-info">
 							<text class="skill-title">{{ skill.title }}</text>
 							<text class="skill-price">¥{{ skill.price }}/{{ skill.priceUnit }}</text>

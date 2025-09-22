@@ -50,7 +50,7 @@
 			<view class="provider-section">
 				<view class="section-title">服务提供者</view>
 				<view class="provider-info">
-					<image :src="skillDetail.userAvatar || '/static/default-avatar.png'" class="provider-avatar" mode="aspectFill"></image>
+					<image :src="skillDetail.userAvatar || '/static/default.png'" class="provider-avatar" mode="aspectFill"></image>
 					<view class="provider-details">
 						<text class="provider-name">{{ skillDetail.username }}</text>
 						<view class="provider-location">

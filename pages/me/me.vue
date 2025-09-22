@@ -7,7 +7,7 @@
         <view v-if="isLoggedIn" class="user-profile">
           <view class="avatar-container" @tap="showProfileEditor">
             <image 
-              :src="userInfo.avatar || '/static/default-avatar.png'" 
+              :src="userInfo.avatar || '/static/default.png'" 
               class="user-avatar"
               mode="aspectFill"
             ></image>
@@ -26,7 +26,7 @@
         
         <!-- 未登录状态 -->
         <view v-else class="login-section">
-          <image src="/static/default-avatar.png" class="default-avatar"></image>
+          <image src="/static/default.png" class="default"></image>
           <view class="login-info">
             <text class="login-title">欢迎使用 hxzyL</text>
             <text class="login-subtitle">登录后享受更多功能</text>
@@ -417,7 +417,7 @@ onMounted(() => {
   gap: 24rpx;
 }
 
-.default-avatar {
+.default {
   width: 120rpx;
   height: 120rpx;
   border-radius: 50%;

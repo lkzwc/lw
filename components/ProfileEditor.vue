@@ -12,7 +12,7 @@
               @chooseavatar="onChooseAvatar"
             >
                <image 
-            :src="formData.avatar || '/static/default-avatar.png'" 
+            :src="formData.avatar || '/static/default.png'" 
             class="edit-avatar"
             mode="aspectFill"
           ></image>

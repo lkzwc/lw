@@ -6,7 +6,7 @@
       <view class="compose-area">
         <image 
           class="user-avatar" 
-          :src="userInfo.avatar || '/static/default-avatar.png'"
+          :src="userInfo.avatar || '/static/default.png'"
           mode="aspectFill"
         ></image>
         
@@ -171,7 +171,7 @@ const inputFocused = ref(false)
 
 // 用户信息
 const userInfo = reactive({
-  avatar: '/static/default-avatar.png',
+  avatar: '/static/default.png',
   nickname: '用户'
 })
 

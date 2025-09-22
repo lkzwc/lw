@@ -39,7 +39,7 @@
 				
 				<!-- 用户头像和基本信息 -->
 				<view class="skill-header">
-					<image :src="skill.userAvatar || '/static/default-avatar.png'" class="user-avatar" mode="aspectFill"></image>
+					<image :src="skill.userAvatar || '/static/default.png'" class="user-avatar" mode="aspectFill"></image>
 					<view class="user-info">
 						<text class="username">{{ skill.username }}</text>
 						<view class="location">
