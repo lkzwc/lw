@@ -1,82 +1,70 @@
 {
-    "bsonType": "object",
-    "required": [
-        "title",
-        "content",
-        "create_time",
-        "tag"
-    ],
-    "permission": {
-        "read": true,
-        "create": false,
-        "update": false,
-        "delete": false
-    },
-    "properties": {
-        "_id": {
-            "description": "ID，系统自动生成"
-        },
-        "title": {
-            "bsonType": "string",
-            "description": "公告标题",
-            "label": "标题",
-            "trim": "both"
-        },
-        "content": {
-            "bsonType": "string",
-            "description": "公告内容",
-            "label": "内容"
-        },
-        "image": {
-            "bsonType": "string",
-            "description": "公告图片URL",
-            "label": "图片"
-        },
-        "tag": {
-            "bsonType": "array",
-            "description": "公告标签",
-            "label": "标签",
-            "items": {
-                "bsonType": "string",
-                "enum": [
-                    {
-                        "text": "公告",
-                        "value": "announcement"
-                    },
-                    {
-                        "text": "物业通知",
-                        "value": "property"
-                    }
-                ]
-            }
-        },
-        "status": {
-            "bsonType": "int",
-            "description": "状态：1-发布，0-草稿，-1-删除",
-            "label": "状态",
-            "defaultValue": 1,
-            "enum": [
-                {
-                    "text": "草稿",
-                    "value": 0
-                },
-                {
-                    "text": "发布",
-                    "value": 1
-                },
-                {
-                    "text": "删除",
-                    "value": -1
-                }
-            ]
-        },
-        "create_time": {
-            "bsonType": "timestamp",
-            "description": "创建时间",
-            "label": "创建时间",
-            "forceDefaultValue": {
-                "$env": "now"
-            }
-        }
-    }
+	"bsonType": "object",
+	"required": ["title", "content", "createTime", "tag"],
+	"permission": {
+		"read": true,
+		"create": false,
+		"update": false,
+		"delete": false
+	},
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"title": {
+			"bsonType": "string",
+			"description": "公告标题",
+			"label": "标题",
+			"trim": "both"
+		},
+		"content": {
+			"bsonType": "string",
+			"description": "公告内容",
+			"label": "内容"
+		},
+		"image": {
+			"bsonType": "string",
+			"description": "公告图片URL",
+			"label": "图片"
+		},
+		"tag": {
+			"bsonType": "array",
+			"description": "公告标签",
+			"label": "标签",
+			"items": {
+				"bsonType": "string",
+				"enum": [{
+					"text": "公告",
+					"value": "announcement"
+				}, {
+					"text": "物业通知",
+					"value": "property"
+				}]
+			}
+		},
+		"status": {
+			"bsonType": "int",
+			"description": "状态：1-发布，0-草稿，-1-删除",
+			"label": "状态",
+			"defaultValue": 1,
+			"enum": [{
+				"text": "草稿",
+				"value": 0
+			}, {
+				"text": "发布",
+				"value": 1
+			}, {
+				"text": "删除",
+				"value": -1
+			}]
+		},
+		"createTime": {
+			"bsonType": "timestamp",
+			"description": "创建时间",
+			"label": "创建时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		}
+	}
 }

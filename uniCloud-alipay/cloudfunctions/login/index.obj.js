@@ -59,6 +59,7 @@ module.exports = {
 					openid: openid,
 					nickname: `微信用户${openid.slice(-6)}`,
 					avatar: '',
+					building: '',
 					points: 0,
 					last_login_time: new Date(),
 					register_time: new Date(),
@@ -101,7 +102,7 @@ module.exports = {
 			const userCollection = db.collection('users')
 			
 			// 构建更新数据，只更新允许的字段
-			const allowedFields = ['nickname', 'avatar']
+			const allowedFields = ['nickname', 'avatar', 'building']
 			const updateData = {}
 			
 			for (const field of allowedFields) {

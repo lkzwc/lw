@@ -24,6 +24,13 @@
       "title": "头像",
       "format": "url"
     },
+    "building": {
+      "bsonType": "string",
+      "description": "用户所在楼号",
+      "title": "楼号信息",
+      "maxLength": 20,
+      "trim": "both"
+    },
     "points": {
       "bsonType": "int",
       "description": "用户积分",

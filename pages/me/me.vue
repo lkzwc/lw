@@ -21,53 +21,46 @@
               <uni-icons type="right" size="14" color="#999"></uni-icons>
             </view>
             <text class="user-id">ID: {{ userInfo._id || 'unknown' }}</text>
+            <text v-if="userInfo.building" class="user-building">{{ userInfo.building }}</text>
           </view>
         </view>
         
         <!-- 未登录状态 -->
         <view v-else class="login-section">
-          <image src="/static/default.png" class="default"></image>
+          <image src="/static/default.png" class="default-avatar"></image>
           <view class="login-info">
             <text class="login-title">欢迎使用 hxzyL</text>
             <text class="login-subtitle">登录后享受更多功能</text>
           </view>
-          <button class="login-btn" @tap="handleLogin">
-            <uni-icons type="weixin" size="18" color="#fff"></uni-icons>
+          <button class="login-btn" open-type="getPhoneNumber" @getphonenumber="handleLogin">
+            <uni-icons type="person" size="16" color="#fff"></uni-icons>
             <text class="login-text">微信登录</text>
           </button>
         </view>
       </view>
     </view>
 
-
-	<view class="quick-actions">
-			<view class="actions-grid">
-				<view class="grid-item" @tap="goToMyPosts">
-					<view class="grid-icon">
-						<uni-icons type="compose" size="20" color="#4A90E2"></uni-icons>
-					</view>
-					<text class="grid-text">我的帖子</text>
-				</view>
-				<view class="grid-item" @tap="goToMyLikes">
-					<view class="grid-icon">
-						<uni-icons type="heart" size="20" color="#FF6B6B"></uni-icons>
-					</view>
-					<text class="grid-text">我的点赞</text>
-				</view>
-				<view class="grid-item" @tap="goToMyComments">
-					<view class="grid-icon">
-						<uni-icons type="chatbubble" size="20" color="#50C878"></uni-icons>
-					</view>
-					<text class="grid-text">我的评论</text>
-				</view>
-				<view class="grid-item" @tap="goToMyCollections">
-					<view class="grid-icon">
-						<uni-icons type="star" size="20" color="#FFD700"></uni-icons>
-					</view>
-					<text class="grid-text">我的收藏</text>
-				</view>
-			</view>
-		</view>
+    <!-- 数据统计区域 -->
+    <view v-if="isLoggedIn" class="stats-section">
+      <view class="stats-grid">
+        <view class="stats-item" @tap="goToMyPosts">
+          <text class="stats-number">{{ userStats.postsCount || 0 }}</text>
+          <text class="stats-label">我的帖子</text>
+        </view>
+        <view class="stats-item">
+          <text class="stats-number">{{ userStats.likesCount || 0 }}</text>
+          <text class="stats-label">获赞</text>
+        </view>
+        <view class="stats-item">
+          <text class="stats-number">{{ userStats.commentsCount || 0 }}</text>
+          <text class="stats-label">评论</text>
+        </view>
+        <view class="stats-item">
+          <text class="stats-number">{{ userStats.favoritesCount || 0 }}</text>
+          <text class="stats-label">收藏</text>
+        </view>
+      </view>
+    </view>
 
     <!-- 功能菜单 -->
     <view class="menu-section">
@@ -105,7 +98,7 @@
       <ProfileEditor
         title="编辑个人信息"
         :show-skip="false"
-        :initial-data="{ nickname: userInfo.nickname, avatar: userInfo.avatar }"
+        :initial-data="{ nickname: userInfo.nickname, avatar: userInfo.avatar, building: userInfo.building }"
         @close="closeProfileEditor"
         @save="saveProfile"
       />
@@ -117,13 +110,13 @@
         <view class="welcome-header">
           <uni-icons type="person-filled" size="40" color="#1DA1F2"></uni-icons>
           <text class="welcome-title">完善个人信息</text>
-          <text class="welcome-subtitle">设置头像和昵称，让大家更好地认识你</text>
+          <text class="welcome-subtitle">设置头像、昵称和楼号信息，让大家更好地认识你</text>
         </view>
         
         <ProfileEditor
           title="完善个人信息"
           :show-skip="true"
-          :initial-data="{ nickname: userInfo.nickname, avatar: userInfo.avatar }"
+          :initial-data="{ nickname: userInfo.nickname, avatar: userInfo.avatar, building: userInfo.building }"
           @close="closeWelcomeDialog"
           @save="completeProfileSetup"
           @skip="skipProfileSetup"
@@ -142,7 +135,15 @@ const userInfo = reactive({
   _id: '',
   nickname: '',
   avatar: '',
+  building: '',
   openid: ''
+})
+
+const userStats = reactive({
+  postsCount: 0,
+  likesCount: 0,
+  commentsCount: 0,
+  favoritesCount: 0
 })
 
 const isLoggedIn = ref(false)
@@ -154,7 +155,7 @@ const welcomePopup = ref(null)
 
 // 计算属性
 const hasCompleteProfile = computed(() => {
-  return userInfo.nickname && userInfo.avatar
+  return userInfo.nickname && userInfo.avatar && userInfo.building
 })
 
 // 方法
@@ -194,33 +195,33 @@ const checkLoginStatus = async () => {
   }
 }
 
-const handleLogin = async () => {
+const handleLogin = async (e) => {
   try {
-    // 显示加载状态
     uni.showLoading({
       title: '登录中...'
     })
     
-    // 微信登录
-    const loginRes = await uni.login({
-      provider: 'weixin'
-    })
+    const { code } = await uni.login()
     
-    if (loginRes.errMsg === 'login:ok') {
-      // 调用云函数处理登录
-      const loginObj = uniCloud.importObject('login')
-      const result = await loginObj.getUserProfile(loginRes.code)
-      
-      console.log('登录成功:', result)
-      
-      // 保存登录状态
+    if (!code) {
+      throw new Error('获取登录凭证失败')
+    }
+    
+    // 调用云函数登录
+    const loginObj = uniCloud.importObject('login')
+    const result = await loginObj.getUserProfile(code)
+    
+    if (result && result.token) {
+      // 保存登录信息
       uni.setStorageSync('token', result.token)
       uni.setStorageSync('userInfo', result.userInfo)
       
       isLoggedIn.value = true
       Object.assign(userInfo, result.userInfo)
       
-      // 如果是新用户或信息未完善，显示完善信息弹窗
+      uni.hideLoading()
+      
+      // 如果是新用户或信息不完整，显示欢迎弹窗
       if (result.isNewUser || !hasCompleteProfile.value) {
         isFirstLogin.value = true
         setTimeout(() => {
@@ -228,7 +229,6 @@ const handleLogin = async () => {
         }, 500)
       }
       
-      uni.hideLoading()
       uni.showToast({
         title: '登录成功',
         icon: 'success'
@@ -259,7 +259,15 @@ const handleLogout = () => {
           _id: '',
           nickname: '',
           avatar: '',
+          building: '',
           openid: ''
+        })
+        
+        Object.assign(userStats, {
+          postsCount: 0,
+          likesCount: 0,
+          commentsCount: 0,
+          favoritesCount: 0
         })
         
         uni.showToast({
@@ -443,6 +451,16 @@ onMounted(() => {
 .user-id {
   font-size: 24rpx;
   color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 4rpx;
+}
+
+.user-building {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  display: inline-block;
 }
 
 /* 未登录状态 */
@@ -452,7 +470,7 @@ onMounted(() => {
   gap: 24rpx;
 }
 
-.default {
+.default-avatar {
   width: 120rpx;
   height: 120rpx;
   border-radius: 50%;
@@ -493,6 +511,49 @@ onMounted(() => {
   color: #fff;
 }
 
+/* 数据统计区域 */
+.stats-section {
+  margin: 0 32rpx;
+  transform: translateY(-24rpx);
+}
+
+.stats-grid {
+  display: flex;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.stats-item {
+  flex: 1;
+  padding: 32rpx 16rpx;
+  text-align: center;
+  border-right: 1rpx solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.stats-item:last-child {
+  border-right: none;
+}
+
+.stats-item:active {
+  background: #f8f9fa;
+}
+
+.stats-number {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.stats-label {
+  font-size: 24rpx;
+  color: #666;
+}
+
 /* 功能菜单 */
 .menu-section {
   padding: 32rpx;
@@ -503,14 +564,13 @@ onMounted(() => {
   border-radius: 16rpx;
   overflow: hidden;
   margin-bottom: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
 }
 
 .menu-item {
   display: flex;
   align-items: center;
   padding: 32rpx 24rpx;
-  border-bottom: 1rpx solid #f0f2f5;
+  border-bottom: 1rpx solid #f5f5f5;
   transition: background-color 0.2s;
 }
 
@@ -519,14 +579,13 @@ onMounted(() => {
 }
 
 .menu-item:active {
-  background: #f8f9fc;
+  background: #f8f9fa;
 }
 
 .menu-icon {
-  width: 56rpx;
-  height: 56rpx;
-  background: #f8f9fc;
-  border-radius: 12rpx;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 8rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -535,139 +594,47 @@ onMounted(() => {
 
 .menu-text {
   flex: 1;
-  font-size: 30rpx;
+  font-size: 28rpx;
   color: #333;
-  font-weight: 500;
 }
 
 .logout-group {
-  margin-top: 32rpx;
+  margin-bottom: 0;
 }
 
 .logout-item {
-  justify-content: center;
-}
-
-.logout-item .menu-icon {
-  background: #fff5f5;
+  color: #FF4757;
 }
 
 .logout-text {
   color: #FF4757;
-  text-align: center;
-  flex: none;
 }
 
-/* 首次设置弹窗样式 */
+/* 欢迎弹窗 */
 .welcome-dialog {
-  width: 600rpx;
+  width: 640rpx;
   background: #fff;
   border-radius: 20rpx;
-  padding: 48rpx 32rpx 0;
-  text-align: center;
+  overflow: hidden;
 }
 
 .welcome-header {
-  margin-bottom: 32rpx;
+  padding: 40rpx 32rpx 20rpx;
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
 }
 
 .welcome-title {
   display: block;
-  font-size: 36rpx;
+  font-size: 32rpx;
   font-weight: 600;
-  color: #333;
-  margin: 16rpx 0 8rpx;
+  margin: 16rpx 0 12rpx;
 }
 
 .welcome-subtitle {
-  display: block;
-  font-size: 26rpx;
-  color: #666;
-  line-height: 1.5;
+  font-size: 24rpx;
+  opacity: 0.9;
+  line-height: 1.4;
 }
-
-
-/* 快捷功能区域样式 */
-	.quick-actions {
-		background-color: white;
-		margin-bottom: 20rpx;
-		border-radius: 16rpx;
-		margin: 0 20rpx 20rpx;
-		overflow: hidden;
-		padding: 20rpx;
-	}
-
-	.actions-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr 1fr 1fr;
-		gap: 20rpx;
-	}
-
-	.grid-item {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 30rpx 20rpx;
-		border-radius: 12rpx;
-		background-color: #fafafa;
-		transition: background-color 0.2s;
-	}
-
-	.grid-item:active {
-		background-color: #f0f0f0;
-	}
-
-	.grid-icon {
-		width: 60rpx;
-		height: 60rpx;
-		border-radius: 50%;
-		background-color: white;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-bottom: 16rpx;
-		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
-	}
-
-	.grid-text {
-		font-size: 24rpx;
-		color: #333;
-		text-align: center;
-	}
-
-	/* 保留原有的 action-item 样式以防其他地方使用 */
-	.action-item {
-		display: flex;
-		align-items: center;
-		padding: 32rpx 24rpx;
-		border-bottom: 1rpx solid #f0f0f0;
-	}
-
-	.action-item:last-child {
-		border-bottom: none;
-	}
-
-	.action-icon {
-		width: 60rpx;
-		height: 60rpx;
-		border-radius: 50%;
-		background-color: #f8f8f8;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-right: 24rpx;
-	}
-
-	.action-text {
-		flex: 1;
-		font-size: 28rpx;
-		color: #333;
-	}
-
-	.action-arrow {
-		margin-left: 20rpx;
-	}
-
-
 </style>
