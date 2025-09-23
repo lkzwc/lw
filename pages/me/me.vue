@@ -158,57 +158,77 @@ const hasCompleteProfile = computed(() => {
 })
 
 // 方法
-const checkLoginStatus = () => {
+const checkLoginStatus = async () => {
   // 检查本地存储的登录状态
   const token = uni.getStorageSync('token')
   const cachedUserInfo = uni.getStorageSync('userInfo')
   
   if (token && cachedUserInfo) {
-    isLoggedIn.value = true
-    Object.assign(userInfo, cachedUserInfo)
-    
-    // 检查是否需要完善信息
-    if (!hasCompleteProfile.value) {
-      isFirstLogin.value = true
-      setTimeout(() => {
-        showWelcomeDialog()
-      }, 500)
+    try {
+      // 从云端获取最新的用户信息
+      const loginObj = uniCloud.importObject('login')
+      const result = await loginObj.getUserInfo(token)
+      
+      isLoggedIn.value = true
+      Object.assign(userInfo, result.userInfo)
+      
+      // 更新本地存储
+      uni.setStorageSync('userInfo', result.userInfo)
+      
+      // 检查是否需要完善信息
+      if (!hasCompleteProfile.value) {
+        isFirstLogin.value = true
+        setTimeout(() => {
+          showWelcomeDialog()
+        }, 500)
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error)
+      // token已过期或无效，清除本地数据
+      uni.removeStorageSync('token')
+      uni.removeStorageSync('userInfo')
+      isLoggedIn.value = false
     }
+  } else {
+    isLoggedIn.value = false
   }
 }
 
 const handleLogin = async () => {
   try {
+    // 显示加载状态
+    uni.showLoading({
+      title: '登录中...'
+    })
+    
     // 微信登录
     const loginRes = await uni.login({
       provider: 'weixin'
     })
     
     if (loginRes.errMsg === 'login:ok') {
-      // 这里应该调用后端接口验证登录
-      console.log('登录成功，code:', loginRes.code)
+      // 调用云函数处理登录
+      const loginObj = uniCloud.importObject('login')
+      const result = await loginObj.getUserProfile(loginRes.code)
       
-      // 模拟登录成功
-      const mockUserInfo = {
-        _id: 'user_' + Date.now(),
-        openid: 'mock_openid',
-        nickname: '',
-        avatar: ''
-      }
+      console.log('登录成功:', result)
       
       // 保存登录状态
-      uni.setStorageSync('token', 'mock_token')
-      uni.setStorageSync('userInfo', mockUserInfo)
+      uni.setStorageSync('token', result.token)
+      uni.setStorageSync('userInfo', result.userInfo)
       
       isLoggedIn.value = true
-      Object.assign(userInfo, mockUserInfo)
+      Object.assign(userInfo, result.userInfo)
       
-      // 首次登录显示完善信息弹窗
-      isFirstLogin.value = true
-      setTimeout(() => {
-        showWelcomeDialog()
-      }, 500)
+      // 如果是新用户或信息未完善，显示完善信息弹窗
+      if (result.isNewUser || !hasCompleteProfile.value) {
+        isFirstLogin.value = true
+        setTimeout(() => {
+          showWelcomeDialog()
+        }, 500)
+      }
       
+      uni.hideLoading()
       uni.showToast({
         title: '登录成功',
         icon: 'success'
@@ -216,6 +236,7 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error('登录失败:', error)
+    uni.hideLoading()
     uni.showToast({
       title: '登录失败，请重试',
       icon: 'none'
@@ -268,19 +289,32 @@ const closeWelcomeDialog = () => {
 
 const saveProfile = async (profileData) => {
   try {
-    // 这里应该调用后端接口保存用户信息
-    console.log('保存用户信息:', profileData)
+    uni.showLoading({
+      title: '保存中...'
+    })
     
-    // 模拟保存延迟
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // 获取token
+    const token = uni.getStorageSync('token')
+    if (!token) {
+      throw new Error('请先登录')
+    }
+    
+    // 调用云函数保存用户信息
+    const loginObj = uniCloud.importObject('login')
+    const result = await loginObj.updateUserInfo({
+      userInfo: profileData,
+      token: token
+    })
+    
+    console.log('保存成功:', result)
     
     // 更新本地用户信息
-    userInfo.nickname = profileData.nickname
-    userInfo.avatar = profileData.avatar
+    Object.assign(userInfo, result.userInfo)
     
     // 更新本地存储
-    uni.setStorageSync('userInfo', userInfo)
+    uni.setStorageSync('userInfo', result.userInfo)
     
+    uni.hideLoading()
     uni.showToast({
       title: '保存成功',
       icon: 'success'
@@ -289,8 +323,9 @@ const saveProfile = async (profileData) => {
     closeProfileEditor()
   } catch (error) {
     console.error('保存失败:', error)
+    uni.hideLoading()
     uni.showToast({
-      title: '保存失败，请重试',
+      title: error.message || '保存失败，请重试',
       icon: 'none'
     })
   }

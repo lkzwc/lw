@@ -6,7 +6,7 @@
     "image": "https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=400,height=400/event-covers/ra/df54811d-c411-46d6-acfd-ad99ce850d55.png",
     "tag": ["announcement"],
     "status": 1,
-    "createTime": 1726718400000
+    "create_time": 1726718400000
   },
   {
     "_id": "announcement_002", 
@@ -15,7 +15,7 @@
     "image": "https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=400,height=400/event-covers/ra/df54811d-c411-46d6-acfd-ad99ce850d55.png",
     "tag": ["announcement"],
     "status": 1,
-    "createTime": 1726632000000
+    "create_time": 1726632000000
   },
   {
     "_id": "announcement_003",
@@ -24,6 +24,6 @@
     "image": "https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=400,height=400/event-covers/ra/df54811d-c411-46d6-acfd-ad99ce850d55.png",
     "tag": ["property"], 
     "status": 1,
-    "createTime": 1726545600000
+    "create_time": 1726545600000
   }
 ]

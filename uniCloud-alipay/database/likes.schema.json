@@ -1,0 +1,33 @@
+{
+  "bsonType": "object",
+  "required": ["post_id", "user_id", "create_time"],
+  "properties": {
+    "_id": {
+      "description": "点赞记录ID，系统自动生成"
+    },
+    "post_id": {
+      "bsonType": "string",
+      "description": "帖子ID",
+      "title": "帖子ID"
+    },
+    "user_id": {
+      "bsonType": "string",
+      "description": "点赞用户ID",
+      "title": "用户ID"
+    },
+    "username": {
+      "bsonType": "string",
+      "description": "点赞用户昵称（冗余字段）",
+      "title": "用户昵称",
+      "maxLength": 50
+    },
+    "create_time": {
+      "bsonType": "timestamp",
+      "description": "点赞时间",
+      "title": "点赞时间",
+      "forceDefaultValue": {
+        "$env": "now"
+      }
+    }
+  }
+}

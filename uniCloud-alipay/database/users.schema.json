@@ -1,0 +1,58 @@
+{
+  "bsonType": "object",
+  "required": ["openid"],
+  "properties": {
+    "_id": {
+      "description": "存储文档 ID（用户 ID），系统自动生成"
+    },
+    "openid": {
+      "bsonType": "string",
+      "description": "微信用户唯一标识符",
+      "title": "微信OpenID",
+      "trim": "both"
+    },
+    "nickname": {
+      "bsonType": "string",
+      "description": "用户昵称/中文名",
+      "title": "用户昵称",
+      "maxLength": 50,
+      "trim": "both"
+    },
+    "avatar": {
+      "bsonType": "string",
+      "description": "用户头像URL",
+      "title": "头像",
+      "format": "url"
+    },
+    "points": {
+      "bsonType": "int",
+      "description": "用户积分",
+      "title": "积分",
+      "minimum": 0,
+      "default": 0
+    },
+    "last_login_time": {
+      "bsonType": "timestamp",
+      "description": "最后登录时间",
+      "title": "最后登录时间",
+      "forceDefaultValue": {
+        "$env": "now"
+      }
+    },
+    "register_time": {
+      "bsonType": "timestamp",
+      "description": "注册时间",
+      "title": "注册时间",
+      "forceDefaultValue": {
+        "$env": "now"
+      }
+    },
+    "status": {
+      "bsonType": "int",
+      "description": "用户状态：0-正常，1-禁用",
+      "title": "用户状态",
+      "enum": [0, 1],
+      "default": 0
+    }
+  }
+}

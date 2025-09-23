@@ -87,14 +87,14 @@ module.exports = {
 			// 按用户筛选
 			if (userId) {
 				query = query.where({
-					userId: userId
+					user_id: userId
 				});
 			}
 			
 			// 分页查询
 			const skip = (page - 1) * pageSize;
 			const result = await query
-				.orderBy('createTime', 'desc')
+				.orderBy('create_time', 'desc')
 				.skip(skip)
 				.limit(pageSize)
 				.get();
@@ -255,20 +255,20 @@ module.exports = {
 				category,
 				location: location.trim(),
 				price: parseFloat(price),
-				priceUnit,
+				price_unit: priceUnit,
 				tags: tags.map(tag => tag.trim()).filter(tag => tag),
 				images: images || [],
 				phone: phone || '',
 				wechat: wechat || '',
-				userId: userInfo.uid,
+				user_id: userInfo.uid,
 				username: userData.nickname || '用户',
-				userAvatar: userData.avatar || '',
+				user_avatar: userData.avatar || '',
 				rating: 5.0,
-				reviewCount: 0,
-				viewCount: 0,
+				review_count: 0,
+				view_count: 0,
 				status: 1, // 1-已发布 0-草稿 -1-已下架
-				createTime: new Date(),
-				updateTime: new Date()
+				create_time: new Date(),
+				update_time: new Date()
 			};
 			
 			// 插入数据库
@@ -604,7 +604,7 @@ module.exports = {
 			const skillResult = await db.collection('skills')
 				.where({
 					_id: skillId,
-					userId: userInfo.uid
+					user_id: userInfo.uid
 				})
 				.get();
 			
@@ -616,7 +616,7 @@ module.exports = {
 			}
 			
 			// 过滤允许更新的字段
-			const allowedFields = ['title', 'description', 'category', 'location', 'price', 'priceUnit', 'tags', 'images', 'phone', 'wechat', 'status'];
+			const allowedFields = ['title', 'description', 'category', 'location', 'price', 'price_unit', 'tags', 'images', 'phone', 'wechat', 'status'];
 			const filteredUpdateData = {};
 			
 			for (let key of allowedFields) {
@@ -626,7 +626,7 @@ module.exports = {
 			}
 			
 			// 添加更新时间
-			filteredUpdateData.updateTime = new Date();
+			filteredUpdateData.update_time = new Date();
 			
 			// 执行更新
 			const updateResult = await db.collection('skills')
@@ -680,11 +680,11 @@ module.exports = {
 			const updateResult = await db.collection('skills')
 				.where({
 					_id: skillId,
-					userId: userInfo.uid
+					user_id: userInfo.uid
 				})
 				.update({
 					status: -1,
-					updateTime: new Date()
+					update_time: new Date()
 				});
 			
 			if (updateResult.updated > 0) {
@@ -734,8 +734,8 @@ module.exports = {
 			// 查询收藏记录
 			const result = await db.collection('skill_collections')
 				.where({
-					userId: token.uid,
-					skillId: skillId
+					user_id: token.uid,
+					skill_id: skillId
 				})
 				.get();
 
@@ -918,9 +918,9 @@ module.exports = {
 			// 查询用户收藏记录
 			const collectionsResult = await db.collection('skill_collections')
 				.where({
-					userId: userInfo.uid
+					user_id: userInfo.uid
 				})
-				.orderBy('createTime', 'desc')
+				.orderBy('create_time', 'desc')
 				.skip(skip)
 				.limit(pageSize)
 				.get();
@@ -948,7 +948,7 @@ module.exports = {
 			// 查询总数
 			const countResult = await db.collection('skill_collections')
 				.where({
-					userId: userInfo.uid
+					user_id: userInfo.uid
 				})
 				.count();
 			
@@ -1010,11 +1010,11 @@ module.exports = {
 				images: skillData.images || [],
 				contact: skillData.contact,
 				price: skillData.price || '',
-				availableTime: skillData.availableTime || '',
-				userId: userInfo.uid,
+				available_time: skillData.availableTime || '',
+				user_id: userInfo.uid,
 				status: 1, // 1: 启用, 0: 草稿, -1: 已删除
-				createTime: new Date(),
-				updateTime: new Date()
+				create_time: new Date(),
+				update_time: new Date()
 			};
 			
 			// 插入数据

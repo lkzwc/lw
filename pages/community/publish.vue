@@ -326,29 +326,43 @@ const handlePublish = async () => {
   try {
     isPublishing.value = true
     
+    // 检查登录状态
+    const token = uni.getStorageSync('token')
+    if (!token) {
+      uni.showToast({
+        title: '请先登录',
+        icon: 'none'
+      })
+      return
+    }
+    
     // 构建发布数据
     const publishData = {
       content: postContent.value.trim(),
-      tags: selectedTags.value,
-      images: uploadedImages.value,
-      createTime: Date.now()
+      tag: selectedTags.value.length > 0 ? selectedTags.value : ['全部'],
+      images: uploadedImages.value
     }
     
-    // 这里应该调用发布接口
-    console.log('发布数据:', publishData)
+    // 调用云函数发布帖子
+    const communityObj = uniCloud.importObject('community')
+    const result = await communityObj.addPost(publishData)
     
-    // 模拟发布延迟
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    uni.showToast({
-      title: '发布成功',
-      icon: 'success'
-    })
-    
-    // 发布成功后返回
-    setTimeout(() => {
-      uni.navigateBack()
-    }, 1000)
+    if (result.errCode === 0) {
+      uni.showToast({
+        title: '发布成功',
+        icon: 'success'
+      })
+      
+      // 发布成功后返回
+      setTimeout(() => {
+        uni.navigateBack()
+      }, 1000)
+    } else {
+      uni.showToast({
+        title: result.errMsg || '发布失败',
+        icon: 'none'
+      })
+    }
     
   } catch (error) {
     console.error('发布失败:', error)
@@ -363,8 +377,37 @@ const handlePublish = async () => {
 
 onMounted(() => {
   // 初始化用户信息
-  // 这里可以从缓存或接口获取用户信息
+  checkLoginAndLoadUserInfo()
 })
+
+// 检查登录状态并获取用户信息
+const checkLoginAndLoadUserInfo = () => {
+  const token = uni.getStorageSync('token')
+  const cachedUserInfo = uni.getStorageSync('userInfo')
+  
+  if (token && cachedUserInfo) {
+    // 更新用户信息
+    Object.assign(userInfo, {
+      avatar: cachedUserInfo.avatar || '/static/default.png',
+      nickname: cachedUserInfo.nickname || '用户'
+    })
+  } else {
+    // 未登录，提示用户登录
+    uni.showModal({
+      title: '提示',
+      content: '请先登录后再发帖',
+      success: (res) => {
+        if (res.confirm) {
+          uni.switchTab({
+            url: '/pages/me/me'
+          })
+        } else {
+          uni.navigateBack()
+        }
+      }
+    })
+  }
+}
 </script>
 
 <style scoped>

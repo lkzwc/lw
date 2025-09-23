@@ -1,0 +1,103 @@
+{
+  "bsonType": "object",
+  "required": ["content", "user_id", "create_time"],
+  "properties": {
+    "_id": {
+      "description": "帖子ID，系统自动生成"
+    },
+    "content": {
+      "bsonType": "string",
+      "description": "帖子内容",
+      "title": "内容",
+      "maxLength": 5000,
+      "trim": "both"
+    },
+    "images": {
+      "bsonType": "array",
+      "description": "图片URL数组",
+      "title": "图片",
+      "items": {
+        "bsonType": "string",
+        "format": "url"
+      },
+      "maxItems": 9
+    },
+    "tag": {
+      "bsonType": "array",
+      "description": "帖子标签",
+      "title": "标签",
+      "items": {
+        "bsonType": "string",
+        "enum": ["全部", "公告", "业主", "举报", "畅玩", "跳蚤", "活动"]
+      },
+      "default": ["全部"]
+    },
+    "user_id": {
+      "bsonType": "string",
+      "description": "发布用户ID",
+      "title": "用户ID"
+    },
+    "username": {
+      "bsonType": "string",
+      "description": "发布用户昵称（冗余字段）",
+      "title": "用户昵称",
+      "maxLength": 50
+    },
+    "user_avatar": {
+      "bsonType": "string",
+      "description": "发布用户头像（冗余字段）",
+      "title": "用户头像",
+      "format": "url"
+    },
+    "like_count": {
+      "bsonType": "int",
+      "description": "点赞数统计",
+      "title": "点赞数",
+      "minimum": 0,
+      "default": 0
+    },
+    "comment_count": {
+      "bsonType": "int",
+      "description": "评论数统计",
+      "title": "评论数",
+      "minimum": 0,
+      "default": 0
+    },
+    "view_count": {
+      "bsonType": "int",
+      "description": "浏览数统计",
+      "title": "浏览数",
+      "minimum": 0,
+      "default": 0
+    },
+    "is_top": {
+      "bsonType": "bool",
+      "description": "是否置顶",
+      "title": "置顶",
+      "default": false
+    },
+    "status": {
+      "bsonType": "int",
+      "description": "状态：1-已发布，0-草稿，-1-已删除",
+      "title": "状态",
+      "enum": [1, 0, -1],
+      "default": 1
+    },
+    "create_time": {
+      "bsonType": "timestamp",
+      "description": "创建时间",
+      "title": "创建时间",
+      "forceDefaultValue": {
+        "$env": "now"
+      }
+    },
+    "update_time": {
+      "bsonType": "timestamp",
+      "description": "更新时间",
+      "title": "更新时间",
+      "forceDefaultValue": {
+        "$env": "now"
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "community",
+  "dependencies": {
+    "wxlogin": "file:../common/wxlogin"
+  },
+  "extensions": {}
+}

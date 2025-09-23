@@ -103,8 +103,8 @@
 				v-slot:default="{data, loading, error}" 
 				collection="announcements" 
 				where="status == 1"
-				field="title,createTime,tag,image,_id"
-				orderby="createTime desc"
+				field="title,create_time,tag,image,_id"
+				orderby="create_time desc"
 				:page-size="3"
 			>
 				<!-- 加载状态 -->
@@ -152,7 +152,7 @@
 										{{ getAnnouncementTagText(t) }}
 									</view>
 								</view>
-								<text class="announcement-date">{{ formatAnnouncementDate(item.createTime) }}</text>
+								<text class="announcement-date">{{ formatAnnouncementDate(item.create_time) }}</text>
 							</view>
 							<text class="announcement-title">{{ item.title }}</text>
 						</view>

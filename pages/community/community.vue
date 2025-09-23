@@ -74,11 +74,11 @@
 							:color="post.isLiked ? '#ff6b6b' : '#999'" 
 							size="18">
 						</uni-icons>
-						<text class="action-text" :class="{ liked: post.isLiked }">{{ post.likeCount || 0 }}</text>
+						<text class="action-text" :class="{ liked: post.isLiked }">{{ post.like_count || 0 }}</text>
 					</view>
 					<view class="action-item" @tap.stop="goToDetail(post)">
 						<uni-icons type="chatbubble" color="#999" size="18"></uni-icons>
-						<text class="action-text">{{ post.commentCount || 0 }}</text>
+						<text class="action-text">{{ post.comment_count || 0 }}</text>
 					</view>
 					<view class="action-item" @tap.stop="sharePost(post)">
 						<uni-icons type="redo" color="#999" size="18"></uni-icons>
@@ -99,175 +99,237 @@
 </template>
 
 <script setup>
-	import {
-		onMounted,
-		reactive,
-		ref
-	} from 'vue';
+import {
+	onMounted,
+	reactive,
+	ref
+} from 'vue'
 
-	const currentCategory = ref('all');
-	const searchKeyword = ref('');
-	const loadStatus = ref('more'); // more, loading, noMore
+const currentCategory = ref('all')
+const searchKeyword = ref('')
+const loadStatus = ref('more') // more, loading, noMore
+const page = ref(1)
+const pageSize = 10
 
-	// 分类数据
-	const categoryList = reactive([
-		{ id: 'all', name: '全部' },
-		{ id: 'notice', name: '公告' },
-		{ id: 'us', name: '业主' },
-		{ id: 'entertainment', name: '举报' },
-		{ id: 'health', name: '畅玩' },
-		{ id: 'life', name: '跳蚤' },
-		{ id: 'study', name: '活动' },
-	]);
+// 分类数据
+const categoryList = reactive([
+	{ id: 'all', name: '全部' },
+	{ id: '公告', name: '公告' },
+	{ id: '业主', name: '业主' },
+	{ id: '举报', name: '举报' },
+	{ id: '畅玩', name: '畅玩' },
+	{ id: '跳蚤', name: '跳蚤' },
+	{ id: '活动', name: '活动' }
+])
 
-	// 帖子列表数据
-	const postList = reactive([
-		{
-			id: 1,
-			username: '技术达人',
-			avatar: 'https://via.placeholder.com/60x60/4A90E2/FFFFFF?text=U1',
-			createTime: '2小时前',
-			categoryName: '技术',
-			title: 'Vue 3 Composition API 最佳实践',
-			content: '分享一些在实际项目中使用 Vue 3 Composition API 的经验和技巧，希望对大家有帮助。',
-			images: [
-				'https://via.placeholder.com/200x150/4A90E2/FFFFFF?text=Code1',
-				'https://via.placeholder.com/200x150/50C878/FFFFFF?text=Code2'
-			],
-			likeCount: 24,
-			commentCount: 8,
-			isLiked: false
-		},
-		{
-			id: 2,
-			username: '生活家',
-			avatar: 'https://via.placeholder.com/60x60/50C878/FFFFFF?text=U2',
-			createTime: '5小时前',
-			categoryName: '生活',
-			title: '周末的美好时光',
-			content: '和朋友一起去公园散步，享受阳光和自然的美好。生活中的小确幸总是让人感到温暖。',
-			images: [
-				'https://via.placeholder.com/200x150/50C878/FFFFFF?text=Life1'
-			],
-			likeCount: 15,
-			commentCount: 3,
-			isLiked: true
-		},
-		{
-			id: 3,
-			username: '学习者',
-			avatar: 'https://via.placeholder.com/60x60/FF6B6B/FFFFFF?text=U3',
-			createTime: '1天前',
-			categoryName: '学习',
-			title: '如何高效学习新技能',
-			content: '分享一些学习方法和技巧，包括时间管理、记忆方法等。',
-			images: [],
-			likeCount: 32,
-			commentCount: 12,
-			isLiked: false
-		},
-		{
-			id: 4,
-			username: '健康专家',
-			avatar: 'https://via.placeholder.com/60x60/FFD700/FFFFFF?text=U4',
-			createTime: '2天前',
-			categoryName: '健康',
-			title: '每日运动打卡',
-			content: '坚持运动第30天！今天完成了5公里跑步和30分钟力量训练。',
-			images: [
-				'https://via.placeholder.com/200x150/FFD700/FFFFFF?text=Sport1',
-				'https://via.placeholder.com/200x150/FF69B4/FFFFFF?text=Sport2',
-				'https://via.placeholder.com/200x150/9370DB/FFFFFF?text=Sport3',
-				'https://via.placeholder.com/200x150/32CD32/FFFFFF?text=Sport4'
-			],
-			likeCount: 18,
-			commentCount: 6,
-			isLiked: false
+// 帖子列表数据
+const postList = reactive([])
+
+// 加载帖子列表
+const loadPostList = async (isRefresh = false) => {
+	try {
+		if (isRefresh) {
+			page.value = 1
+			postList.length = 0
 		}
-	]);
-
-	// 搜索输入
-	const onSearchInput = (value) => {
-		searchKeyword.value = value;
-		// 实际项目中这里应该调用搜索接口
-		console.log('搜索关键词:', value);
-	};
-
-	// 切换分类
-	const switchCategory = (categoryId) => {
-		currentCategory.value = categoryId;
-		// 实际项目中这里应该根据分类加载数据
-		console.log('切换分类:', categoryId);
-	};
-
-	// 点赞/取消点赞
-	const toggleLike = (post) => {
-		post.isLiked = !post.isLiked;
-		if (post.isLiked) {
-			post.likeCount++;
-		} else {
-			post.likeCount--;
-		}
-		// 实际项目中这里应该调用点赞接口
-		console.log('点赞操作:', post.id, post.isLiked);
-	};
-
-	// 分享帖子
-	const sharePost = (post) => {
-		uni.showActionSheet({
-			itemList: ['分享到微信', '分享到朋友圈', '复制链接'],
-			success: (res) => {
-				console.log('分享选择:', res.tapIndex, post.id);
-				uni.showToast({
-					title: '分享功能开发中',
-					icon: 'none'
-				});
+		
+		loadStatus.value = 'loading'
+		
+		// 调用云函数
+		const communityObj = uniCloud.importObject('community')
+		const result = await communityObj.getPostList({
+			tag: currentCategory.value === 'all' ? null : currentCategory.value,
+			page: page.value,
+			pageSize: pageSize
+		})
+		
+		if (result.errCode === 0) {
+			const newPosts = result.data.list.map(post => ({
+				...post,
+				id: post._id,
+				isLiked: false, // 后续可以通过查询点赞表获取
+				createTime: formatTime(post.create_time)
+			}))
+			
+			if (isRefresh) {
+				postList.splice(0, postList.length, ...newPosts)
+			} else {
+				postList.push(...newPosts)
 			}
-		});
-	};
-
-	// 预览图片
-	const previewImage = (images, current) => {
-		uni.previewImage({
-			urls: images,
-			current: current
-		});
-	};
-
-	// 跳转到帖子详情
-	const goToDetail = (post) => {
-		uni.navigateTo({
-			url: `/pages/community/post-detail?id=${post.id}`
-		});
-	};
-
-	// 跳转到发布页面
-	const goToPublish = () => {
-		uni.navigateTo({
-			url: '/pages/community/publish'
-		});
-	};
-
-	// 加载更多
-	const loadMore = () => {
-		if (loadStatus.value === 'loading' || loadStatus.value === 'noMore') {
-			return;
+			
+			// 判断是否还有更多数据
+			if (result.data.list.length < pageSize) {
+				loadStatus.value = 'noMore'
+			} else {
+				loadStatus.value = 'more'
+				page.value++
+			}
+		} else {
+			console.error('加载帖子列表失败:', result.errMsg)
+			uni.showToast({
+				title: result.errMsg || '加载失败',
+				icon: 'none'
+			})
+			loadStatus.value = 'more'
 		}
-		
-		loadStatus.value = 'loading';
-		
-		// 模拟加载数据
-		setTimeout(() => {
-			// 实际项目中这里应该调用接口加载更多数据
-			console.log('加载更多数据');
-			loadStatus.value = 'more';
-		}, 1500);
-	};
+	} catch (error) {
+		console.error('加载帖子列表错误:', error)
+		uni.showToast({
+			title: '加载失败，请重试',
+			icon: 'none'
+		})
+		loadStatus.value = 'more'
+	}
+}
 
-	onMounted(() => {
-		console.log('社区页面加载完成');
-		// 初始化数据加载
-	});
+// 搜索输入
+const onSearchInput = (value) => {
+	searchKeyword.value = value
+	// TODO: 实现搜索功能
+	console.log('搜索关键词:', value)
+}
+
+// 切换分类
+const switchCategory = (categoryId) => {
+	currentCategory.value = categoryId
+	loadPostList(true) // 刷新数据
+}
+
+// 点赞/取消点赞
+const toggleLike = async (post) => {
+	try {
+		const communityObj = uniCloud.importObject('community')
+		const result = await communityObj.toggleLike({
+			post_id: post.id
+		})
+		
+		if (result.errCode === 0) {
+			post.isLiked = result.data.isLiked
+			if (result.data.action === 'like') {
+				post.like_count++
+			} else {
+				post.like_count--
+			}
+		} else {
+			uni.showToast({
+				title: result.errMsg || '操作失败',
+				icon: 'none'
+			})
+		}
+	} catch (error) {
+		console.error('点赞操作错误:', error)
+		uni.showToast({
+			title: '操作失败，请重试',
+			icon: 'none'
+		})
+	}
+}
+
+// 分享帖子
+const sharePost = (post) => {
+	uni.showActionSheet({
+		itemList: ['分享到微信', '分享到朋友圈', '复制链接'],
+		success: (res) => {
+			console.log('分享选择:', res.tapIndex, post.id)
+			uni.showToast({
+				title: '分享功能开发中',
+				icon: 'none'
+			})
+		}
+	})
+}
+
+// 预览图片
+const previewImage = (images, current) => {
+	uni.previewImage({
+		urls: images,
+		current: current
+	})
+}
+
+// 跳转到帖子详情
+const goToDetail = (post) => {
+	uni.navigateTo({
+		url: `/pages/community/post-detail?id=${post.id}`
+	})
+}
+
+// 跳转到发布页面
+const goToPublish = () => {
+	// 检查登录状态
+	const token = uni.getStorageSync('token')
+	if (!token) {
+		uni.showToast({
+			title: '请先登录',
+			icon: 'none'
+		})
+		return
+	}
+	
+	uni.navigateTo({
+		url: '/pages/community/publish'
+	})
+}
+
+// 加载更多
+const loadMore = () => {
+	if (loadStatus.value === 'loading' || loadStatus.value === 'noMore') {
+		return
+	}
+	loadPostList(false)
+}
+
+// 时间格式化
+const formatTime = (timestamp) => {
+	const now = new Date()
+	const time = new Date(timestamp)
+	const diff = now - time
+	
+	const minute = 60 * 1000
+	const hour = 60 * minute
+	const day = 24 * hour
+	
+	if (diff < minute) {
+		return '刚刚'
+	} else if (diff < hour) {
+		return Math.floor(diff / minute) + '分钟前'
+	} else if (diff < day) {
+		return Math.floor(diff / hour) + '小时前'
+	} else if (diff < 7 * day) {
+		return Math.floor(diff / day) + '天前'
+	} else {
+		return time.toLocaleDateString()
+	}
+}
+
+// 下拉刷新
+const onPullDownRefresh = () => {
+	loadPostList(true).then(() => {
+		uni.stopPullDownRefresh()
+	})
+}
+
+// 触底加载更多
+const onReachBottom = () => {
+	loadMore()
+}
+
+// 页面显示时刷新数据
+const onShow = () => {
+	loadPostList(true)
+}
+
+onMounted(() => {
+	console.log('社区页面加载完成')
+	loadPostList(true)
+})
+
+// 导出页面生命周期方法
+defineExpose({
+	onPullDownRefresh,
+	onReachBottom,
+	onShow
+})
 </script>
 
 <style scoped>

@@ -5,7 +5,7 @@
       v-slot:default="{data, loading, error, options}" 
       collection="announcements" 
       :where="whereCondition"
-      field="title,content,createTime,tag,image"
+      field="title,content,create_time,tag,image"
       :getone="true"
     >
       <!-- 加载状态 -->
@@ -39,7 +39,7 @@
           </view>
           <text class="title">{{ data.title }}</text>
           <view class="meta">
-            <text class="date">{{ formatDate(data.createTime) }}</text>
+            <text class="date">{{ formatDate(data.create_time) }}</text>
           </view>
         </view>
         

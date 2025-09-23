@@ -1,0 +1,58 @@
+{
+  "bsonType": "object",
+  "required": ["post_id", "content", "user_id", "create_time"],
+  "properties": {
+    "_id": {
+      "description": "评论ID，系统自动生成"
+    },
+    "post_id": {
+      "bsonType": "string",
+      "description": "所属帖子ID",
+      "title": "帖子ID"
+    },
+    "parent_id": {
+      "bsonType": "string",
+      "description": "父评论ID，null表示一级评论",
+      "title": "父评论ID"
+    },
+    "content": {
+      "bsonType": "string",
+      "description": "评论内容",
+      "title": "内容",
+      "maxLength": 1000,
+      "trim": "both"
+    },
+    "user_id": {
+      "bsonType": "string",
+      "description": "评论用户ID",
+      "title": "用户ID"
+    },
+    "username": {
+      "bsonType": "string",
+      "description": "评论用户昵称（冗余字段）",
+      "title": "用户昵称",
+      "maxLength": 50
+    },
+    "user_avatar": {
+      "bsonType": "string",
+      "description": "评论用户头像（冗余字段）",
+      "title": "用户头像",
+      "format": "url"
+    },
+    "status": {
+      "bsonType": "int",
+      "description": "状态：1-正常，-1-已删除",
+      "title": "状态",
+      "enum": [1, -1],
+      "default": 1
+    },
+    "create_time": {
+      "bsonType": "timestamp",
+      "description": "创建时间",
+      "title": "创建时间",
+      "forceDefaultValue": {
+        "$env": "now"
+      }
+    }
+  }
+}

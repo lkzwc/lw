@@ -118,9 +118,42 @@ const handleSave = async () => {
   isSaving.value = true
   
   try {
-    await emit('save', { ...formData })
+    // 如果有选择头像，先上传头像
+    let avatarUrl = formData.avatar
+    if (formData.avatar && formData.avatar.startsWith('wxfile://')) {
+      // 头像是本地临时文件，需要上传
+      avatarUrl = await uploadAvatar(formData.avatar)
+    }
+    
+    const profileData = {
+      ...formData,
+      avatar: avatarUrl
+    }
+    
+    await emit('save', profileData)
+  } catch (error) {
+    console.error('保存失败:', error)
+    uni.showToast({
+      title: '保存失败，请重试',
+      icon: 'none'
+    })
   } finally {
     isSaving.value = false
+  }
+}
+
+// 上传头像
+const uploadAvatar = async (tempFilePath) => {
+  try {
+    const result = await uniCloud.uploadFile({
+      filePath: tempFilePath,
+      cloudPath: `avatars/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`,
+      fileType: 'image'
+    })
+    return result.fileID
+  } catch (error) {
+    console.error('头像上传失败:', error)
+    throw new Error('头像上传失败')
   }
 }
 </script>
