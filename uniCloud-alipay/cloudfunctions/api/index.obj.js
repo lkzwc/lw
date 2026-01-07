@@ -26,7 +26,7 @@ module.exports = {
 			}
 			
 			// 高德地图API Key
-			const AMAP_KEY = config.amap.apiKey;
+			const AMAP_KEY = config.amap.key;
 			
 			// 构建请求URL
 			const apiUrl = `https://restapi.amap.com/v3/weather/weatherInfo?city=${city}&key=${AMAP_KEY}&extensions=${extensions}&output=JSON`;
@@ -118,37 +118,18 @@ module.exports = {
 	
 	/**
 	 * 获取每日60秒新闻
-	 * @param {string} date 日期，格式：YYYY-MM-DD，不传则获取今日新闻
-	 * @param {boolean} forceUpdate 是否强制更新，默认false
 	 * @returns {object} 返回新闻信息
 	 */
-	async getDailyNews(date = '', forceUpdate = false) {
+	async getDailyNews() {
 		try {
-			// 构建请求URL
-			let apiUrl = 'https://60s.viki.moe/v2/60s';
-			const params = [];
-			
-			if (date) {
-				params.push(`date=${date}`);
-			}
-			
-			if (forceUpdate) {
-				params.push('forceUpdate=true');
-			}
-			
-			if (params.length > 0) {
-				apiUrl += '?' + params.join('&');
-			}
-			
 			// 发起HTTP请求
 			const response = await uniCloud.request({
-				url: apiUrl,
+				url: 'https://60s.viki.moe/v2/60s',
 				method: 'GET',
-				timeout: 15000,
-				headers: {
-					'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-				}
+				timeout: 15000
 			});
+
+			console.log('response:', response);
 			
 			// 解析响应数据
 			let newsData;
@@ -157,7 +138,7 @@ module.exports = {
 			} else {
 				newsData = response.data;
 			}
-			
+
 			// 检查API返回状态
 			if (response.status !== 200) {
 				return {
@@ -197,35 +178,15 @@ module.exports = {
 	
 	/**
 	 * 获取AI新闻快讯
-	 * @param {string} date 日期，格式：YYYY-MM-DD，不传则获取今日新闻
-	 * @param {boolean} forceUpdate 是否强制更新，默认false
 	 * @returns {object} 返回AI新闻信息
 	 */
-	async getAINews(date = '', forceUpdate = false) {
+	async getAINews() {
 		try {
-			// 构建请求URL
-			let apiUrl = 'https://60s.viki.moe/v2/ai-news';
-			const params = [];
-			
-			if (date) {
-				params.push(`date=${date}`);
-			}
-			
-			if (forceUpdate) {
-				params.push('forceUpdate=true');
-			}
-			
-			if (params.length > 0) {
-				apiUrl += '?' + params.join('&');
-			}
-			
 			// 发起HTTP请求
-			const response = await uniCloud.httpclient.request(apiUrl, {
+			const response = await uniCloud.request({
+				url: 'https://60s.viki.moe/v2/ai-news',
 				method: 'GET',
-				timeout: 15000,
-				headers: {
-					'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-				}
+				timeout: 15000
 			});
 			
 			// 解析响应数据
@@ -235,7 +196,7 @@ module.exports = {
 			} else {
 				newsData = response.data;
 			}
-			
+
 			// 检查API返回状态
 			if (response.status !== 200) {
 				return {

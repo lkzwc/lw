@@ -165,11 +165,11 @@
 	};
 
 	// 获取每日新闻数据
-	const getDailyNewsData = async (forceUpdate = false) => {
+	const getDailyNewsData = async () => {
 		if (!apiObj) return;
 
 		try {
-			const result = await apiObj.getDailyNews('', forceUpdate);
+			const result = await apiObj.getDailyNews();
 			
 			if (result && result.errCode === 0 && result.data) {
 				Object.assign(dailyNewsData, {
@@ -190,11 +190,11 @@
 	};
 
 	// 获取全球热点数据（使用每日新闻接口）
-	const getGlobalNewsData = async (forceUpdate = false) => {
+	const getGlobalNewsData = async () => {
 		if (!apiObj) return;
 
 		try {
-			const result = await apiObj.getDailyNews('', forceUpdate);
+			const result = await apiObj.getDailyNews();
 			
 			if (result && result.errCode === 0 && result.data) {
 				Object.assign(globalNewsData, {
@@ -215,11 +215,11 @@
 	};
 
 	// 获取AI新闻数据
-	const getAINewsData = async (forceUpdate = false) => {
+	const getAINewsData = async () => {
 		if (!apiObj) return;
 
 		try {
-			const result = await apiObj.getAINews('', forceUpdate);
+			const result = await apiObj.getAINews();
 			
 			if (result && result.errCode === 0 && result.data) {
 				Object.assign(aiNewsData, {
@@ -240,7 +240,7 @@
 	};
 
 	// 获取新闻数据
-	const getNewsData = async (forceUpdate = false) => {
+	const getNewsData = async () => {
 		if (!apiObj) {
 			isLoading.value = false;
 			return;
@@ -248,17 +248,17 @@
 
 		try {
 			isLoading.value = true;
-			
+
 			// 根据当前tab获取对应数据
 			switch (currentTab.value) {
 				case 'daily':
-					await getDailyNewsData(forceUpdate);
+					await getDailyNewsData();
 					break;
 				case 'global':
-					await getGlobalNewsData(forceUpdate);
+					await getGlobalNewsData();
 					break;
 				case 'ai':
-					await getAINewsData(forceUpdate);
+					await getAINewsData();
 					break;
 			}
 			
@@ -300,8 +300,8 @@
 			title: '正在刷新...',
 			icon: 'loading'
 		});
-		
-		getNewsData(true);
+
+		getNewsData();
 	};
 
 	// 格式化日期

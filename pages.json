@@ -51,6 +51,30 @@
 			}
 		},
 		{
+			"path": "pages/community/my-posts",
+			"style": {
+				"navigationBarTitleText": "我的帖子"
+			}
+		},
+		{
+			"path": "pages/community/search",
+			"style": {
+				"navigationBarTitleText": "搜索"
+			}
+		},
+		{
+			"path": "pages/skills/my-skills",
+			"style": {
+				"navigationBarTitleText": "我的技能"
+			}
+		},
+		{
+			"path": "pages/settings/settings",
+			"style": {
+				"navigationBarTitleText": "设置"
+			}
+		},
+		{
 			"path": "pages/camera/camera",
 			"style": {
 				"navigationBarTitleText": "随手拍"

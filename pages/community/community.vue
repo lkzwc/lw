@@ -1,13 +1,13 @@
 <template>
 	<view class="container">
 		<!-- 顶部搜索栏 -->
-		<view class="search-bar">
-			<uni-search-bar 
-				@input="onSearchInput" 
-				placeholder="搜索帖子内容..." 
-				:focus="false" 
+		<view class="search-bar" @tap="goToSearch">
+			<uni-search-bar
+				placeholder="搜索帖子内容..."
+				:focus="false"
 				bg-color="#f5f5f5"
-				cancel-button="none">
+				cancel-button="none"
+				:readonly="true">
 			</uni-search-bar>
 		</view>
 
@@ -180,10 +180,11 @@ const loadPostList = async (isRefresh = false) => {
 	}
 }
 
-// 搜索输入
-const onSearchInput = (value) => {
-	searchKeyword.value = value
-	// TODO: 实现搜索功能
+// 跳转到搜索页面
+const goToSearch = () => {
+	uni.navigateTo({
+		url: '/pages/community/search'
+	})
 }
 
 // 切换分类
