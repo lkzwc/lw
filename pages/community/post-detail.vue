@@ -262,7 +262,6 @@
 		const currentPage = pages[pages.length - 1];
 		postId.value = currentPage.options.id || '1';
 		
-		console.log('帖子详情页加载完成, ID:', postId.value);
 		// 实际项目中这里应该根据ID加载帖子详情和评论数据
 	});
 </script>

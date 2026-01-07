@@ -5,6 +5,9 @@ const {
 	getToken
 } = require('wxlogin')
 
+// 引入配置
+const config = require('../common/config.js')
+
 module.exports = {
 	_before: function () { // 通用预处理器
 
@@ -15,14 +18,14 @@ module.exports = {
 	 * @param {string} code - 微信登录临时凭证
 	 */
 	async getUserProfile(code){
-		const APPID = 'wxdfe9979725d25ed2'
-		const APP_SECRET= 'cf39bd3f424dcd580a84990479549c5c'
+		const APPID = config.wechat.appId
+		const APP_SECRET = config.wechat.appSecret
 
 		try {
 			// 通过code获取openid和session_key
-			const res = await uniCloud.httpclient.request(
-				`https://api.weixin.qq.com/sns/jscode2session?appid=${APPID}&secret=${APP_SECRET}&js_code=${code}&grant_type=authorization_code`
-			)
+			const res = await uniCloud.request({
+				url: `https://api.weixin.qq.com/sns/jscode2session?appid=${APPID}&secret=${APP_SECRET}&js_code=${code}&grant_type=authorization_code`
+			})
 			
 			const wxData = JSON.parse(res?.data?.toString('utf8'))
 			

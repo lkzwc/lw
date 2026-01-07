@@ -32,7 +32,7 @@
             <text class="login-title">欢迎使用 hxzyL</text>
             <text class="login-subtitle">登录后享受更多功能</text>
           </view>
-          <button class="login-btn" open-type="getPhoneNumber" @getphonenumber="handleLogin">
+          <button class="login-btn" @tap="handleLogin">
             <uni-icons type="person" size="16" color="#fff"></uni-icons>
             <text class="login-text">微信登录</text>
           </button>
@@ -184,7 +184,7 @@ const checkLoginStatus = async () => {
         }, 500)
       }
     } catch (error) {
-      console.error('获取用户信息失败:', error)
+
       // token已过期或无效，清除本地数据
       uni.removeStorageSync('token')
       uni.removeStorageSync('userInfo')
@@ -202,7 +202,7 @@ const handleLogin = async (e) => {
     })
     
     const { code } = await uni.login()
-    
+	
     if (!code) {
       throw new Error('获取登录凭证失败')
     }
@@ -210,6 +210,7 @@ const handleLogin = async (e) => {
     // 调用云函数登录
     const loginObj = uniCloud.importObject('login')
     const result = await loginObj.getUserProfile(code)
+	
     
     if (result && result.token) {
       // 保存登录信息
@@ -235,9 +236,7 @@ const handleLogin = async (e) => {
       })
     }
   } catch (error) {
-    console.error('登录失败:', error)
-    uni.hideLoading()
-    uni.showToast({
+
       title: '登录失败，请重试',
       icon: 'none'
     })
@@ -314,7 +313,7 @@ const saveProfile = async (profileData) => {
       token: token
     })
     
-    console.log('保存成功:', result)
+
     
     // 更新本地用户信息
     Object.assign(userInfo, result.userInfo)
@@ -322,17 +321,15 @@ const saveProfile = async (profileData) => {
     // 更新本地存储
     uni.setStorageSync('userInfo', result.userInfo)
     
-    uni.hideLoading()
-    uni.showToast({
+
       title: '保存成功',
       icon: 'success'
     })
     
     closeProfileEditor()
   } catch (error) {
-    console.error('保存失败:', error)
-    uni.hideLoading()
-    uni.showToast({
+
+
       title: error.message || '保存失败，请重试',
       icon: 'none'
     })

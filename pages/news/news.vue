@@ -130,7 +130,7 @@
 	});
 
 	// 云对象实例
-	let utilObj = null;
+	let apiObj = null;
 
 	// 计算当前显示的新闻数据
 	const getCurrentNewsData = () => {
@@ -155,7 +155,7 @@
 	// 初始化云对象
 	const initCloudObj = () => {
 		try {
-			utilObj = uniCloud.importObject('util');
+			apiObj = uniCloud.importObject('api');
 		} catch (error) {
 			uni.showToast({
 				title: '云对象初始化失败',
@@ -166,10 +166,10 @@
 
 	// 获取每日新闻数据
 	const getDailyNewsData = async (forceUpdate = false) => {
-		if (!utilObj) return;
+		if (!apiObj) return;
 
 		try {
-			const result = await utilObj.getDailyNews('', forceUpdate);
+			const result = await apiObj.getDailyNews('', forceUpdate);
 			
 			if (result && result.errCode === 0 && result.data) {
 				Object.assign(dailyNewsData, {
@@ -191,10 +191,10 @@
 
 	// 获取全球热点数据（使用每日新闻接口）
 	const getGlobalNewsData = async (forceUpdate = false) => {
-		if (!utilObj) return;
+		if (!apiObj) return;
 
 		try {
-			const result = await utilObj.getDailyNews('', forceUpdate);
+			const result = await apiObj.getDailyNews('', forceUpdate);
 			
 			if (result && result.errCode === 0 && result.data) {
 				Object.assign(globalNewsData, {
@@ -216,10 +216,10 @@
 
 	// 获取AI新闻数据
 	const getAINewsData = async (forceUpdate = false) => {
-		if (!utilObj) return;
+		if (!apiObj) return;
 
 		try {
-			const result = await utilObj.getAINews('', forceUpdate);
+			const result = await apiObj.getAINews('', forceUpdate);
 			
 			if (result && result.errCode === 0 && result.data) {
 				Object.assign(aiNewsData, {
@@ -241,7 +241,7 @@
 
 	// 获取新闻数据
 	const getNewsData = async (forceUpdate = false) => {
-		if (!utilObj) {
+		if (!apiObj) {
 			isLoading.value = false;
 			return;
 		}
@@ -426,7 +426,7 @@
 		// 获取新闻数据
 		setTimeout(() => {
 			getNewsData();
-		}, 500);
+		}, 100);
 	});
 </script>
 

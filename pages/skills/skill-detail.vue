@@ -164,12 +164,8 @@
 
 	// 使用 onLoad 获取页面参数 - 这是 uni-app 推荐的方式
 	onLoad((options) => {
-		console.log('页面加载参数:', options);
 		if (options && options.id) {
 			skillId.value = options.id;
-			console.log('获取到技能ID:', skillId.value);
-		} else {
-			console.error('未获取到技能ID参数');
 		}
 	});
 
@@ -177,7 +173,6 @@
 	const initCloudObj = () => {
 		try {
 			skillsCloudObj = uniCloud.importObject('skills');
-			console.log('云对象初始化成功');
 		} catch (error) {
 			console.error('初始化云对象失败:', error);
 			uni.showToast({
@@ -257,7 +252,6 @@
 		}
 
 		try {
-			console.log('开始加载相关技能推荐...');
 			const result = await skillsCloudObj.getSkillsList({
 				category: skillDetail.category,
 				page: 1,
@@ -268,7 +262,6 @@
 				// 过滤掉当前技能，只显示其他技能
 				const filteredSkills = result.data.list.filter(skill => skill._id !== skillId.value);
 				relatedSkills.splice(0, relatedSkills.length, ...filteredSkills.slice(0, 4));
-				console.log('相关技能加载成功，数量:', relatedSkills.length);
 			}
 		} catch (error) {
 			console.error('获取相关技能失败:', error);

@@ -165,7 +165,6 @@ const loadPostList = async (isRefresh = false) => {
 				page.value++
 			}
 		} else {
-			console.error('加载帖子列表失败:', result.errMsg)
 			uni.showToast({
 				title: result.errMsg || '加载失败',
 				icon: 'none'
@@ -173,7 +172,6 @@ const loadPostList = async (isRefresh = false) => {
 			loadStatus.value = 'more'
 		}
 	} catch (error) {
-		console.error('加载帖子列表错误:', error)
 		uni.showToast({
 			title: '加载失败，请重试',
 			icon: 'none'
@@ -186,7 +184,6 @@ const loadPostList = async (isRefresh = false) => {
 const onSearchInput = (value) => {
 	searchKeyword.value = value
 	// TODO: 实现搜索功能
-	console.log('搜索关键词:', value)
 }
 
 // 切换分类
@@ -217,7 +214,6 @@ const toggleLike = async (post) => {
 			})
 		}
 	} catch (error) {
-		console.error('点赞操作错误:', error)
 		uni.showToast({
 			title: '操作失败，请重试',
 			icon: 'none'
@@ -230,7 +226,6 @@ const sharePost = (post) => {
 	uni.showActionSheet({
 		itemList: ['分享到微信', '分享到朋友圈', '复制链接'],
 		success: (res) => {
-			console.log('分享选择:', res.tapIndex, post.id)
 			uni.showToast({
 				title: '分享功能开发中',
 				icon: 'none'
@@ -320,7 +315,6 @@ const onShow = () => {
 }
 
 onMounted(() => {
-	console.log('社区页面加载完成')
 	loadPostList(true)
 })
 

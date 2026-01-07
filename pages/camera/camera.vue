@@ -236,8 +236,7 @@
 
 	// 图片上传成功回调
 	const onUploadSuccess = (data) => {
-		console.log('图片上传成功:', data);
-		// 自动触发车牌识别
+			// 自动触发车牌识别
 		if (uploadedImages.value.length === 1) {
 			setTimeout(() => {
 				recognizeLicense();
@@ -321,7 +320,7 @@
 				reportTime: new Date().toISOString()
 			};
 
-			console.log('提交举报数据:', reportData);
+
 
 			// 如果有举报云对象，调用云函数
 			if (reportCloudObj) {

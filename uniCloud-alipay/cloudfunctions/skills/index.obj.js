@@ -118,8 +118,7 @@ module.exports = {
 			};
 			
 		} catch (error) {
-			console.error(`[调用ID: ${Date.now()}] 云对象方法执行异常:`, error);
-			console.error(`[调用ID: ${Date.now()}] 异常堆栈:`, error.stack);
+			console.error('获取技能列表失败:', error);
 			return {
 				errCode: 'GET_SKILLS_FAILED',
 				errMsg: '获取技能列表失败: ' + error.message
@@ -303,19 +302,14 @@ module.exports = {
 	 * @returns {Object} 技能详情
 	 */
 	async getSkillDetail(skillId) {
-		const callId = Date.now() + '_' + Math.random().toString(36).substring(2);
-		console.log(`[调用ID: ${callId}] 获取技能详情开始，skillId:`, skillId);
-		
 		try {
 			if (!skillId || typeof skillId !== 'string') {
-				console.log(`[调用ID: ${callId}] 技能ID验证失败:`, skillId);
 				return {
 					errCode: 'INVALID_SKILL_ID',
 					errMsg: '技能ID不能为空'
 				};
 			}
 			
-			console.log(`[调用ID: ${callId}] 开始查询技能详情...`);
 			const result = await db.collection('skills')
 				.where({
 					_id: skillId,
@@ -323,17 +317,13 @@ module.exports = {
 				})
 				.get();
 			
-			console.log(`[调用ID: ${callId}] 数据库查询结果:`, result);
-			
 			if (result.data.length === 0) {
-				console.log(`[调用ID: ${callId}] 技能不存在或已下架`);
 				return {
 					errCode: 'SKILL_NOT_FOUND',
 					errMsg: '技能不存在或已下架'
 				};
 			}
 			
-			console.log(`[调用ID: ${callId}] 开始增加浏览次数...`);
 			// 增加浏览次数
 			await db.collection('skills')
 				.where({ _id: skillId })
@@ -342,9 +332,6 @@ module.exports = {
 				});
 			
 			const skillData = result.data[0];
-			console.log(`[调用ID: ${callId}] 技能数据获取成功:`, skillData);
-			
-			console.log(`[调用ID: ${callId}] 最终返回数据:`, skillData);
 			
 			return {
 				errCode: 0,
@@ -352,8 +339,7 @@ module.exports = {
 				data: skillData
 			};
 		} catch (error) {
-			console.error(`[调用ID: ${callId}] 获取技能详情异常:`, error);
-			console.error(`[调用ID: ${callId}] 异常堆栈:`, error.stack);
+			console.error('获取技能详情失败:', error);
 			return {
 				errCode: 'GET_DETAIL_FAILED',
 				errMsg: '获取技能详情失败: ' + error.message
@@ -1276,128 +1262,4 @@ module.exports = {
 		}
 	},
 	
-	/**
-	 * 获取模拟技能列表（用于测试）
-	 * @param {Object} params 查询参数
-	 * @returns {Object} 返回模拟技能列表
-	 */
-	async getMockSkillsList(params = {}) {
-		try {
-			// 模拟技能数据
-			const mockSkills = [
-				{
-					_id: 'mock_1',
-					title: 'Web前端开发',
-					category: '编程开发',
-					description: '精通HTML、CSS、JavaScript，熟悉Vue、React框架，有3年开发经验。',
-					images: ['https://via.placeholder.com/300x200/4facfe/FFFFFF?text=前端开发'],
-					contact: 'frontend_dev',
-					price: '100-200元/小时',
-					availableTime: '工作日晚上、周末',
-					userId: 'mock_user_1',
-					status: 1,
-					createTime: new Date('2024-01-15'),
-					updateTime: new Date('2024-01-15')
-				},
-				{
-					_id: 'mock_2',
-					title: 'UI/UX设计',
-					category: '设计创意',
-					description: '专业UI/UX设计师，擅长移动端界面设计，熟练使用Figma、Sketch等设计工具。',
-					images: ['https://via.placeholder.com/300x200/667eea/FFFFFF?text=UI设计'],
-					contact: 'ui_designer',
-					price: '80-150元/小时',
-					availableTime: '周一到周五',
-					userId: 'mock_user_2',
-					status: 1,
-					createTime: new Date('2024-01-14'),
-					updateTime: new Date('2024-01-14')
-				},
-				{
-					_id: 'mock_3',
-					title: '英语口语培训',
-					category: '语言翻译',
-					description: '英语专业八级，有海外留学经验，提供一对一英语口语培训服务。',
-					images: ['https://via.placeholder.com/300x200/f093fb/FFFFFF?text=英语培训'],
-					contact: 'english_teacher',
-					price: '60-100元/小时',
-					availableTime: '周末全天',
-					userId: 'mock_user_3',
-					status: 1,
-					createTime: new Date('2024-01-13'),
-					updateTime: new Date('2024-01-13')
-				},
-				{
-					_id: 'mock_4',
-					title: '钢琴教学',
-					category: '音乐艺术',
-					description: '音乐学院毕业，有10年钢琴教学经验，可教授古典、流行钢琴。',
-					images: ['https://via.placeholder.com/300x200/4ade80/FFFFFF?text=钢琴教学'],
-					contact: 'piano_teacher',
-					price: '120-200元/课时',
-					availableTime: '周二、周四、周六',
-					userId: 'mock_user_4',
-					status: 1,
-					createTime: new Date('2024-01-12'),
-					updateTime: new Date('2024-01-12')
-				},
-				{
-					_id: 'mock_5',
-					title: '健身私教',
-					category: '体育健身',
-					description: '国家认证健身教练，专业制定健身计划，帮助您达到理想身材。',
-					images: ['https://via.placeholder.com/300x200/f59e0b/FFFFFF?text=健身私教'],
-					contact: 'fitness_coach',
-					price: '150-300元/课时',
-					availableTime: '每天早上6-9点，晚上7-10点',
-					userId: 'mock_user_5',
-					status: 1,
-					createTime: new Date('2024-01-11'),
-					updateTime: new Date('2024-01-11')
-				}
-			];
-			
-			const { category, keyword, page = 1, pageSize = 10 } = params;
-			
-			// 筛选数据
-			let filteredSkills = mockSkills;
-			
-			if (category && category !== 'all') {
-				filteredSkills = filteredSkills.filter(skill => skill.category === category);
-			}
-			
-			if (keyword && keyword.trim()) {
-				const searchTerm = keyword.trim().toLowerCase();
-				filteredSkills = filteredSkills.filter(skill => 
-					skill.title.toLowerCase().includes(searchTerm) ||
-					skill.description.toLowerCase().includes(searchTerm)
-				);
-			}
-			
-			// 分页
-			const startIndex = (page - 1) * pageSize;
-			const endIndex = startIndex + pageSize;
-			const paginatedSkills = filteredSkills.slice(startIndex, endIndex);
-			const hasMore = endIndex < filteredSkills.length;
-			
-			return {
-				errCode: 0,
-				errMsg: 'success (mock data)',
-				data: {
-					list: paginatedSkills,
-					total: filteredSkills.length,
-					page: page,
-					pageSize: pageSize,
-					hasMore: hasMore
-				}
-			};
-			
-		} catch (error) {
-			return {
-				errCode: 'MOCK_ERROR',
-				errMsg: '获取模拟数据失败: ' + error.message,
-				data: null
-			};
-		}
-	},
 };

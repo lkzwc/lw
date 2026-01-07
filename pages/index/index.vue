@@ -236,7 +236,7 @@ const weatherData = reactive({
 });
 
 // 云对象实例
-let utilObj = null;
+let apiObj = null;
 
 // 轮播图
 const bannerList = reactive([
@@ -286,7 +286,7 @@ const getFunctionGradient = (index) => {
 // 初始化云对象
 const initCloudObj = () => {
   try {
-    utilObj = uniCloud.importObject('util');
+    apiObj = uniCloud.importObject('api');
   } catch (error) {
     uni.showToast({ title: '云对象初始化失败', icon: 'none' });
   }
@@ -296,7 +296,7 @@ const initCloudObj = () => {
 const getWeatherData = async () => {
   if (isGettingWeather.value) return;
 
-  if (!utilObj) {
+  if (!apiObj) {
     weatherLoading.value = false;
     uni.showToast({ title: '云对象未初始化', icon: 'none' });
     return;
@@ -305,7 +305,7 @@ const getWeatherData = async () => {
   try {
     isGettingWeather.value = true;
     weatherLoading.value = true;
-    const result = await utilObj.getWeatherByCityName();
+    const result = await apiObj.getWeatherByCityName();
     if (result && result.errCode === 0 && result.data) {
       Object.assign(weatherData, {
         city: result.data.city,
@@ -319,7 +319,6 @@ const getWeatherData = async () => {
       uni.showToast({ title: result?.errMsg || '天气数据获取失败', icon: 'none' });
     }
   } catch (e) {
-    console.error('获取天气数据失败:', e);
     uni.showToast({ title: '天气数据获取失败', icon: 'none' });
   } finally {
     weatherLoading.value = false;
@@ -332,7 +331,7 @@ const change = (e) => {
   current.value = e.detail.current;
 };
 const clickBannerItem = (item) => {
-  console.log('点击轮播图:', item);
+  // TODO: 处理轮播图点击事件
 };
 const clickMenuItem = (item) => {
   switch (item.type) {

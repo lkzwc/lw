@@ -281,7 +281,6 @@ const selectFile = () => {
     count: 1,
     extension: ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt'],
     success: (res) => {
-      console.log('选择文件成功:', res)
       uni.showToast({
         title: '文件选择成功',
         icon: 'success'
@@ -289,7 +288,6 @@ const selectFile = () => {
       closeAttachmentPicker()
     },
     fail: (err) => {
-      console.error('选择文件失败:', err)
       uni.showToast({
         title: '文件选择失败',
         icon: 'none'
@@ -311,7 +309,6 @@ const selectDocument = () => {
       closeAttachmentPicker()
     },
     fail: (err) => {
-      console.error('选择文档失败:', err)
       uni.showToast({
         title: '文档选择失败',
         icon: 'none'
@@ -365,7 +362,6 @@ const handlePublish = async () => {
     }
     
   } catch (error) {
-    console.error('发布失败:', error)
     uni.showToast({
       title: '发布失败，请重试',
       icon: 'none'
