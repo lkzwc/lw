@@ -157,6 +157,7 @@
 
 <script setup>
 	import { ref, reactive, onMounted } from 'vue';
+	import { community } from '@/utils/cloudObjectManager';
 
 	const loading = ref(true);
 	const commentText = ref('');
@@ -183,24 +184,12 @@
 	// 评论列表数据
 	const commentList = reactive([]);
 
-	// 云对象实例
-	let communityObj = null;
-
-	// 初始化云对象
-	const initCloudObj = () => {
-		try {
-			communityObj = uniCloud.importObject('community');
-		} catch (error) {
-			console.error('云对象初始化失败:', error);
-		}
-	};
-
 	// 获取帖子详情
 	const getPostDetail = async () => {
-		if (!communityObj || !postId.value) return;
+		if (!postId.value) return;
 
 		try {
-			const result = await communityObj.getPostDetail(postId.value);
+			const result = await community().getPostDetail(postId.value);
 
 			if (result.errCode === 0 && result.data) {
 				Object.assign(postDetail, {
@@ -234,10 +223,10 @@
 
 	// 获取评论列表
 	const getCommentList = async () => {
-		if (!communityObj || !postId.value) return;
+		if (!postId.value) return;
 
 		try {
-			const result = await communityObj.getCommentList({
+			const result = await community().getCommentList({
 				post_id: postId.value,
 				page: 1,
 				pageSize: 50
@@ -259,10 +248,8 @@
 
 	// 点赞帖子
 	const toggleLike = async () => {
-		if (!communityObj) return;
-
 		try {
-			const result = await communityObj.toggleLike({
+			const result = await community().toggleLike({
 				post_id: postId.value
 			});
 
@@ -300,12 +287,12 @@
 
 	// 发送评论
 	const sendComment = async () => {
-		if (!communityObj || !commentText.value.trim()) {
+		if (!commentText.value.trim()) {
 			return;
 		}
 
 		try {
-			const result = await communityObj.addComment({
+			const result = await community().addComment({
 				post_id: postId.value,
 				content: commentText.value.trim()
 			});
@@ -414,9 +401,6 @@
 		const pages = getCurrentPages();
 		const currentPage = pages[pages.length - 1];
 		postId.value = currentPage.options.id || '';
-
-		// 初始化云对象
-		initCloudObj();
 
 		// 获取帖子详情
 		getPostDetail();

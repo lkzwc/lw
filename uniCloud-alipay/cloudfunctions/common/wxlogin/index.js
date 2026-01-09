@@ -1,9 +1,6 @@
 const APPID = 'wxdfe9979725d25ed2'
-// 引入配置
-const config = require('./config.js')
-
-const SECRET = config.jwt.secret
-const WEATHERKEY = config.weather.apiKey
+const SECRET = 'cf39bd3f424dcd580a84990479549c5c'
+const WEATHERKEY = '9fbdcab1ae888ab615566e7bb7e8ab22'
 const jwt = require('jsonwebtoken')
 
 function getToken( openId){

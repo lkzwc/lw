@@ -45,6 +45,7 @@
 
 <script setup>
 	import { ref, watch, defineProps, defineEmits } from 'vue';
+	import { upload } from '@/utils/cloudObjectManager';
 	
 	// 定义props
 	const props = defineProps({
@@ -71,21 +72,7 @@
 	
 	// 响应式数据
 	const imageList = ref([]);
-	
-	// 云对象实例
-	let uploadObj = null;
-	
-	// 初始化云对象
-	const initCloudObj = () => {
-		try {
-			uploadObj = uniCloud.importObject('upload');
-		} catch (error) {
-			uni.showToast({
-				title: '上传服务初始化失败',
-				icon: 'none'
-			});
-		}
-	};
+
 	
 	// 监听props变化
 	watch(() => props.modelValue, (newVal) => {
@@ -136,16 +123,6 @@
 	
 	// 上传图片
 	const uploadImages = async (filePaths) => {
-		if (!uploadObj) {
-			initCloudObj();
-			if (!uploadObj) {
-				uni.showToast({
-					title: '上传服务不可用',
-					icon: 'none'
-				});
-				return;
-			}
-		}
 		
 		// 添加到图片列表，显示上传进度
 		const newImages = filePaths.map(path => ({
@@ -171,7 +148,7 @@
 				}, 200);
 				
 				// 调用云对象上传
-				const result = await uploadObj.uploadFile({
+				const result = await upload().uploadFile({
 					filePath: imageItem.path,
 					module: props.module
 				});
@@ -251,9 +228,7 @@
 			urls: urls
 		});
 	};
-	
-	// 初始化
-	initCloudObj();
+
 </script>
 
 <style scoped>

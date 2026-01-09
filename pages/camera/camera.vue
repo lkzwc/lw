@@ -156,6 +156,7 @@
 <script setup>
 	import { ref, reactive, computed, onMounted } from 'vue';
 	import ImageUploader from '@/components/ImageUploader.vue';
+	import { upload } from '@/utils/cloudObjectManager';
 
 	const currentTab = ref('report');
 	const uploadedImages = ref([]);
@@ -208,18 +209,6 @@
 			latestReport: new Date('2024-01-16')
 		}
 	]);
-
-	// 云对象实例
-	let reportCloudObj = null;
-
-	// 初始化云对象
-	const initCloudObj = () => {
-		try {
-			reportCloudObj = uniCloud.importObject('report');
-		} catch (error) {
-			console.error('举报云对象初始化失败:', error);
-		}
-	};
 
 	// 是否可以提交
 	const canSubmit = computed(() => {
@@ -324,7 +313,7 @@
 
 			// 如果有举报云对象，调用云函数
 			if (reportCloudObj) {
-				const result = await reportCloudObj.submitReport(reportData);
+				const result = await upload().submitReport(reportData);
 				
 				if (result.errCode === 0) {
 					// 提交成功
@@ -389,8 +378,8 @@
 		}
 	};
 
+
 	onMounted(() => {
-		initCloudObj();
 	});
 </script>
 

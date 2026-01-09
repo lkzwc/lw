@@ -1,7 +1,10 @@
 // 云对象教程: https://uniapp.dcloud.net.cn/uniCloud/cloud-obj
 // jsdoc语法提示教程：https://ask.dcloud.net.cn/docs/#//ask.dcloud.net.cn/article/129
 // 引入配置
-const config = require('../common/config.js')
+
+const {
+	WEATHERKEY
+} = require('wxlogin')
 
 module.exports = {
 	_before: function () { // 通用预处理器
@@ -25,11 +28,9 @@ module.exports = {
 				}
 			}
 			
-			// 高德地图API Key
-			const AMAP_KEY = config.amap.key;
 			
 			// 构建请求URL
-			const apiUrl = `https://restapi.amap.com/v3/weather/weatherInfo?city=${city}&key=${AMAP_KEY}&extensions=${extensions}&output=JSON`;
+			const apiUrl = `https://restapi.amap.com/v3/weather/weatherInfo?city=${city}&key=${WEATHERKEY}&extensions=${extensions}&output=JSON`;
 			
 			// 发起HTTP请求
 			const response = await uniCloud.request({
@@ -38,16 +39,8 @@ module.exports = {
 				timeout: 10000
 			});
 			
-			// 解析响应数据
-			let weatherData;
-			if (typeof response.data === 'string') {
-				weatherData = JSON.parse(response.data);
-			} else {
-				weatherData = response.data;
-			}
-			
 			// 检查API返回状态
-			if (weatherData.status !== '1') {
+			if (response.data?.status === '0') {
 				return {
 					errCode: 'WEATHER_API_ERROR',
 					errMsg: weatherData.info || '天气数据获取失败',
@@ -56,13 +49,13 @@ module.exports = {
 			}
 			
 			// 格式化返回数据
-			let formattedData = {};
-			
-			if (extensions === 'base' && weatherData.lives && weatherData.lives.length > 0) {
-				// 实况天气数据
-				const live = weatherData.lives[0];
+			const live = response.data?.lives[0];
 				
-				formattedData = {
+			
+			return {
+				errCode: 0,
+				errMsg: 'success',
+				data: {
 					type: 'live',
 					province: live.province,
 					city: live.city,
@@ -73,25 +66,7 @@ module.exports = {
 					windpower: live.windpower,
 					humidity: live.humidity,
 					reporttime: live.reporttime
-				};
-			} else if (extensions === 'all' && weatherData.forecasts && weatherData.forecasts.length > 0) {
-				// 预报天气数据
-				const forecast = weatherData.forecasts[0];
-				
-				formattedData = {
-					type: 'forecast',
-					province: forecast.province,
-					city: forecast.city,
-					adcode: forecast.adcode,
-					reporttime: forecast.reporttime,
-					casts: forecast.casts
-				};
-			}
-			
-			return {
-				errCode: 0,
-				errMsg: 'success',
-				data: formattedData
+				}
 			};
 			
 		} catch (error) {
@@ -106,15 +81,6 @@ module.exports = {
 		}
 	},
 	
-	/**
-	 * 根据城市名称获取天气（支持中文城市名）
-	 * @param {string} cityName 城市名称，如：北京、上海、广州
-	 * @returns {object} 返回天气信息
-	 */
-	async getWeatherByCityName() {
-		// 默认返回西安灞桥区的天气
-		return await this.getWeather('610111', 'base');
-	},
 	
 	/**
 	 * 获取每日60秒新闻
@@ -129,32 +95,24 @@ module.exports = {
 				timeout: 15000
 			});
 
-			console.log('response:', response);
+			console.log('新闻数据:', response);
 			
-			// 解析响应数据
-			let newsData;
-			if (typeof response.data === 'string') {
-				newsData = JSON.parse(response.data);
-			} else {
-				newsData = response.data;
-			}
 
 			// 检查API返回状态
-			if (response.status !== 200) {
+			if (response.data.code !== 200) {
 				return {
 					errCode: 'NEWS_API_ERROR',
 					errMsg: '新闻数据获取失败',
 					data: null
 				}
 			}
+
+			const newsData = response.data?.data;
 			
 			// 格式化返回数据
 			const formattedData = {
 				date: newsData.date || new Date().toISOString().split('T')[0],
 				news: newsData.news || [],
-				tip: newsData.tip || '',
-				image: newsData.image || '',
-				head: newsData.head || '每日60秒读懂世界',
 				updated: new Date().toISOString()
 			};
 			
@@ -191,8 +149,11 @@ module.exports = {
 			
 			// 解析响应数据
 			let newsData;
+
+			console.log("response",response)
 			if (typeof response.data === 'string') {
 				newsData = JSON.parse(response.data);
+
 			} else {
 				newsData = response.data;
 			}

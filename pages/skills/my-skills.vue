@@ -156,6 +156,7 @@
 
 <script setup>
 	import { ref, reactive, onMounted, computed } from 'vue';
+	import { skills } from '@/utils/cloudObjectManager';
 
 	const loading = ref(true);
 	const skillList = reactive([]);
@@ -175,21 +176,8 @@
 		return skillList.reduce((sum, skill) => sum + (skill.view_count || 0), 0);
 	});
 
-	// 云对象实例
-	let skillsObj = null;
-
-	// 初始化云对象
-	const initCloudObj = () => {
-		try {
-			skillsObj = uniCloud.importObject('skills');
-		} catch (error) {
-			console.error('云对象初始化失败:', error);
-		}
-	};
-
 	// 获取技能列表
 	const getSkillList = async (refresh = false) => {
-		if (!skillsObj) return;
 
 		if (refresh) {
 			page.value = 1;
@@ -300,7 +288,7 @@
 		if (!currentSkill.value || !skillsObj) return;
 
 		try {
-			const result = await skillsObj.deleteSkill(currentSkill.value._id);
+			const result = await skills().deleteSkill(currentSkill.value._id);
 
 			if (result.errCode === 0) {
 				uni.showToast({ title: '删除成功', icon: 'success' });
@@ -363,9 +351,6 @@
 	};
 
 	onMounted(() => {
-		// 初始化云对象
-		initCloudObj();
-
 		// 获取技能列表
 		getSkillList();
 	});

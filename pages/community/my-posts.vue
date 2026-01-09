@@ -137,6 +137,7 @@
 
 <script setup>
 	import { ref, reactive, onMounted, watch } from 'vue';
+	import { community } from '@/utils/cloudObjectManager';
 
 	const loading = ref(true);
 	const currentIndex = ref(0);
@@ -148,18 +149,6 @@
 	const deletePopup = ref(null);
 	const currentPost = ref(null);
 	const tabList = ['全部', '已发布', '草稿'];
-
-	// 云对象实例
-	let communityObj = null;
-
-	// 初始化云对象
-	const initCloudObj = () => {
-		try {
-			communityObj = uniCloud.importObject('community');
-		} catch (error) {
-			console.error('云对象初始化失败:', error);
-		}
-	};
 
 	// 获取帖子列表
 	const getPostList = async (refresh = false) => {
@@ -286,10 +275,10 @@
 
 	// 确认删除
 	const confirmDelete = async () => {
-		if (!currentPost.value || !communityObj) return;
+		if (!currentPost.value) return;
 
 		try {
-			const result = await communityObj.deletePost(currentPost.value._id);
+			const result = await community().deletePost(currentPost.value._id);
 
 			if (result.errCode === 0) {
 				uni.showToast({ title: '删除成功', icon: 'success' });
@@ -352,9 +341,6 @@
 	};
 
 	onMounted(() => {
-		// 初始化云对象
-		initCloudObj();
-
 		// 获取帖子列表
 		getPostList();
 	});

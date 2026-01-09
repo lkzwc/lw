@@ -104,6 +104,7 @@ import {
 	reactive,
 	ref
 } from 'vue'
+import { community } from '@/utils/cloudObjectManager'
 
 const currentCategory = ref('all')
 const searchKeyword = ref('')
@@ -134,10 +135,9 @@ const loadPostList = async (isRefresh = false) => {
 		}
 		
 		loadStatus.value = 'loading'
-		
+
 		// 调用云函数
-		const communityObj = uniCloud.importObject('community')
-		const result = await communityObj.getPostList({
+		const result = await community().getPostList({
 			tag: currentCategory.value === 'all' ? null : currentCategory.value,
 			page: page.value,
 			pageSize: pageSize
@@ -196,8 +196,7 @@ const switchCategory = (categoryId) => {
 // 点赞/取消点赞
 const toggleLike = async (post) => {
 	try {
-		const communityObj = uniCloud.importObject('community')
-		const result = await communityObj.toggleLike({
+		const result = await community().toggleLike({
 			post_id: post.id
 		})
 		

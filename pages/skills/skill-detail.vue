@@ -147,6 +147,7 @@
 <script setup>
 	import { ref, reactive, onMounted } from 'vue';
 	import { onLoad } from '@dcloudio/uni-app';
+	import { skills } from '@/utils/cloudObjectManager';
 
 	const contactPopup = ref(null);
 	const isCollected = ref(false);
@@ -159,28 +160,12 @@
 	// 相关技能推荐
 	const relatedSkills = reactive([]);
 
-	// 云对象实例
-	let skillsCloudObj = null;
-
 	// 使用 onLoad 获取页面参数 - 这是 uni-app 推荐的方式
 	onLoad((options) => {
 		if (options && options.id) {
 			skillId.value = options.id;
 		}
 	});
-
-	// 初始化云对象
-	const initCloudObj = () => {
-		try {
-			skillsCloudObj = uniCloud.importObject('skills');
-		} catch (error) {
-			console.error('初始化云对象失败:', error);
-			uni.showToast({
-				title: '服务初始化失败',
-				icon: 'none'
-			});
-		}
-	};
 
 	// 加载技能详情
 	const loadSkillDetail = async () => {
@@ -210,7 +195,7 @@
 			isLoading.value = true;
 			console.log('调用云对象获取技能详情...');
 
-			const result = await skillsCloudObj.getSkillDetail(skillId.value);
+			const result = await skills().getSkillDetail(skillId.value);
 			console.log('云对象返回结果:', result);
 
 			if (result && result.errCode === 0) {
@@ -252,7 +237,7 @@
 		}
 
 		try {
-			const result = await skillsCloudObj.getSkillsList({
+			const result = await skills().getSkillsList({
 				category: skillDetail.category,
 				page: 1,
 				pageSize: 5
@@ -358,7 +343,7 @@
 		try {
 			if (isCollected.value) {
 				// 取消收藏
-				const result = await skillsCloudObj.uncollectSkill(skillId.value);
+				const result = await skills().uncollectSkill(skillId.value);
 				if (result.errCode === 0) {
 					isCollected.value = false;
 					uni.showToast({
@@ -373,7 +358,7 @@
 				}
 			} else {
 				// 收藏
-				const result = await skillsCloudObj.collectSkill(skillId.value);
+				const result = await skills().collectSkill(skillId.value);
 				if (result.errCode === 0) {
 					isCollected.value = true;
 					uni.showToast({
@@ -459,19 +444,16 @@
 	// 页面挂载时初始化
 	onMounted(() => {
 		console.log('页面挂载，开始初始化...');
-		
-		// 初始化云对象
-		initCloudObj();
-		
+
 		// 延迟一下确保 skillId 已经通过 onLoad 设置
 		setTimeout(() => {
-			if (skillsCloudObj && skillId.value) {
+			if (skillId.value) {
 				console.log('开始加载技能详情...');
 				loadSkillDetail();
 				// 暂时不检查收藏状态，避免报错
 				// checkCollectStatus();
 			} else {
-				console.log('云对象或技能ID缺失，停止加载');
+				console.log('技能ID缺失，停止加载');
 				isLoading.value = false;
 			}
 		}, 100);

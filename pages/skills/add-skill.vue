@@ -99,6 +99,7 @@
 	import { ref, reactive } from 'vue';
 	import { onLoad } from '@dcloudio/uni-app';
 	import ImageUploader from '@/components/ImageUploader.vue';
+	import { skills } from '@/utils/cloudObjectManager';
 
 	// 响应式数据
 	const skillData = reactive({
@@ -125,21 +126,6 @@
 		{ name: '生活服务', value: 'life' },
 		{ name: '其他技能', value: 'other' }
 	]);
-
-	// 云对象实例
-	let skillsObj = null;
-
-	// 初始化云对象
-	const initCloudObj = () => {
-		try {
-			skillsObj = uniCloud.importObject('skills');
-		} catch (error) {
-			uni.showToast({
-				title: '服务初始化失败',
-				icon: 'none'
-			});
-		}
-	};
 
 	// 分类选择
 	const onCategoryChange = (e) => {
@@ -204,17 +190,6 @@
 			return;
 		}
 
-		if (!skillsObj) {
-			initCloudObj();
-			if (!skillsObj) {
-				uni.showToast({
-					title: '服务不可用，请重试',
-					icon: 'none'
-				});
-				return;
-			}
-		}
-
 		try {
 			isSubmitting.value = true;
 
@@ -230,7 +205,7 @@
 			};
 
 			// 调用云对象提交技能
-			const result = await skillsObj.addSkill(submitData);
+			const result = await skills().addSkill(submitData);
 
 			if (result.errCode === 0) {
 				uni.showToast({
@@ -259,7 +234,6 @@
 	};
 
 	onLoad(() => {
-		initCloudObj();
 	});
 </script>
 

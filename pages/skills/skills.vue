@@ -113,6 +113,7 @@
 <script setup>
 	import { ref, onMounted } from 'vue';
 	import { onReachBottom, onShow } from '@dcloudio/uni-app';
+	import { skills } from '@/utils/cloudObjectManager';
 
 	const searchKeyword = ref('');
 	const currentFilter = ref('all');
@@ -135,22 +136,6 @@
 		{ label: '其他', value: 'other' }
 	]);
 
-	// 云对象实例
-	let skillsCloudObj = null;
-
-	// 初始化云对象
-	const initCloudObj = () => {
-		try {
-			skillsCloudObj = uniCloud.importObject('skills');
-		} catch (error) {
-			console.error('技能云对象初始化失败:', error);
-			uni.showToast({
-				title: '服务初始化失败',
-				icon: 'none'
-			});
-		}
-	};
-
 	// 获取技能列表
 	const getSkillsList = async (reset = false) => {
 		if (isLoading.value && !reset) {
@@ -159,17 +144,6 @@
 
 		if (!hasMore.value && !reset) {
 			return;
-		}
-
-		if (!skillsCloudObj) {
-			initCloudObj();
-			if (!skillsCloudObj) {
-				uni.showToast({
-					title: '服务不可用，请重试',
-					icon: 'none'
-				});
-				return;
-			}
 		}
 
 		try {
@@ -190,7 +164,7 @@
 			};
 
 			// 调用云对象查询
-			const result = await skillsCloudObj.getSkillsList(params);
+			const result = await skills().getSkillsList(params);
 
 			if (result && result.errCode === 0 && result.data) {
 				const { list, hasMore: moreData } = result.data;
@@ -324,10 +298,7 @@
 
 	// 页面初始化
 	const initPage = async () => {
-		// 初始化云对象
-		initCloudObj();
-		
-		// 等待云对象初始化完成
+		// 等待一下确保模块加载完成
 		await new Promise(resolve => setTimeout(resolve, 100));
 		
 		// 获取技能列表

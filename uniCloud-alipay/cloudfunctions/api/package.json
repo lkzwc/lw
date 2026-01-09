@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "公共工具云对象 - 提供天气查询等功能",
   "main": "index.obj.js",
-  "dependencies": {},
-  "extensions": {
-    "uni-cloud-jql": {}
-  }
+  "dependencies": {
+    "wxlogin": "file:../common/wxlogin"
+  },
+  "extensions": {}
 }

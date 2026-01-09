@@ -221,6 +221,7 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
+import { api } from '@/utils/cloudObjectManager';
 
 const current = ref(0);
 const swiperCurrent = ref(0);
@@ -235,14 +236,11 @@ const weatherData = reactive({
   humidity: '65'
 });
 
-// 云对象实例
-let apiObj = null;
 
 // 轮播图
 const bannerList = reactive([
-  { image: 'https://via.placeholder.com/750x300/667eea/FFFFFF?text=欢迎使用hxzyL', title: '欢迎使用hxzyL', content: '发现更多精彩内容' },
-  { image: 'https://via.placeholder.com/750x300/764ba2/FFFFFF?text=社区互动', title: '社区互动', content: '与朋友分享生活点滴' },
-  { image: 'https://via.placeholder.com/750x300/f093fb/FFFFFF?text=技能提升', title: '技能提升', content: '学习新技能，提升自己' }
+  { image: 'https://ts1.tc.mm.bing.net/th/id/OIP-C.IJZgTNx1vp9EML_1wV5p2gHaEo?w=295&h=211&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2', title: '欢迎使用hxzyL', content: '发现更多精彩内容' },
+  
 ]);
 
 // 菜单数据
@@ -283,29 +281,14 @@ const getFunctionGradient = (index) => {
   return gradients[index] || gradients[0];
 };
 
-// 初始化云对象
-const initCloudObj = () => {
-  try {
-    apiObj = uniCloud.importObject('api');
-  } catch (error) {
-    uni.showToast({ title: '云对象初始化失败', icon: 'none' });
-  }
-};
-
 // 获取天气
 const getWeatherData = async () => {
   if (isGettingWeather.value) return;
 
-  if (!apiObj) {
-    weatherLoading.value = false;
-    uni.showToast({ title: '云对象未初始化', icon: 'none' });
-    return;
-  }
-
   try {
     isGettingWeather.value = true;
     weatherLoading.value = true;
-    const result = await apiObj.getWeatherByCityName();
+    const result = await api().getWeather('610111', 'base');
     if (result && result.errCode === 0 && result.data) {
       Object.assign(weatherData, {
         city: result.data.city,
@@ -441,7 +424,6 @@ const normalizeTag = (tag) => {
 };
 
 onMounted(() => {
-  initCloudObj();
   setTimeout(() => getWeatherData(), 500);
 });
 </script>

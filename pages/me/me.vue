@@ -114,6 +114,7 @@
 		onMounted
 	} from 'vue'
 	import ProfileEditor from '@/components/ProfileEditor.vue'
+	import { login } from '@/utils/cloudObjectManager'
 
 	// 响应式数据
 	const userInfo = reactive({
@@ -152,8 +153,7 @@
 		if (token && cachedUserInfo) {
 			try {
 				// 从云端获取最新的用户信息
-				const loginObj = uniCloud.importObject('login')
-				const result = await loginObj.getUserInfo(token)
+				const result = await login().getUserInfo(token)
 
 				isLoggedIn.value = true
 				Object.assign(userInfo, result.userInfo)
@@ -195,8 +195,7 @@
 			}
 
 			// 调用云函数登录
-			const loginObj = uniCloud.importObject('login')
-			const result = await loginObj.getUserProfile(code)
+			const result = await login().getUserProfile(code)
 
 
 			if (result && result.token) {
@@ -302,8 +301,7 @@
 			}
 
 			// 调用云函数保存用户信息
-			const loginObj = uniCloud.importObject('login')
-			const result = await loginObj.updateUserInfo({
+			const result = await login().updateUserInfo({
 				userInfo: profileData,
 				token: token
 			})

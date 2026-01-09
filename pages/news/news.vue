@@ -97,6 +97,7 @@
 		ref,
 		computed
 	} from 'vue';
+	import { api } from '@/utils/cloudObjectManager';
 
 	const isLoading = ref(true);
 	const currentTab = ref('daily'); // 当前选中的tab: daily, global, ai
@@ -129,16 +130,11 @@
 		updated: ''
 	});
 
-	// 云对象实例
-	let apiObj = null;
-
 	// 计算当前显示的新闻数据
 	const getCurrentNewsData = () => {
 		switch (currentTab.value) {
 			case 'daily':
 				return dailyNewsData;
-			case 'global':
-				return globalNewsData;
 			case 'ai':
 				return aiNewsData;
 			default:
@@ -152,24 +148,15 @@
 		return `${tabIndex * 33.33}%`;
 	});
 
-	// 初始化云对象
-	const initCloudObj = () => {
-		try {
-			apiObj = uniCloud.importObject('api');
-		} catch (error) {
-			uni.showToast({
-				title: '云对象初始化失败',
-				icon: 'none'
-			});
-		}
-	};
-
 	// 获取每日新闻数据
 	const getDailyNewsData = async () => {
-		if (!apiObj) return;
+		if (!api) return;
 
 		try {
-			const result = await apiObj.getDailyNews();
+			const result = await api.getDailyNews();
+
+
+			console.log('news', result);
 			
 			if (result && result.errCode === 0 && result.data) {
 				Object.assign(dailyNewsData, {
@@ -189,37 +176,11 @@
 		}
 	};
 
-	// 获取全球热点数据（使用每日新闻接口）
-	const getGlobalNewsData = async () => {
-		if (!apiObj) return;
-
-		try {
-			const result = await apiObj.getDailyNews();
-			
-			if (result && result.errCode === 0 && result.data) {
-				Object.assign(globalNewsData, {
-					date: result.data.date,
-					head: '全球热点',
-					news: result.data.news || [],
-					tip: '了解全球重要事件，拓展国际视野。',
-					image: result.data.image,
-					updated: result.data.updated
-				});
-			}
-		} catch (error) {
-			uni.showToast({
-				title: '全球热点获取失败',
-				icon: 'none'
-			});
-		}
-	};
 
 	// 获取AI新闻数据
 	const getAINewsData = async () => {
-		if (!apiObj) return;
-
 		try {
-			const result = await apiObj.getAINews();
+			const result = await api().getAINews();
 			
 			if (result && result.errCode === 0 && result.data) {
 				Object.assign(aiNewsData, {
@@ -241,7 +202,7 @@
 
 	// 获取新闻数据
 	const getNewsData = async () => {
-		if (!apiObj) {
+		if (!api) {
 			isLoading.value = false;
 			return;
 		}
@@ -253,9 +214,6 @@
 			switch (currentTab.value) {
 				case 'daily':
 					await getDailyNewsData();
-					break;
-				case 'global':
-					await getGlobalNewsData();
 					break;
 				case 'ai':
 					await getAINewsData();
@@ -421,8 +379,6 @@
 	};
 
 	onMounted(() => {
-		// 初始化云对象
-		initCloudObj();
 		// 获取新闻数据
 		setTimeout(() => {
 			getNewsData();

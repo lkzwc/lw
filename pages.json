@@ -63,7 +63,6 @@
 			}
 		},
 		{
-			"pat	{
 			"path": "pages/skills/my-skills",
 			"style": {
 				"navigationBarTitleText": "我的技能"

@@ -159,6 +159,7 @@
 <script setup>
 import { ref, computed, reactive, onMounted } from 'vue'
 import ImageUploader from '@/components/ImageUploader.vue'
+import { community } from '@/utils/cloudObjectManager'
 
 // 响应式数据
 const postContent = ref('')
@@ -363,8 +364,7 @@ const handlePublish = async () => {
 
     // 调用云函数发布帖子
     // 注意：uniCloud会自动从getUniIdToken()获取token，或者使用客户端认证
-    const communityObj = uniCloud.importObject('community')
-    const result = await communityObj.addPost(publishData)
+    const result = await community().addPost(publishData)
 
     console.log('[publish] 云函数返回结果:', result)
 

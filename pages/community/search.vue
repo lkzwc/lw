@@ -177,6 +177,7 @@
 
 <script setup>
 	import { ref, reactive, onMounted } from 'vue';
+	import { community, skills } from '@/utils/cloudObjectManager';
 
 	const searchKeyword = ref('');
 	const currentIndex = ref(0);
@@ -202,20 +203,6 @@
 		'邻里互助'
 	];
 
-	// 云对象实例
-	let communityObj = null;
-	let skillsObj = null;
-
-	// 初始化云对象
-	const initCloudObj = () => {
-		try {
-			communityObj = uniCloud.importObject('community');
-			skillsObj = uniCloud.importObject('skills');
-		} catch (error) {
-			console.error('云对象初始化失败:', error);
-		}
-	};
-
 	// 执行搜索
 	const handleSearch = async () => {
 		const keyword = searchKeyword.value.trim();
@@ -230,7 +217,7 @@
 		try {
 			// 搜索帖子
 			if (currentIndex.value === 0 || currentIndex.value === 1) {
-				const postRes = await communityObj.searchPosts({ keyword });
+				const postRes = await community().searchPosts({ keyword });
 				if (postRes.errCode === 0) {
 					postResults.splice(0, postResults.length, ...(postRes.data || []));
 				}
@@ -238,7 +225,7 @@
 
 			// 搜索技能
 			if (currentIndex.value === 0 || currentIndex.value === 2) {
-				const skillRes = await skillsObj.searchSkills({ keyword });
+				const skillRes = await skills().searchSkills({ keyword });
 				if (skillRes.errCode === 0) {
 					skillResults.splice(0, skillResults.length, ...(skillRes.data || []));
 				}
@@ -359,9 +346,6 @@
 	};
 
 	onMounted(() => {
-		// 初始化云对象
-		initCloudObj();
-
 		// 加载搜索历史
 		loadSearchHistory();
 	});

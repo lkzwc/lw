@@ -3,7 +3,6 @@
  * 用于统一管理云对象的创建和缓存
  */
 
-import { isDev } from '@/config/env.js';
 import { CLOUD_OBJECTS } from '@/config/constants.js';
 
 // 云对象缓存
@@ -35,15 +34,11 @@ export const getCloudObject = (objectName, options = {}) => {
 		// 缓存云对象
 		cloudObjectCache.set(objectName, cloudObj);
 
-		if (isDev()) {
-			console.log(`[CloudObjectManager] 云对象 ${objectName} 初始化成功`);
-		}
+		console.log(`[CloudObjectManager] 云对象 ${objectName} 初始化成功`);
 
 		return cloudObj;
 	} catch (error) {
-		if (isDev()) {
-			console.error(`[CloudObjectManager] 云对象 ${objectName} 初始化失败:`, error);
-		}
+		console.error(`[CloudObjectManager] 云对象 ${objectName} 初始化失败:`, error);
 		return null;
 	}
 };
@@ -55,14 +50,10 @@ export const getCloudObject = (objectName, options = {}) => {
 export const clearCloudObjectCache = (objectName) => {
 	if (objectName) {
 		cloudObjectCache.delete(objectName);
-		if (isDev()) {
-			console.log(`[CloudObjectManager] 已清除 ${objectName} 云对象缓存`);
-		}
+		console.log(`[CloudObjectManager] 已清除 ${objectName} 云对象缓存`);
 	} else {
 		cloudObjectCache.clear();
-		if (isDev()) {
-			console.log('[CloudObjectManager] 已清除所有云对象缓存');
-		}
+		console.log('[CloudObjectManager] 已清除所有云对象缓存');
 	}
 };
 
@@ -71,25 +62,19 @@ export const clearCloudObjectCache = (objectName) => {
  * @param {Array<string>} objectNames - 云对象名称数组
  */
 export const preLoadCloudObjects = async (objectNames) => {
-	if (isDev()) {
-		console.log('[CloudObjectManager] 开始预加载云对象:', objectNames);
-	}
+	console.log('[CloudObjectManager] 开始预加载云对象:', objectNames);
 
 	const promises = objectNames.map(async (objectName) => {
 		try {
 			await getCloudObject(objectName);
 		} catch (error) {
-			if (isDev()) {
-				console.error(`[CloudObjectManager] 预加载 ${objectName} 失败:`, error);
-			}
+			console.error(`[CloudObjectManager] 预加载 ${objectName} 失败:`, error);
 		}
 	});
 
 	await Promise.allSettled(promises);
 
-	if (isDev()) {
-		console.log('[CloudObjectManager] 云对象预加载完成');
-	}
+	console.log('[CloudObjectManager] 云对象预加载完成');
 };
 
 // 便捷方法：获取常用云对象
