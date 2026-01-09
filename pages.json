@@ -63,15 +63,10 @@
 			}
 		},
 		{
+			"pat	{
 			"path": "pages/skills/my-skills",
 			"style": {
 				"navigationBarTitleText": "我的技能"
-			}
-		},
-		{
-			"path": "pages/settings/settings",
-			"style": {
-				"navigationBarTitleText": "设置"
 			}
 		},
 		{

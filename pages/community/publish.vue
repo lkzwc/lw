@@ -319,37 +319,66 @@ const selectDocument = () => {
 
 const handlePublish = async () => {
   if (!canPublish.value) return
-  
+
   try {
     isPublishing.value = true
-    
+
     // 检查登录状态
     const token = uni.getStorageSync('token')
-    if (!token) {
-      uni.showToast({
-        title: '请先登录',
-        icon: 'none'
+    const cachedUserInfo = uni.getStorageSync('userInfo')
+
+    console.log('[publish] 发布前检查登录状态:', {
+    	hasToken: !!token,
+    	hasUserInfo: !!cachedUserInfo,
+    	tokenPreview: token ? token.substring(0, 20) + '...' : 'none'
+    })
+
+    if (!token || !cachedUserInfo) {
+      console.log('[publish] 未登录，提示用户登录')
+      uni.showModal({
+        title: '提示',
+        content: '请先登录后再发布',
+        confirmText: '去登录',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            uni.switchTab({
+              url: '/pages/me/me'
+            })
+          }
+        }
       })
+      isPublishing.value = false
       return
     }
-    
+
     // 构建发布数据
     const publishData = {
       content: postContent.value.trim(),
       tag: selectedTags.value.length > 0 ? selectedTags.value : ['全部'],
       images: uploadedImages.value
     }
-    
+
+    console.log('[publish] 开始调用云函数发布帖子')
+
     // 调用云函数发布帖子
+    // 注意：uniCloud会自动从getUniIdToken()获取token，或者使用客户端认证
     const communityObj = uniCloud.importObject('community')
     const result = await communityObj.addPost(publishData)
-    
+
+    console.log('[publish] 云函数返回结果:', result)
+
     if (result.errCode === 0) {
       uni.showToast({
         title: '发布成功',
         icon: 'success'
       })
-      
+
+      // 清空内容
+      postContent.value = ''
+      selectedTags.value = []
+      uploadedImages.value = []
+
       // 发布成功后返回
       setTimeout(() => {
         uni.navigateBack()
@@ -360,8 +389,9 @@ const handlePublish = async () => {
         icon: 'none'
       })
     }
-    
+
   } catch (error) {
+    console.error('发布失败:', error)
     uni.showToast({
       title: '发布失败，请重试',
       icon: 'none'
@@ -380,15 +410,23 @@ onMounted(() => {
 const checkLoginAndLoadUserInfo = () => {
   const token = uni.getStorageSync('token')
   const cachedUserInfo = uni.getStorageSync('userInfo')
-  
+
+  console.log('[publish] 检查登录状态:', {
+   	hasToken: !!token,
+   	hasUserInfo: !!cachedUserInfo,
+   	tokenPreview: token ? token.substring(0, 20) + '...' : 'none'
+  })
+
   if (token && cachedUserInfo) {
     // 更新用户信息
     Object.assign(userInfo, {
       avatar: cachedUserInfo.avatar || '/static/default.png',
       nickname: cachedUserInfo.nickname || '用户'
     })
+    console.log('[publish] 用户信息加载成功')
   } else {
     // 未登录，提示用户登录
+    console.log('[publish] 用户未登录')
     uni.showModal({
       title: '提示',
       content: '请先登录后再发帖',

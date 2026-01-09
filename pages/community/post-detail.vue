@@ -3,17 +3,17 @@
 		<!-- 顶部导航栏 -->
 		<view class="navbar">
 			<view class="nav-left" @tap="goBack">
-				<t-icon name="chevron-left" size="24px" color="#333"></t-icon>
+				<uni-icons type="arrowleft" size="20" color="#333"></uni-icons>
 			</view>
 			<view class="nav-title">帖子详情</view>
 			<view class="nav-right" @tap="showMoreActions">
-				<t-icon name="more" size="24px" color="#333"></t-icon>
+				<uni-icons type="more-filled" size="20" color="#333"></uni-icons>
 			</view>
 		</view>
 
 		<!-- 加载状态 -->
 		<view class="loading-container" v-if="loading">
-			<t-loading theme="circular" size="40px" text="加载中..."></t-loading>
+			<uni-load-more status="loading" :content-text="{contentdown: '加载中...',contentrefresh: '加载中...',contentnomore: ''}"></uni-load-more>
 		</view>
 
 		<!-- 帖子内容 -->
@@ -22,17 +22,15 @@
 			<view class="post-card">
 				<!-- 用户信息 -->
 				<view class="post-header">
-					<t-avatar :image="postDetail.user_avatar" size="large"></t-avatar>
+					<image :src="postDetail.user_avatar || '/static/default.png'" class="user-avatar" mode="aspectFill"></image>
 					<view class="user-details">
 						<view class="username-row">
 							<text class="username">{{ postDetail.username }}</text>
-							<t-tag theme="primary" size="small" variant="light" v-if="postDetail.tag && postDetail.tag.length > 0">
-								{{ postDetail.tag[0] }}
-							</t-tag>
+							<uni-tag v-if="postDetail.tag && postDetail.tag.length > 0" :text="postDetail.tag[0]" size="mini" type="primary"></uni-tag>
 						</view>
 						<text class="post-time">{{ formatTime(postDetail.create_time) }}</text>
 					</view>
-					<t-button size="small" variant="outline" theme="default">关注</t-button>
+					<button class="follow-btn" type="default" size="mini" plain>关注</button>
 				</view>
 
 				<!-- 帖子内容 -->
@@ -55,23 +53,23 @@
 				<!-- 互动统计 -->
 				<view class="post-stats">
 					<view class="stat-item" @tap="toggleLike">
-						<t-icon
-							:name="postDetail.isLiked ? 'heart-filled' : 'heart'"
+						<uni-icons
+							:type="postDetail.isLiked ? 'heart-filled' : 'heart'"
 							:color="postDetail.isLiked ? '#ff6b6b' : '#999'"
-							size="20px">
-						</t-icon>
+							size="20">
+						</uni-icons>
 						<text class="stat-text" :class="{ liked: postDetail.isLiked }">{{ postDetail.like_count || 0 }}</text>
 					</view>
 					<view class="stat-item">
-						<t-icon name="chat-bubble" color="#999" size="20px"></t-icon>
+						<uni-icons type="chatbubble" color="#999" size="20"></uni-icons>
 						<text class="stat-text">{{ commentList.length }}</text>
 					</view>
 					<view class="stat-item" @tap="sharePost">
-						<t-icon name="share" color="#999" size="20px"></t-icon>
+						<uni-icons type="redo" color="#999" size="20"></uni-icons>
 						<text class="stat-text">分享</text>
 					</view>
 					<view class="stat-item">
-						<t-icon name="star" color="#999" size="20px"></t-icon>
+						<uni-icons type="star" color="#999" size="20"></uni-icons>
 						<text class="stat-text">收藏</text>
 					</view>
 				</view>
@@ -81,105 +79,91 @@
 			<view class="comment-section">
 				<view class="section-header">
 					<text class="section-title">评论 {{ commentList.length > 0 ? `(${commentList.length})` : '' }}</text>
-					<t-dropdown>
-						<t-dropdown-item value="hot">
-							<view class="sort-btn">
-								<text class="sort-text">{{ sortType === 'hot' ? '最热' : '最新' }}</text>
-								<t-icon name="chevron-down" size="16px"></t-icon>
-							</view>
-						</t-dropdown-item>
-					</t-dropdown>
+					<view class="sort-btn" @tap="toggleSort">
+						<text class="sort-text">{{ sortType === 'hot' ? '最热' : '最新' }}</text>
+						<uni-icons type="arrowdown" size="16" color="#999"></uni-icons>
+					</view>
 				</view>
 
 				<!-- 评论列表 -->
 				<view class="comment-list" v-if="commentList.length > 0">
-					<t-comment
-						v-for="comment in commentList"
-						:key="comment._id"
-						:avatar="comment.user_avatar"
-						:author="comment.username"
-						:content="comment.content"
-						:datetime="formatTime(comment.create_time)"
-						:reply="comment.replies"
-						@like="toggleCommentLike(comment)">
-						<template #actions>
+					<view class="comment-item" v-for="comment in commentList" :key="comment._id">
+						<image :src="comment.user_avatar || '/static/default.png'" class="comment-avatar" mode="aspectFill"></image>
+						<view class="comment-content">
+							<view class="comment-header">
+								<text class="comment-author">{{ comment.username }}</text>
+								<text class="comment-time">{{ formatTime(comment.create_time) }}</text>
+							</view>
+							<text class="comment-text">{{ comment.content }}</text>
 							<view class="comment-actions">
 								<view class="action-item" @tap="toggleCommentLike(comment)">
-									<t-icon
-										:name="comment.isLiked ? 'heart-filled' : 'heart'"
+									<uni-icons
+										:type="comment.isLiked ? 'heart-filled' : 'heart'"
 										:color="comment.isLiked ? '#ff6b6b' : '#999'"
-										size="16px">
-									</t-icon>
+										size="16">
+									</uni-icons>
 									<text class="action-text">{{ comment.like_count || 0 }}</text>
 								</view>
 								<view class="action-item" @tap="replyComment(comment)">
-									<t-icon name="chat-bubble" color="#999" size="16px"></t-icon>
+									<uni-icons type="chatbubble" color="#999" size="16"></uni-icons>
 									<text class="action-text">回复</text>
 								</view>
 							</view>
-						</template>
-					</t-comment>
+						</view>
+					</view>
 				</view>
 
 				<!-- 空状态 -->
-				<t-empty v-else description="暂无评论，快来抢沙发吧~"></t-empty>
+				<view class="empty-state" v-else>
+					<image class="empty-image" src="/static/empty-comment.png" mode="aspectFit"></image>
+					<text class="empty-text">暂无评论，快来抢沙发吧~</text>
+				</view>
 			</view>
 		</scroll-view>
 
 		<!-- 底部评论输入框 -->
 		<view class="comment-bar">
 			<view class="input-wrapper">
-				<t-input
+				<uni-easyinput
 					v-model="commentText"
 					placeholder="写下你的评论..."
 					:clearable="true"
 					class="comment-input">
-				</t-input>
-				<t-button
-					theme="primary"
-					size="medium"
-					:disabled="!commentText.trim()"
-					@tap="sendComment">
-					发送
-				</t-button>
+				</uni-easyinput>
+				<button class="send-btn" type="primary" size="mini" :disabled="!commentText.trim()" @tap="sendComment">发送</button>
 			</view>
 		</view>
 
 		<!-- 更多操作弹窗 -->
-		<t-action-sheet
-			v-model:visible="moreActionsVisible"
-			:items="moreActionItems"
-			@select="handleMoreAction">
-		</t-action-sheet>
-
-		<!-- 提示消息 -->
-		<t-toast v-model:visible="toastVisible" :content="toastMessage"></t-toast>
+		<uni-popup ref="morePopup" type="bottom" @change="onPopupChange">
+			<view class="action-sheet">
+				<view class="action-item" @tap="handleAction('favorite')">
+					<uni-icons type="star" size="24" color="#333"></uni-icons>
+					<text class="action-text">收藏帖子</text>
+				</view>
+				<view class="action-item" @tap="handleAction('report')">
+					<uni-icons type="info" size="24" color="#333"></uni-icons>
+					<text class="action-text">举报帖子</text>
+				</view>
+				<view class="action-item" @tap="handleAction('copy')">
+					<uni-icons type="link" size="24" color="#333"></uni-icons>
+					<text class="action-text">复制链接</text>
+				</view>
+				<view class="action-cancel" @tap="closePopup">取消</view>
+			</view>
+		</uni-popup>
 	</view>
 </template>
 
 <script setup>
-	import { ref, reactive, onMounted, computed } from 'vue';
-	import TIcon from 'tdesign-miniprogram/icon/icon';
-	import TAvatar from 'tdesign-miniprogram/avatar/avatar';
-	import TButton from 'tdesign-miniprogram/button/button';
-	import TTag from 'tdesign-miniprogram/tag/tag';
-	import TLoading from 'tdesign-miniprogram/loading/loading';
-	import TComment from 'tdesign-miniprogram/comment/comment';
-	import TEmpty from 'tdesign-miniprogram/empty/empty';
-	import TInput from 'tdesign-miniprogram/input/input';
-	import TToast from 'tdesign-miniprogram/toast/toast';
-	import TActionSheet from 'tdesign-miniprogram/action-sheet/action-sheet';
-	import TDropdown from 'tdesign-miniprogram/dropdown/dropdown';
-	import TDropdownItem from 'tdesign-miniprogram/dropdown/dropdown-item';
+	import { ref, reactive, onMounted } from 'vue';
 
 	const loading = ref(true);
 	const commentText = ref('');
 	const postId = ref('');
-	const moreActionsVisible = ref(false);
-	const toastVisible = ref(false);
-	const toastMessage = ref('');
 	const sortType = ref('newest');
 	const bottomHeight = ref(100);
+	const morePopup = ref(null);
 
 	// 帖子详情数据
 	const postDetail = reactive({
@@ -198,13 +182,6 @@
 
 	// 评论列表数据
 	const commentList = reactive([]);
-
-	// 更多操作菜单
-	const moreActionItems = [
-		{ label: '收藏帖子', value: 'favorite' },
-		{ label: '举报帖子', value: 'report' },
-		{ label: '复制链接', value: 'copy' }
-	];
 
 	// 云对象实例
 	let communityObj = null;
@@ -245,11 +222,11 @@
 				// 获取评论列表
 				await getCommentList();
 			} else {
-				showToast(result.errMsg || '帖子加载失败');
+				uni.showToast({ title: result.errMsg || '帖子加载失败', icon: 'none' });
 			}
 		} catch (error) {
 			console.error('获取帖子详情失败:', error);
-			showToast('网络错误，请重试');
+			uni.showToast({ title: '网络错误，请重试', icon: 'none' });
 		} finally {
 			loading.value = false;
 		}
@@ -293,13 +270,15 @@
 				postDetail.isLiked = !postDetail.isLiked;
 				if (postDetail.isLiked) {
 					postDetail.like_count++;
+					uni.showToast({ title: '点赞成功', icon: 'success' });
 				} else {
 					postDetail.like_count--;
+					uni.showToast({ title: '取消点赞', icon: 'none' });
 				}
 			}
 		} catch (error) {
 			console.error('点赞失败:', error);
-			showToast('操作失败，请重试');
+			uni.showToast({ title: '操作失败，请重试', icon: 'none' });
 		}
 	};
 
@@ -332,15 +311,15 @@
 			});
 
 			if (result.errCode === 0) {
-				showToast('评论成功');
+				uni.showToast({ title: '评论成功', icon: 'success' });
 				commentText.value = '';
 				await getCommentList();
 			} else {
-				showToast(result.errMsg || '评论失败');
+				uni.showToast({ title: result.errMsg || '评论失败', icon: 'none' });
 			}
 		} catch (error) {
 			console.error('发送评论失败:', error);
-			showToast('网络错误，请重试');
+			uni.showToast({ title: '网络错误，请重试', icon: 'none' });
 		}
 	};
 
@@ -349,35 +328,53 @@
 		uni.showShareMenu({
 			withShareTicket: true,
 			success: () => {
-				showToast('分享成功');
+				uni.showToast({ title: '分享成功', icon: 'success' });
 			}
 		});
 	};
 
 	// 显示更多操作
 	const showMoreActions = () => {
-		moreActionsVisible.value = true;
+		if (morePopup.value) {
+			morePopup.value.open();
+		}
 	};
 
-	// 处理更多操作
-	const handleMoreAction = (e) => {
-		const action = e.value;
-		moreActionsVisible.value = false;
+	// 关闭弹窗
+	const closePopup = () => {
+		if (morePopup.value) {
+			morePopup.value.close();
+		}
+	};
 
+	// 处理操作
+	const handleAction = (action) => {
+		closePopup();
 		switch (action) {
 			case 'favorite':
-				showToast('收藏成功');
+				uni.showToast({ title: '收藏成功', icon: 'success' });
 				break;
 			case 'report':
-				showToast('举报功能开发中');
+				uni.showToast({ title: '举报功能开发中', icon: 'none' });
 				break;
 			case 'copy':
 				uni.setClipboardData({
 					data: `https://你的小程序链接/pages/community/post-detail?id=${postId.value}`,
-					success: () => showToast('链接已复制')
+					success: () => uni.showToast({ title: '链接已复制', icon: 'success' })
 				});
 				break;
 		}
+	};
+
+	// 切换排序
+	const toggleSort = () => {
+		sortType.value = sortType.value === 'hot' ? 'newest' : 'hot';
+		// TODO: 重新加载评论列表
+	};
+
+	// 弹窗状态变化
+	const onPopupChange = (e) => {
+		console.log('popup变化:', e.show);
 	};
 
 	// 预览图片
@@ -407,12 +404,6 @@
 		});
 	};
 
-	// 显示提示
-	const showToast = (message) => {
-		toastMessage.value = message;
-		toastVisible.value = true;
-	};
-
 	// 返回
 	const goBack = () => {
 		uni.navigateBack();
@@ -438,222 +429,374 @@
 
 <style lang="scss" scoped>
 	.container {
-		background-color: #f3f3f3;
-		min-height: 100vh;
+		width: 100%;
+		height: 100vh;
+		background: #f5f5f5;
 		display: flex;
 		flex-direction: column;
 	}
 
-	/* 导航栏样式 */
+	/* 顶部导航栏 */
 	.navbar {
+		width: 100%;
+		height: 44px;
+		background: #fff;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		padding: 20rpx 30rpx;
-		height: 88rpx;
-		box-shadow: 0 2rpx 12rpx rgba(102, 126, 234, 0.15);
-		position: fixed;
+		padding: 0 16px;
+		box-sizing: border-box;
+		position: sticky;
 		top: 0;
-		left: 0;
-		right: 0;
-		z-index: 1000;
+		z-index: 100;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 	}
 
-	.nav-left,
-	.nav-right {
-		width: 48rpx;
-		height: 48rpx;
+	.nav-left, .nav-right {
+		width: 44px;
+		height: 44px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 	}
 
 	.nav-title {
-		font-size: 32rpx;
+		font-size: 18px;
 		font-weight: 600;
-		color: #ffffff;
+		color: #333;
 	}
 
 	/* 加载状态 */
 	.loading-container {
+		flex: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 200rpx 0;
-		background-color: #f3f3f3;
+		padding: 40px 0;
 	}
 
 	/* 滚动容器 */
 	.scroll-container {
 		flex: 1;
-		overflow-y: auto;
-		padding-top: 108rpx;
+		width: 100%;
 	}
 
-	/* 帖子卡片样式 */
+	/* 帖子卡片 */
 	.post-card {
-		background-color: #ffffff;
-		margin: 20rpx;
-		border-radius: 20rpx;
-		padding: 30rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+		background: #fff;
+		margin: 12px;
+		border-radius: 12px;
+		padding: 16px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 	}
 
 	.post-header {
 		display: flex;
 		align-items: center;
-		margin-bottom: 24rpx;
+		margin-bottom: 12px;
+	}
+
+	.user-avatar {
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
+		margin-right: 12px;
+		background: #f0f0f0;
 	}
 
 	.user-details {
 		flex: 1;
-		margin-left: 20rpx;
-		display: flex;
-		flex-direction: column;
-		gap: 8rpx;
 	}
 
 	.username-row {
 		display: flex;
 		align-items: center;
-		gap: 12rpx;
+		margin-bottom: 4px;
 	}
 
 	.username {
-		font-size: 28rpx;
+		font-size: 16px;
 		font-weight: 600;
-		color: #333333;
+		color: #333;
+		margin-right: 8px;
 	}
 
 	.post-time {
-		font-size: 22rpx;
-		color: #999999;
+		font-size: 12px;
+		color: #999;
+	}
+
+	.follow-btn {
+		margin: 0 !important;
+		padding: 4px 16px !important;
+		height: 28px !important;
+		line-height: 20px !important;
+		font-size: 12px !important;
+		border-radius: 14px !important;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+		border: none !important;
+		color: #fff !important;
 	}
 
 	/* 帖子内容 */
 	.post-content {
-		margin-bottom: 24rpx;
+		margin-bottom: 16px;
 	}
 
 	.post-text {
-		font-size: 28rpx;
-		line-height: 1.8;
-		color: #333333;
-		margin-bottom: 20rpx;
+		font-size: 15px;
+		line-height: 1.6;
+		color: #333;
 		display: block;
-		white-space: pre-line;
+		margin-bottom: 12px;
 	}
 
 	.post-images {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 12rpx;
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 8px;
 	}
 
 	.post-image {
-		width: 220rpx;
-		height: 220rpx;
-		border-radius: 12rpx;
+		width: 100%;
+		height: 0;
+		padding-bottom: 100%;
+		position: relative;
+		border-radius: 8px;
+		overflow: hidden;
+		background: #f5f5f5;
+	}
+
+	.post-image::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
 	}
 
 	/* 互动统计 */
 	.post-stats {
 		display: flex;
 		align-items: center;
-		padding-top: 24rpx;
-		border-top: 1rpx solid #f0f0f0;
-		gap: 40rpx;
+		padding-top: 16px;
+		border-top: 1px solid #f0f0f0;
 	}
 
 	.stat-item {
 		display: flex;
 		align-items: center;
-		gap: 8rpx;
-		padding: 8rpx 0;
+		margin-right: 24px;
 	}
 
 	.stat-text {
-		font-size: 26rpx;
-		color: #999999;
+		font-size: 14px;
+		color: #999;
+		margin-left: 4px;
 	}
 
 	.stat-text.liked {
 		color: #ff6b6b;
 	}
 
-	/* 评论区样式 */
+	/* 评论区 */
 	.comment-section {
-		background-color: #ffffff;
-		margin: 0 20rpx 20rpx;
-		border-radius: 20rpx;
-		padding: 30rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+		background: #fff;
+		margin: 12px;
+		margin-top: 0;
+		border-radius: 12px;
+		padding: 16px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 	}
 
 	.section-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin-bottom: 24rpx;
+		margin-bottom: 16px;
 	}
 
 	.section-title {
-		font-size: 32rpx;
+		font-size: 16px;
 		font-weight: 600;
-		color: #333333;
+		color: #333;
 	}
 
 	.sort-btn {
 		display: flex;
 		align-items: center;
-		gap: 4rpx;
 	}
 
 	.sort-text {
-		font-size: 26rpx;
-		color: #666666;
+		font-size: 14px;
+		color: #999;
+		margin-right: 4px;
 	}
 
-	/* 底部评论栏 */
+	/* 评论列表 */
+	.comment-list {
+		margin-top: 16px;
+	}
+
+	.comment-item {
+		display: flex;
+		padding: 16px 0;
+		border-bottom: 1px solid #f0f0f0;
+	}
+
+	.comment-item:last-child {
+		border-bottom: none;
+	}
+
+	.comment-avatar {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		margin-right: 12px;
+		background: #f0f0f0;
+		flex-shrink: 0;
+	}
+
+	.comment-content {
+		flex: 1;
+	}
+
+	.comment-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 8px;
+	}
+
+	.comment-author {
+		font-size: 14px;
+		font-weight: 500;
+		color: #333;
+	}
+
+	.comment-time {
+		font-size: 12px;
+		color: #999;
+	}
+
+	.comment-text {
+		font-size: 15px;
+		line-height: 1.5;
+		color: #333;
+		display: block;
+		margin-bottom: 8px;
+	}
+
+	.comment-actions {
+		display: flex;
+		align-items: center;
+	}
+
+	.action-item {
+		display: flex;
+		align-items: center;
+		margin-right: 20px;
+		opacity: 0.6;
+		transition: opacity 0.2s;
+	}
+
+	.action-item:active {
+		opacity: 1;
+	}
+
+	.action-text {
+		font-size: 12px;
+		color: #999;
+		margin-left: 4px;
+	}
+
+	/* 空状态 */
+	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 60px 20px;
+	}
+
+	.empty-image {
+		width: 160px;
+		height: 160px;
+		margin-bottom: 16px;
+		opacity: 0.6;
+	}
+
+	.empty-text {
+		font-size: 14px;
+		color: #999;
+	}
+
+	/* 底部评论输入框 */
 	.comment-bar {
 		position: fixed;
 		bottom: 0;
 		left: 0;
 		right: 0;
-		background-color: #ffffff;
-		border-top: 1rpx solid #f0f0f0;
-		padding: 20rpx 30rpx;
-		box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.08);
-		z-index: 999;
-		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+		background: #fff;
+		padding: 12px 16px;
+		box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+		z-index: 100;
 	}
 
 	.input-wrapper {
 		display: flex;
 		align-items: center;
-		gap: 16rpx;
+		gap: 12px;
 	}
 
 	.comment-input {
 		flex: 1;
 	}
 
-	/* 评论操作 */
-	.comment-actions {
-		display: flex;
-		align-items: center;
-		gap: 32rpx;
+	.send-btn {
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+		border: none !important;
+		color: #fff !important;
+		padding: 8px 24px !important;
+		height: 36px !important;
+		line-height: 20px !important;
+		border-radius: 18px !important;
+		font-size: 14px !important;
+	}
+
+	/* 操作弹窗 */
+	.action-sheet {
+		background: #fff;
+		border-radius: 16px 16px 0 0;
+		overflow: hidden;
+		padding-bottom: env(safe-area-inset-bottom);
 	}
 
 	.action-item {
 		display: flex;
 		align-items: center;
-		gap: 6rpx;
+		padding: 16px 20px;
+		border-bottom: 1px solid #f0f0f0;
+		transition: background 0.2s;
+	}
+
+	.action-item:active {
+		background: #f5f5f5;
 	}
 
 	.action-text {
-		font-size: 24rpx;
-		color: #999999;
+		font-size: 16px;
+		color: #333;
+		margin-left: 12px;
+	}
+
+	.action-cancel {
+		padding: 16px;
+		text-align: center;
+		font-size: 16px;
+		color: #ff3b30;
+		background: #fff;
+		margin-top: 8px;
 	}
 </style>

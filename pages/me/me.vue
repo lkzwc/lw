@@ -69,14 +69,6 @@
 					<text class="menu-text">我的技能</text>
 					<uni-icons type="right" size="14" color="#c0c4cc"></uni-icons>
 				</view>
-
-				<view class="menu-item" @tap="goToSettings">
-					<view class="menu-icon">
-						<uni-icons type="settings" size="20" color="#FF6B6B"></uni-icons>
-					</view>
-					<text class="menu-text">设置</text>
-					<uni-icons type="right" size="14" color="#c0c4cc"></uni-icons>
-				</view>
 			</view>
 
 			<!-- 登录后显示退出登录 -->
@@ -211,6 +203,13 @@
 				// 保存登录信息
 				uni.setStorageSync('token', result.token)
 				uni.setStorageSync('userInfo', result.userInfo)
+
+				// 设置uniCloud全局token
+				if (uniCloud) {
+					uniCloud.setCustomData({
+						token: result.token
+					})
+				}
 
 				isLoggedIn.value = true
 				Object.assign(userInfo, result.userInfo)
@@ -364,12 +363,6 @@
 		}
 		uni.navigateTo({
 			url: '/pages/skills/my-skills'
-		})
-	}
-
-	const goToSettings = () => {
-		uni.navigateTo({
-			url: '/pages/settings/settings'
 		})
 	}
 

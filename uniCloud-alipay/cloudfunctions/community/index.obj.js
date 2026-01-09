@@ -6,33 +6,73 @@ module.exports = {
 	 * 通用用户验证方法
 	 * @returns {Object} 返回用户验证结果
 	 */
-	verifyUser() {
-		// 获取token
-		const token = this.getUniCloudRequestHeaders()['token']
-		
+	async verifyUser() {
+		// 获取token - 从多种来源尝试获取
+		let token = null;
+
+		// 1. 尝试从getUniIdToken获取（uniCloud内置方法）
+		try {
+			token = this.getUniIdToken();
+			if (token && typeof token === 'string') {
+				token = token; // 保持不变
+			} else if (token && typeof token === 'object' && token.uid) {
+				// 如果返回的是对象，提取uid
+				token = token.uid;
+			} else {
+				token = null;
+			}
+		} catch (e) {
+			// 忽略错误，继续尝试其他方法
+		}
+
+		// 2. 如果getUniIdToken获取不到，尝试从请求头获取
 		if (!token) {
+			try {
+				const headers = this.getUniCloudRequestHeaders();
+				token = headers['token'] || headers['x-token'] || headers['authorization'];
+			} catch (e) {
+				// 忽略错误
+			}
+		}
+
+		// 3. 如果还是获取不到，尝试从客户端信息获取
+		if (!token) {
+			try {
+				const clientInfo = this.getClientInfo();
+				if (clientInfo && clientInfo.uniIdToken) {
+					token = clientInfo.uniIdToken;
+				}
+			} catch (e) {
+				// 忽略错误
+			}
+		}
+
+		if (!token) {
+			console.log('[community] token获取失败');
 			return {
 				errCode: 'UNAUTHORIZED',
 				errMsg: '用户未登录',
 				data: null
-			}
+			};
 		}
-		
+
 		// 通过token获取openid
-		const openid = getUidByToken(token)
+		const openid = getUidByToken(token);
 		if (!openid) {
+			console.log('[community] token验证失败');
 			return {
 				errCode: 'INVALID_TOKEN',
 				errMsg: '无效的token',
 				data: null
-			}
+			};
 		}
-		
+
+		console.log('[community] 用户验证成功:', openid);
 		return {
 			errCode: 0,
 			errMsg: 'success',
 			data: { openid }
-		}
+		};
 	},
 	
 	/**

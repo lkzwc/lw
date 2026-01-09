@@ -3,15 +3,15 @@
 		<!-- 搜索栏 -->
 		<view class="search-bar">
 			<view class="search-input-wrapper">
-				<t-icon name="search" size="20px" color="#999" class="search-icon"></t-icon>
-				<t-input
+				<uni-icons type="search" size="20" color="#999" class="search-icon"></uni-icons>
+				<uni-easyinput
 					v-model="searchKeyword"
 					placeholder="搜索帖子、用户、技能"
 					:clearable="true"
 					@confirm="handleSearch"
 					@clear="handleClear"
 					class="search-input">
-				</t-input>
+				</uni-easyinput>
 			</view>
 			<view class="search-btn" @tap="handleSearch">
 				<text class="search-text">搜索</text>
@@ -25,37 +25,36 @@
 				<text class="history-clear" @tap="clearHistory">清除</text>
 			</view>
 			<view class="history-tags">
-				<t-tag
+				<view
+					class="history-tag"
 					v-for="(keyword, index) in searchHistory"
 					:key="index"
-					variant="light"
-					theme="default"
-					shape="round"
 					@tap="searchFromHistory(keyword)">
 					{{ keyword }}
-				</t-tag>
+				</view>
 			</view>
 		</view>
 
 		<!-- 搜索结果 -->
-		<view class="search-results" v-if="hasSearched">
+		<scroll-view scroll-y class="search-results" v-if="hasSearched">
 			<!-- 筛选标签 -->
 			<view class="filter-tabs">
-				<t-tabs v-model:active="activeTab" :space-evenly="true" theme="line">
-					<t-tab-panel value="all" label="全部"></t-tab-panel>
-					<t-tab-panel value="posts" label="帖子"></t-tab-panel>
-					<t-tab-panel value="skills" label="技能"></t-tab-panel>
-					<t-tab-panel value="users" label="用户"></t-tab-panel>
-				</t-tabs>
+				<uni-segmented-control
+					:current="currentIndex"
+					:values="tabList"
+					@clickItem="onTabChange"
+					styleType="text"
+					activeColor="#667eea">
+				</uni-segmented-control>
 			</view>
 
 			<!-- 加载状态 -->
 			<view class="loading-container" v-if="loading">
-				<t-loading theme="circular" size="40px" text="搜索中..."></t-loading>
+				<uni-load-more status="loading" :content-text="{contentdown: '搜索中...',contentrefresh: '搜索中...',contentnomore: ''}"></uni-load-more>
 			</view>
 
 			<!-- 帖子结果 -->
-			<view class="result-section" v-if="activeTab === 'all' || activeTab === 'posts'">
+			<view class="result-section" v-if="currentIndex === 0 || currentIndex === 1">
 				<view class="section-header">
 					<text class="section-title">帖子 ({{ postResults.length }})</text>
 				</view>
@@ -74,29 +73,27 @@
 						<view class="result-content">
 							<text class="result-title">{{ post.content || '暂无内容' }}</text>
 							<view class="result-meta">
-								<t-tag size="small" variant="light" theme="primary">
-									{{ (post.tag || ['全部'])[0] }}
-								</t-tag>
-								<text class="result-stats">
-									<t-icon name="chat-bubble" size="14px"></t-icon>
+								<uni-tag :text="(post.tag || ['全部'])[0]" size="mini" type="primary"></uni-tag>
+								<view class="result-stats">
+									<uni-icons type="chatbubble" size="14"></uni-icons>
 									{{ post.comment_count || 0 }}
-								</text>
-								<text class="result-stats">
-									<t-icon name="heart" size="14px"></t-icon>
+								</view>
+								<view class="result-stats">
+									<uni-icons type="heart" size="14"></uni-icons>
 									{{ post.like_count || 0 }}
-								</text>
+								</view>
 							</view>
 						</view>
 					</view>
 				</view>
-				<t-empty v-if="postResults.length === 0 && !loading"
-					description="没有找到相关帖子"
-					image="https://tdesign.gtimg.com/miniprogram/images/empty.png">
-				</t-empty>
+				<view class="empty-state" v-if="postResults.length === 0 && !loading">
+					<image class="empty-image" src="/static/empty.png" mode="aspectFit"></image>
+					<text class="empty-text">没有找到相关帖子</text>
+				</view>
 			</view>
 
 			<!-- 技能结果 -->
-			<view class="result-section" v-if="activeTab === 'all' || activeTab === 'skills'">
+			<view class="result-section" v-if="currentIndex === 0 || currentIndex === 2">
 				<view class="section-header">
 					<text class="section-title">技能 ({{ skillResults.length }})</text>
 				</view>
@@ -116,25 +113,23 @@
 							<text class="result-title">{{ skill.title }}</text>
 							<text class="result-desc">{{ skill.description }}</text>
 							<view class="result-meta">
-								<t-tag size="small" variant="light" theme="primary">
-									{{ skill.category }}
-								</t-tag>
-								<text class="result-stats">
-									<t-icon name="money-circle" size="14px"></t-icon>
+								<uni-tag :text="skill.category" size="mini" type="primary"></uni-tag>
+								<view class="result-stats">
+									<uni-icons type="wallet" size="14"></uni-icons>
 									{{ skill.price }}{{ skill.price_unit || '/次' }}
-								</text>
+								</view>
 							</view>
 						</view>
 					</view>
 				</view>
-				<t-empty v-if="skillResults.length === 0 && !loading"
-					description="没有找到相关技能"
-					image="https://tdesign.gtimg.com/miniprogram/images/empty.png">
-				</t-empty>
+				<view class="empty-state" v-if="skillResults.length === 0 && !loading">
+					<image class="empty-image" src="/static/empty.png" mode="aspectFit"></image>
+					<text class="empty-text">没有找到相关技能</text>
+				</view>
 			</view>
 
 			<!-- 用户结果 -->
-			<view class="result-section" v-if="activeTab === 'all' || activeTab === 'users'">
+			<view class="result-section" v-if="currentIndex === 0 || currentIndex === 3">
 				<view class="section-header">
 					<text class="section-title">用户 ({{ userResults.length }})</text>
 				</view>
@@ -144,30 +139,30 @@
 						v-for="user in userResults"
 						:key="user._id"
 						@tap="goToUserProfile(user._id)">
-						<t-avatar :image="user.avatar" size="large"></t-avatar>
+						<image :src="user.avatar || '/static/default.png'" class="user-avatar" mode="aspectFill"></image>
 						<view class="user-info">
 							<text class="user-name">{{ user.nickname }}</text>
 							<text class="user-building">{{ user.building || '' }}</text>
 						</view>
 					</view>
 				</view>
-				<t-empty v-if="userResults.length === 0 && !loading"
-					description="没有找到相关用户"
-					image="https://tdesign.gtimg.com/miniprogram/images/empty.png">
-				</t-empty>
+				<view class="empty-state" v-if="userResults.length === 0 && !loading">
+					<image class="empty-image" src="/static/empty.png" mode="aspectFit"></image>
+					<text class="empty-text">没有找到相关用户</text>
+				</view>
 			</view>
 
-			<!-- 空状态 -->
-			<t-empty v-if="postResults.length === 0 && skillResults.length === 0 && userResults.length === 0 && !loading"
-				description="没有找到任何相关内容"
-				image="https://tdesign.gtimg.com/miniprogram/images/empty.png">
-			</t-empty>
-		</view>
+			<!-- 全部空状态 -->
+			<view class="empty-state" v-if="postResults.length === 0 && skillResults.length === 0 && userResults.length === 0 && !loading">
+				<image class="empty-image" src="/static/empty.png" mode="aspectFit"></image>
+				<text class="empty-text">没有找到任何相关内容</text>
+			</view>
+		</scroll-view>
 
 		<!-- 热门推荐 -->
 		<view class="hot-recommend" v-if="!hasSearched && searchHistory.length === 0">
 			<view class="recommend-header">
-				<t-icon name="fire" size="20px" color="#ff6b6b"></t-icon>
+				<uni-icons type="fire-filled" size="20" color="#ff6b6b"></uni-icons>
 				<text class="recommend-title">热门搜索</text>
 			</view>
 			<view class="hot-tags">
@@ -177,30 +172,17 @@
 				</view>
 			</view>
 		</view>
-
-		<!-- 提示消息 -->
-		<t-toast v-model:visible="toastVisible" :content="toastMessage"></t-toast>
 	</view>
 </template>
 
 <script setup>
 	import { ref, reactive, onMounted } from 'vue';
-	import TIcon from 'tdesign-miniprogram/icon/icon';
-	import TInput from 'tdesign-miniprogram/input/input';
-	import TTag from 'tdesign-miniprogram/tag/tag';
-	import TTabs from 'tdesign-miniprogram/tabs/tabs';
-	import TTabPanel from 'tdesign-miniprogram/tab-panel/tab-panel';
-	import TLoading from 'tdesign-miniprogram/loading/loading';
-	import TEmpty from 'tdesign-miniprogram/empty/empty';
-	import TToast from 'tdesign-miniprogram/toast/toast';
-	import TAvatar from 'tdesign-miniprogram/avatar/avatar';
 
 	const searchKeyword = ref('');
-	const activeTab = ref('all');
+	const currentIndex = ref(0);
 	const loading = ref(false);
 	const hasSearched = ref(false);
-	const toastVisible = ref(false);
-	const toastMessage = ref('');
+	const tabList = ['全部', '帖子', '技能', '用户'];
 
 	// 搜索历史
 	const searchHistory = reactive([]);
@@ -238,7 +220,7 @@
 	const handleSearch = async () => {
 		const keyword = searchKeyword.value.trim();
 		if (!keyword) {
-			showToast('请输入搜索关键词');
+			uni.showToast({ title: '请输入搜索关键词', icon: 'none' });
 			return;
 		}
 
@@ -247,56 +229,59 @@
 
 		try {
 			// 搜索帖子
-			const postResult = await communityObj.getPostList({});
-			if (postResult.errCode === 0 && postResult.data) {
-				const filteredPosts = postResult.data.list.filter(post =>
-					post.content?.includes(keyword) ||
-					(post.tag || []).some(tag => tag.includes(keyword))
-				);
-				postResults.splice(0, postResults.length, ...filteredPosts);
+			if (currentIndex.value === 0 || currentIndex.value === 1) {
+				const postRes = await communityObj.searchPosts({ keyword });
+				if (postRes.errCode === 0) {
+					postResults.splice(0, postResults.length, ...(postRes.data || []));
+				}
 			}
 
 			// 搜索技能
-			const skillResult = await skillsObj.getSkillsList({});
-			if (skillResult.errCode === 0 && skillResult.data) {
-				const filteredSkills = skillResult.data.list.filter(skill =>
-					skill.title?.includes(keyword) ||
-					skill.description?.includes(keyword) ||
-					skill.category?.includes(keyword)
-				);
-				skillResults.splice(0, skillResults.length, ...filteredSkills);
+			if (currentIndex.value === 0 || currentIndex.value === 2) {
+				const skillRes = await skillsObj.searchSkills({ keyword });
+				if (skillRes.errCode === 0) {
+					skillResults.splice(0, skillResults.length, ...(skillRes.data || []));
+				}
 			}
 
-			// 搜索用户（从数据库直接查询）
-			const db = uniCloud.database();
-			const userResult = await db.collection('users')
-				.where({
-					nickname: db.command.contains(keyword)
-				})
-				.limit(10)
-				.get();
-			if (userResult.data.length > 0) {
-				userResults.splice(0, userResults.length, ...userResult.data);
+			// 搜索用户
+			if (currentIndex.value === 0 || currentIndex.value === 3) {
+				const db = uniCloud.database();
+				const userRes = await db.collection('users')
+					.where({
+						nickname: new RegExp(keyword, 'i')
+					})
+					.limit(10)
+					.get();
+
+				userResults.splice(0, userResults.length, ...userRes.data);
 			}
 
-			// 保存搜索历史
+			// 保存到搜索历史
 			saveSearchHistory(keyword);
-
 		} catch (error) {
 			console.error('搜索失败:', error);
-			showToast('搜索失败，请重试');
+			uni.showToast({ title: '搜索失败，请重试', icon: 'none' });
 		} finally {
 			loading.value = false;
 		}
 	};
 
-	// 清除搜索
+	// 清空搜索
 	const handleClear = () => {
 		searchKeyword.value = '';
 		hasSearched.value = false;
 		postResults.splice(0, postResults.length);
 		skillResults.splice(0, skillResults.length);
 		userResults.splice(0, userResults.length);
+	};
+
+	// 切换标签
+	const onTabChange = (e) => {
+		currentIndex.value = e.currentIndex;
+		if (hasSearched.value) {
+			handleSearch();
+		}
 	};
 
 	// 从历史搜索
@@ -319,9 +304,9 @@
 		}
 		searchHistory.unshift(keyword);
 
-		// 最多保存10条历史
+		// 最多保存10条
 		if (searchHistory.length > 10) {
-			searchHistory.length = 10;
+			searchHistory.pop();
 		}
 
 		uni.setStorageSync('searchHistory', searchHistory);
@@ -329,17 +314,25 @@
 
 	// 清除历史
 	const clearHistory = () => {
-		searchHistory.splice(0, searchHistory.length);
-		uni.removeStorageSync('searchHistory');
-		showToast('搜索历史已清除');
+		uni.showModal({
+			title: '提示',
+			content: '确定要清除搜索历史吗？',
+			success: (res) => {
+				if (res.confirm) {
+					searchHistory.splice(0, searchHistory.length);
+					uni.removeStorageSync('searchHistory');
+					uni.showToast({ title: '已清除', icon: 'success' });
+				}
+			}
+		});
 	};
 
 	// 加载搜索历史
 	const loadSearchHistory = () => {
 		try {
 			const history = uni.getStorageSync('searchHistory');
-			if (history && Array.isArray(history)) {
-				searchHistory.push(...history);
+			if (Array.isArray(history)) {
+				searchHistory.splice(0, searchHistory.length, ...history);
 			}
 		} catch (error) {
 			console.error('加载搜索历史失败:', error);
@@ -347,331 +340,348 @@
 	};
 
 	// 跳转帖子详情
-	const goToPostDetail = (postId) => {
+	const goToPostDetail = (id) => {
 		uni.navigateTo({
-			url: `/pages/community/post-detail?id=${postId}`
+			url: `/pages/community/post-detail?id=${id}`
 		});
 	};
 
 	// 跳转技能详情
-	const goToSkillDetail = (skillId) => {
+	const goToSkillDetail = (id) => {
 		uni.navigateTo({
-			url: `/pages/skills/skill-detail?id=${skillId}`
+			url: `/pages/skills/skill-detail?id=${id}`
 		});
 	};
 
-	// 跳转用户资料
-	const goToUserProfile = (userId) => {
-		showToast('用户资料功能开发中');
-	};
-
-	// 显示提示
-	const showToast = (message) => {
-		toastMessage.value = message;
-		toastVisible.value = true;
+	// 跳转用户主页
+	const goToUserProfile = (id) => {
+		uni.showToast({ title: '用户主页功能开发中', icon: 'none' });
 	};
 
 	onMounted(() => {
+		// 初始化云对象
 		initCloudObj();
+
+		// 加载搜索历史
 		loadSearchHistory();
 	});
 </script>
 
 <style lang="scss" scoped>
 	.container {
-		background-color: #f3f3f3;
-		min-height: 100vh;
+		width: 100%;
+		height: 100vh;
+		background: #f5f5f5;
 		display: flex;
 		flex-direction: column;
 	}
 
 	/* 搜索栏 */
 	.search-bar {
+		background: #fff;
+		padding: 12px 16px;
 		display: flex;
 		align-items: center;
-		background-color: #ffffff;
-		padding: 20rpx 30rpx;
-		gap: 16rpx;
-		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+		gap: 12px;
 	}
 
 	.search-input-wrapper {
 		flex: 1;
 		display: flex;
 		align-items: center;
-		background-color: #f8f8f8;
-		border-radius: 30rpx;
-		padding: 0 24rpx;
-		height: 70rpx;
+		background: #f5f5f5;
+		border-radius: 22px;
+		padding: 8px 16px;
 	}
 
 	.search-icon {
-		margin-right: 12rpx;
+		margin-right: 8px;
 	}
 
 	.search-input {
 		flex: 1;
+		background: transparent !important;
+	}
+
+	.search-input::v-deep .uni-easyinput__content {
+		background: transparent !important;
 	}
 
 	.search-btn {
-		padding: 0 30rpx;
-		height: 70rpx;
+		padding: 8px 20px;
 		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		border-radius: 35rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		border-radius: 22px;
 	}
 
 	.search-text {
-		font-size: 28rpx;
-		color: #ffffff;
-		font-weight: 600;
+		font-size: 15px;
+		color: #fff;
+		font-weight: 500;
 	}
 
 	/* 搜索历史 */
 	.search-history {
-		background-color: #ffffff;
-		margin: 20rpx;
-		border-radius: 20rpx;
-		padding: 30rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+		background: #fff;
+		margin-top: 12px;
+		padding: 16px;
 	}
 
 	.history-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin-bottom: 24rpx;
+		margin-bottom: 12px;
 	}
 
 	.history-title {
-		font-size: 28rpx;
+		font-size: 15px;
 		font-weight: 600;
-		color: #333333;
+		color: #333;
 	}
 
 	.history-clear {
-		font-size: 24rpx;
-		color: #999999;
+		font-size: 14px;
+		color: #999;
 	}
 
 	.history-tags {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 16rpx;
+		gap: 10px;
+	}
+
+	.history-tag {
+		padding: 6px 14px;
+		background: #f5f5f5;
+		border-radius: 16px;
+		font-size: 14px;
+		color: #666;
+		transition: all 0.2s;
+	}
+
+	.history-tag:active {
+		background: #e5e5e5;
 	}
 
 	/* 搜索结果 */
 	.search-results {
 		flex: 1;
-		overflow-y: auto;
+		padding: 12px;
+	}
+
+	.filter-tabs {
+		background: #fff;
+		padding: 12px 16px;
+		margin-bottom: 12px;
+		border-radius: 12px;
 	}
 
 	.loading-container {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 200rpx 0;
-		background-color: #f3f3f3;
+		padding: 40px 0;
 	}
 
-	/* 筛选标签 */
-	.filter-tabs {
-		background-color: #ffffff;
-		padding: 0 20rpx;
-		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
-	}
-
-	/* 结果区域 */
 	.result-section {
-		margin: 20rpx;
-		background-color: #ffffff;
-		border-radius: 20rpx;
-		padding: 30rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+		margin-bottom: 16px;
 	}
 
 	.section-header {
-		margin-bottom: 24rpx;
+		margin-bottom: 12px;
 	}
 
 	.section-title {
-		font-size: 30rpx;
+		font-size: 15px;
 		font-weight: 600;
-		color: #333333;
+		color: #333;
 	}
 
-	/* 帖子卡片 */
+	.result-list {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
 	.result-card {
 		display: flex;
-		background-color: #f8f8f8;
-		border-radius: 16rpx;
-		padding: 20rpx;
-		margin-bottom: 20rpx;
-		transition: all 0.3s;
+		background: #fff;
+		border-radius: 12px;
+		padding: 12px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+		transition: transform 0.2s;
 	}
 
 	.result-card:active {
 		transform: scale(0.98);
-		background-color: #f0f0f0;
-	}
-
-	.result-card:last-child {
-		margin-bottom: 0;
 	}
 
 	.result-image {
-		width: 160rpx;
-		height: 160rpx;
-		border-radius: 12rpx;
+		width: 80px;
+		height: 80px;
+		border-radius: 8px;
+		margin-right: 12px;
 		flex-shrink: 0;
-		background-color: #f5f5f5;
+		background: #f5f5f5;
 	}
 
 	.result-content {
 		flex: 1;
-		margin-left: 20rpx;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
-		min-height: 160rpx;
+		min-width: 0;
 	}
 
 	.result-title {
-		font-size: 28rpx;
-		font-weight: 600;
-		color: #333333;
-		line-height: 1.4;
-		margin-bottom: 12rpx;
-		display: -webkit-box;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 2;
+		font-size: 15px;
+		color: #333;
 		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		margin-bottom: 6px;
 	}
 
 	.result-desc {
-		font-size: 24rpx;
-		color: #666666;
-		line-height: 1.4;
-		margin-bottom: 12rpx;
-		display: -webkit-box;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 2;
+		font-size: 13px;
+		color: #999;
 		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		margin-bottom: 8px;
 	}
 
 	.result-meta {
 		display: flex;
 		align-items: center;
-		gap: 16rpx;
+		gap: 12px;
 	}
 
 	.result-stats {
 		display: flex;
 		align-items: center;
-		gap: 4rpx;
-		font-size: 22rpx;
-		color: #999999;
+		gap: 4px;
+		font-size: 12px;
+		color: #999;
 	}
 
 	/* 用户列表 */
 	.user-list {
-		display: flex;
-		flex-direction: column;
-		gap: 20rpx;
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 12px;
 	}
 
 	.user-card {
+		background: #fff;
+		border-radius: 12px;
+		padding: 16px;
 		display: flex;
+		flex-direction: column;
 		align-items: center;
-		background-color: #f8f8f8;
-		border-radius: 16rpx;
-		padding: 20rpx;
-		transition: all 0.3s;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+		transition: transform 0.2s;
 	}
 
 	.user-card:active {
 		transform: scale(0.98);
-		background-color: #f0f0f0;
+	}
+
+	.user-avatar {
+		width: 60px;
+		height: 60px;
+		border-radius: 50%;
+		background: #f0f0f0;
+		margin-bottom: 12px;
 	}
 
 	.user-info {
-		flex: 1;
-		margin-left: 20rpx;
 		display: flex;
 		flex-direction: column;
-		gap: 8rpx;
+		align-items: center;
 	}
 
 	.user-name {
-		font-size: 28rpx;
+		font-size: 15px;
 		font-weight: 600;
-		color: #333333;
+		color: #333;
+		margin-bottom: 4px;
 	}
 
 	.user-building {
-		font-size: 24rpx;
-		color: #999999;
+		font-size: 12px;
+		color: #999;
+	}
+
+	/* 空状态 */
+	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 60px 20px;
+	}
+
+	.empty-image {
+		width: 160px;
+		height: 160px;
+		margin-bottom: 16px;
+		opacity: 0.6;
+	}
+
+	.empty-text {
+		font-size: 14px;
+		color: #999;
 	}
 
 	/* 热门推荐 */
 	.hot-recommend {
-		background-color: #ffffff;
-		margin: 20rpx;
-		border-radius: 20rpx;
-		padding: 30rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+		background: #fff;
+		margin-top: 12px;
+		padding: 16px;
 	}
 
 	.recommend-header {
 		display: flex;
 		align-items: center;
-		gap: 12rpx;
-		margin-bottom: 24rpx;
+		margin-bottom: 12px;
 	}
 
 	.recommend-title {
-		font-size: 30rpx;
+		font-size: 15px;
 		font-weight: 600;
-		color: #333333;
+		color: #333;
+		margin-left: 6px;
 	}
 
 	.hot-tags {
 		display: flex;
-		flex-direction: column;
-		gap: 16rpx;
+		flex-wrap: wrap;
+		gap: 10px;
 	}
 
 	.hot-tag {
 		display: flex;
 		align-items: center;
-		gap: 16rpx;
-		padding: 16rpx 24rpx;
-		background-color: #f8f8f8;
-		border-radius: 12rpx;
-		transition: all 0.3s;
+		padding: 8px 16px;
+		background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(255, 107, 107, 0.05) 100%);
+		border-radius: 20px;
+		transition: all 0.2s;
 	}
 
 	.hot-tag:active {
-		background-color: #f0f0f0;
+		transform: scale(0.95);
 	}
 
 	.hot-rank {
-		width: 32rpx;
-		height: 32rpx;
-		background: linear-gradient(135deg, #ff6b6b 0%, #ffa600 100%);
-		border-radius: 8rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 20rpx;
+		font-size: 14px;
 		font-weight: 700;
-		color: #ffffff;
+		color: #ff6b6b;
+		margin-right: 6px;
 	}
 
 	.hot-text {
-		font-size: 28rpx;
-		color: #333333;
+		font-size: 14px;
+		color: #333;
 	}
 </style>
