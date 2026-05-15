@@ -38,12 +38,6 @@ Page({
       wx.navigateBack()
     }
   },
-        joinAvatars: ['', '', '', ''],
-        isJoined: false
-      },
-      loading: false
-    })
-  },
 
   // 报名/取消报名
   onJoinTap: async function () {
