@@ -66,23 +66,7 @@ Page({
       this.setData({ newsList })
     } catch (err) {
       console.error('加载新闻失败', err)
-      
-      // 失败时使用模拟数据
-      const mockNews = this.data.currentTab === 'domestic' ? [
-        { id: 1, title: '我国经济持续稳定恢复 主要指标符合预期', source: '新华社', time: '1小时前', cover: '', url: '' },
-        { id: 2, title: '全国多地推出便民服务新举措', source: '人民日报', time: '2小时前', cover: '', url: '' },
-        { id: 3, title: '科技创新助力产业升级转型', source: '央视新闻', time: '3小时前', cover: '', url: '' },
-        { id: 4, title: '教育改革取得新进展', source: '教育部', time: '4小时前', cover: '', url: '' },
-        { id: 5, title: '医疗健康服务惠及更多群众', source: '健康报', time: '5小时前', cover: '', url: '' }
-      ] : [
-        { id: 1, title: '全球合作推动经济复苏进程', source: '新华社', time: '1小时前', cover: '', url: '' },
-        { id: 2, title: '国际社会关注气候变化议题', source: '央视新闻', time: '2小时前', cover: '', url: '' },
-        { id: 3, title: '多国加强科技领域合作', source: '人民日报', time: '3小时前', cover: '', url: '' },
-        { id: 4, title: '国际贸易呈现新趋势', source: '经济日报', time: '4小时前', cover: '', url: '' },
-        { id: 5, title: '文化交流促进民心相通', source: '光明日报', time: '5小时前', cover: '', url: '' }
-      ]
-
-      this.setData({ newsList: mockNews })
+      util.showToast('加载失败，请下拉刷新')
     } finally {
       this.setData({ loading: false })
     }

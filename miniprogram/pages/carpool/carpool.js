@@ -60,52 +60,20 @@ Page({
     this.setData({ loading: true })
     
     try {
-      // 模拟数据
-      const mockRoutes = [
-        {
-          _id: '1',
-          start: '小区东门',
-          end: '高新软件园',
-          type: 'long',
-          distance: '约12km',
-          seats: 2,
-          userName: '张先生',
-          avatar: '',
-          timeStr: '工作日 8:00',
-          phone: '138****8888'
-        },
-        {
-          _id: '2',
-          start: '小区西门',
-          end: '钟楼',
-          type: 'once',
-          distance: '约8km',
-          seats: 3,
-          userName: '李女士',
-          avatar: '',
-          timeStr: '周六 10:00',
-          phone: '139****9999'
-        },
-        {
-          _id: '3',
-          start: '小区北门',
-          end: '咸阳机场',
-          type: 'once',
-          distance: '约35km',
-          seats: 1,
-          userName: '王先生',
-          avatar: '',
-          timeStr: '明天 6:00',
-          phone: '137****7777'
-        }
-      ]
+      const db = wx.cloud.database()
+      const _ = db.command
       
-      let filteredRoutes = mockRoutes
+      let query = db.collection('carpools').where({
+        status: _.neq('deleted')
+      })
+      
       if (this.data.filterType !== 'all') {
-        filteredRoutes = mockRoutes.filter(r => r.type === this.data.filterType)
+        query = query.where({ type: this.data.filterType })
       }
       
-      this.setData({ routes: filteredRoutes })
+      const res = await query.orderBy('createTime', 'desc').get()
+      
+      this.setData({ routes: res.data })
     } catch (err) {
       console.error('加载路线失败', err)
       util.showToast('加载失败，请重试')

@@ -15,8 +15,8 @@ Page({
       this.setData({ id })
       this.loadDetail(id)
     } else {
-      // 模拟数据
-      this.loadMockData()
+      util.showToast('缺少活动ID')
+      wx.navigateBack()
     }
   },
 
@@ -25,28 +25,19 @@ Page({
     this.setData({ loading: true })
     
     try {
-      // TODO: 从云数据库获取
-      this.loadMockData()
+      const db = wx.cloud.database()
+      const res = await db.collection('activities').doc(id).get()
+      
+      this.setData({
+        activity: res.data,
+        loading: false
+      })
     } catch (err) {
       console.error('加载失败', err)
       util.showToast('加载失败')
-    } finally {
-      this.setData({ loading: false })
+      wx.navigateBack()
     }
   },
-
-  // 模拟数据
-  loadMockData: function () {
-    this.setData({
-      activity: {
-        _id: '1',
-        title: '亲子运动会',
-        cover: '',
-        location: '小区中央广场',
-        timeStr: '2024年5月15日 09:00-12:00',
-        desc: '欢迎小区家长带着孩子参加亲子运动会！活动项目包括：亲子接力赛、袋鼠跳、两人三足等趣味运动。参与即可获得精美礼品，前三名更有大奖！\n\n注意事项：\n1. 请穿着运动服装\n2. 自备饮用水\n3. 提前10分钟到场签到',
-        status: 'upcoming',
-        joinCount: 32,
         joinAvatars: ['', '', '', ''],
         isJoined: false
       },

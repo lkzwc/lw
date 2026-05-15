@@ -26,42 +26,19 @@ Page({
     this.setData({ loading: true })
     
     try {
-      // TODO: 从云数据库获取
-      this.loadMockData()
+      const db = wx.cloud.database()
+      const res = await db.collection('timeline').doc(id).get()
+      
+      this.setData({
+        detail: res.data,
+        loading: false
+      })
     } catch (err) {
       console.error('加载失败', err)
       util.showToast('加载失败')
-    } finally {
-      this.setData({ loading: false })
+      wx.navigateBack()
     }
   },
-
-  // 模拟数据
-  loadMockData: function () {
-    this.setData({
-      detail: {
-        _id: '1',
-        userName: '王先生',
-        avatar: '',
-        timeStr: '今天 14:30',
-        type: 'issue',
-        typeLabel: '问题',
-        title: '3号楼电梯有异响，请物业尽快检修',
-        desc: '最近几天发现3号楼电梯运行时有明显的异响，特别是在上升过程中，声音比较大。希望物业能够尽快安排专业人员检查维修，确保业主出行安全。',
-        images: [],
-        status: 'processing',
-        statusText: '处理中',
-        likeCount: 12,
-        commentCount: 5
-      },
-      comments: [
-        {
-          _id: '1',
-          userName: '李女士',
-          avatar: '',
-          content: '我也听到了，确实挺响的',
-          timeStr: '今天 15:00'
-        },
         {
           _id: '2',
           userName: '物业管理处',

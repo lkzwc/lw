@@ -77,31 +77,39 @@ Page({
       this.setData({ notices })
     } catch (err) {
       console.error('加载公告失败', err)
-      // 兜底模拟数据
-      this.setData({
-        notices: [
-          { _id: 'n1', title: '物业通知：本周六小区绿化修剪，请大家注意避让', category: '物业通知', dateStr: '05-15' },
-          { _id: 'n2', title: '关于小区停车位分配方案的投票通知', category: '投票', dateStr: '05-12' },
-          { _id: 'n3', title: '社区亲子运动会报名开始啦！', category: '活动', dateStr: '05-10' }
-        ]
-      })
+      // 不再使用兜底数据
     }
   },
 
   // 加载技能
-  loadSkills: function () {
-    this.setData({
-      skills: [
-        { _id: '1', title: 'AI绘画入门教程', cover: '', avatar: '', author: '张老师', likes: 128 },
-        { _id: '2', title: '家庭收纳小技巧', cover: '', avatar: '', author: '李阿姨', likes: 256 },
-        { _id: '3', title: '手机摄影构图法', cover: '', avatar: '', author: '王先生', likes: 89 }
-      ]
-    })
+  loadSkills: async function () {
+    try {
+      const db = wx.cloud.database()
+      const res = await db.collection('skills')
+        .where({ status: 'active', showHome: true })
+        .orderBy('createTime', 'desc')
+        .limit(3)
+        .get()
+      this.setData({ skills: res.data })
+    } catch (err) {
+      console.error('加载技能失败', err)
+    }
   },
 
   // 加载活动
-  loadActivities: function () {
-    this.setData({
+  loadActivities: async function () {
+    try {
+      const db = wx.cloud.database()
+      const res = await db.collection('activities')
+        .where({ status: 'active' })
+        .orderBy('createTime', 'desc')
+        .limit(3)
+        .get()
+      this.setData({ activities: res.data })
+    } catch (err) {
+      console.error('加载活动失败', err)
+    }
+  },
       activities: [
         { 
           _id: '1', 

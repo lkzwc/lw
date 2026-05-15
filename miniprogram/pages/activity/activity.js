@@ -178,44 +178,17 @@ Page({
     this.setData({ loading: true })
     
     try {
-      // 模拟数据
-      const mockActivities = [
-        {
-          _id: '1',
-          title: '社区亲子运动会',
-          cover: '',
-          location: '小区广场',
-          timeStr: '5月15日 上午9:00',
-          status: 'upcoming',
-          joinCount: 32,
-          joinAvatars: ['', '', ''],
-          isJoined: false
-        },
-        {
-          _id: '2',
-          title: '端午节包粽子活动',
-          cover: '',
-          location: '物业中心',
-          timeStr: '5月28日 下午2:00',
-          status: 'upcoming',
-          joinCount: 18,
-          joinAvatars: ['', ''],
-          isJoined: true
-        },
-        {
-          _id: '3',
-          title: '小区读书分享会',
-          cover: '',
-          location: '社区图书馆',
-          timeStr: '每周三 晚上7:00',
-          status: 'ongoing',
-          joinCount: 8,
-          joinAvatars: [''],
-          isJoined: false
-        }
-      ]
+      const db = wx.cloud.database()
+      const _ = db.command
       
-      this.setData({ activities: mockActivities })
+      const res = await db.collection('activities')
+        .where({
+          status: _.neq('deleted')
+        })
+        .orderBy('createTime', 'desc')
+        .get()
+      
+      this.setData({ activities: res.data })
     } catch (err) {
       console.error('加载活动失败', err)
     } finally {

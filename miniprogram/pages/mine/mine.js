@@ -62,40 +62,144 @@ Page({
   },
 
   // 加载统计数据
-  loadStats: function () {
+  loadStats: async function () {
     if (!app.globalData.isLoggedIn) return
-
-    // 模拟数据，后续接入云数据库
-    this.setData({
-      stats: {
-        postCount: 5,
-        likeCount: 12,
-        skillCount: 2,
-        carpoolCount: 3
-      }
-    })
+    
+    try {
+      const db = wx.cloud.database()
+      const _ = db.command
+      const openid = app.globalData.openid
+      
+      if (!openid) return
+      
+      // 获取我的帖子数
+      const postsRes = await db.collection('posts')
+        .where({ _openid: openid, status: _.neq('deleted') })
+        .count()
+      
+      // 获取我的技能数
+      const skillsRes = await db.collection('skills')
+        .where({ _openid: openid, status: _.neq('deleted') })
+        .count()
+      
+      // 获取我的拼车数
+      const carpoolsRes = await db.collection('carpools')
+        .where({ _openid: openid, status: _.neq('deleted') })
+        .count()
+      
+      // 获取我的点赞数
+      const likesRes = await db.collection('likes')
+        .where({ _openid: openid })
+        .count()
+      
+      this.setData({
+        stats: {
+          postCount: postsRes.total,
+          likeCount: likesRes.total,
+          skillCount: skillsRes.total,
+          carpoolCount: carpoolsRes.total
+        }
+      })
+    } catch (err) {
+      console.error('加载统计失败', err)
+    }
   },
 
-  // 登录
+  // 登录 - 使用微信授权
   onLogin: function () {
     wx.showLoading({ title: '登录中...' })
     
-    // 模拟登录成功
-    setTimeout(() => {
-      app.globalData.isLoggedIn = true
-      app.globalData.userInfo = {
-        avatarUrl: '/assets/images/default-avatar.png',
-        nickName: '新用户',
-        phase: '',
-        building: ''
+    // 使用 wx.getUserProfile 获取用户信息
+    wx.getUserProfile({
+      desc: '用于完善用户资料',
+      success: async (res) => {
+        const userInfo = res.userInfo
+        
+        try {
+          // 获取 openid
+          const app = getApp()
+          if (!app.globalData.openid) {
+            await this._getOpenId()
+          }
+          
+          // 尝试获取已有用户信息
+          const db = wx.cloud.database()
+          const userRes = await db.collection('users')
+            .where({ _openid: app.globalData.openid })
+            .get()
+          
+          if (userRes.data.length > 0) {
+            // 更新已有用户
+            await db.collection('users').doc(userRes.data[0]._id).update({
+              data: {
+                nickName: userInfo.nickName,
+                avatarUrl: userInfo.avatarUrl,
+                updateTime: db.serverDate()
+              }
+            })
+            
+            app.globalData.userInfo = {
+              ...userRes.data[0],
+              ...userInfo
+            }
+          } else {
+            // 创建新用户
+            const newUser = {
+              nickName: userInfo.nickName,
+              avatarUrl: userInfo.avatarUrl,
+              phase: '',
+              building: '',
+              createTime: db.serverDate(),
+              updateTime: db.serverDate()
+            }
+            
+            await db.collection('users').add({ data: newUser })
+            app.globalData.userInfo = newUser
+          }
+          
+          // 检查是否是管理员（这里可以根据实际需求设置）
+          app.globalData.isAdmin = false // 可根据数据库字段判断
+          app.globalData.isLoggedIn = true
+          
+          wx.hideLoading()
+          util.showToast('登录成功')
+          
+          this.checkLoginStatus()
+          this.loadStats()
+        } catch (err) {
+          wx.hideLoading()
+          console.error('登录失败:', err)
+          util.showToast('登录失败，请重试')
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading()
+        console.log('用户拒绝授权:', err)
+        // 用户拒绝时使用游客模式
+        app.globalData.isLoggedIn = true
+        app.globalData.userInfo = {
+          avatarUrl: '/assets/images/default-avatar.png',
+          nickName: '游客',
+          phase: '',
+          building: ''
+        }
+        this.checkLoginStatus()
       }
-      
-      wx.hideLoading()
-      util.showToast('登录成功')
-      
-      this.checkLoginStatus()
-      this.loadStats()
-    }, 500)
+    })
+  },
+  
+  // 获取 openid
+  _getOpenId: function () {
+    return new Promise((resolve, reject) => {
+      wx.cloud.callFunction({
+        name: 'getOpenId',
+        success: (res) => {
+          getApp().globalData.openid = res.result.openid
+          resolve(res.result.openid)
+        },
+        fail: reject
+      })
+    })
   },
 
   // 打开编辑弹窗
@@ -168,7 +272,8 @@ Page({
   },
 
   // 保存用户信息
-  onSaveUserInfo: function () {
+  // 保存用户资料
+  onSaveUserInfo: async function () {
     const { editForm } = this.data
     
     if (!editForm.nickName.trim()) {
@@ -178,11 +283,46 @@ Page({
     
     wx.showLoading({ title: '保存中...' })
     
-    // 模拟保存
-    setTimeout(() => {
-      app.globalData.userInfo = {
-        ...app.globalData.userInfo,
-        ...editForm
+    try {
+      const app = getApp()
+      const db = wx.cloud.database()
+      
+      // 获取当前用户
+      const userRes = await db.collection('users')
+        .where({ _openid: app.globalData.openid })
+        .get()
+      
+      if (userRes.data.length > 0) {
+        // 更新用户信息
+        await db.collection('users').doc(userRes.data[0]._id).update({
+          data: {
+            nickName: editForm.nickName,
+            avatarUrl: editForm.avatarUrl,
+            phase: editForm.phase,
+            building: editForm.building,
+            updateTime: db.serverDate()
+          }
+        })
+        
+        // 更新 globalData
+        app.globalData.userInfo = {
+          ...userRes.data[0],
+          ...editForm
+        }
+      } else {
+        // 创建新用户
+        await db.collection('users').add({
+          data: {
+            nickName: editForm.nickName,
+            avatarUrl: editForm.avatarUrl || '/assets/images/default-avatar.png',
+            phase: editForm.phase,
+            building: editForm.building,
+            createTime: db.serverDate(),
+            updateTime: db.serverDate()
+          }
+        })
+        
+        app.globalData.userInfo = editForm
       }
       
       this.setData({
@@ -192,7 +332,11 @@ Page({
       
       wx.hideLoading()
       util.showToast('保存成功')
-    }, 500)
+    } catch (err) {
+      wx.hideLoading()
+      console.error('保存失败:', err)
+      util.showToast('保存失败，请重试')
+    }
   },
 
   // 我的发布

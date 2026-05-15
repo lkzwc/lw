@@ -50,61 +50,10 @@ Page({
         loading: false
       })
     } catch (err) {
-      console.error('加载帖子详情失败，使用本地数据', err)
-      // 云数据库无数据时，从社区页模拟数据中查找
-      this.loadMockDetail()
+      console.error('加载帖子详情失败', err)
+      util.showToast('加载失败')
+      wx.navigateBack()
     }
-  },
-
-  // 本地模拟数据兜底
-  loadMockDetail: function () {
-    const mockPosts = {
-      '1': {
-        _id: '1',
-        userInfo: { nickName: '王先生', avatarUrl: '' },
-        content: '今天小区绿化修剪，大家注意避让！物业通知周六上午进行。',
-        images: [],
-        tags: ['分享'],
-        tag: '分享',
-        likeCount: 12,
-        commentCount: 3,
-        isLiked: false,
-        createTimeStr: '今天 14:30'
-      },
-      '2': {
-        _id: '2',
-        userInfo: { nickName: '李女士', avatarUrl: '' },
-        content: '请问有人知道3号楼的快递柜在哪里吗？刚搬来不太熟悉。',
-        images: [],
-        tags: ['求助'],
-        tag: '求助',
-        likeCount: 5,
-        commentCount: 8,
-        isLiked: true,
-        createTimeStr: '今天 10:20'
-      },
-      '3': {
-        _id: '3',
-        userInfo: { nickName: '张大爷', avatarUrl: '' },
-        content: '明天早上6点有人一起晨跑吗？从小区门口出发，绕公园两圈。',
-        images: [],
-        tags: ['活动'],
-        tag: '活动',
-        likeCount: 28,
-        commentCount: 15,
-        isLiked: false,
-        createTimeStr: '昨天 20:15'
-      }
-    }
-    
-    const post = mockPosts[this.data.postId] || mockPosts['1']
-    
-    this.setData({
-      post,
-      isOwner: false,
-      isLiked: post.isLiked || false,
-      loading: false
-    })
   },
 
   // 加载评论
@@ -120,23 +69,8 @@ Page({
       
       this.setData({ comments: formattedComments })
     } catch (err) {
-      console.error('加载评论失败，使用本地数据', err)
-      // 云数据库无数据时，显示模拟评论
-      const mockComments = [
-        {
-          _id: 'c1',
-          userInfo: { nickName: '李女士', avatarUrl: '' },
-          content: '收到，会注意的！',
-          createTimeStr: '今天 15:00'
-        },
-        {
-          _id: 'c2',
-          userInfo: { nickName: '张大爷', avatarUrl: '' },
-          content: '辛苦物业了！',
-          createTimeStr: '今天 15:30'
-        }
-      ]
-      this.setData({ comments: mockComments })
+      console.error('加载评论失败', err)
+      // 不再使用兜底数据
     }
   },
 
