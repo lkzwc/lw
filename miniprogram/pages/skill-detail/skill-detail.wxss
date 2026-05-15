@@ -1,0 +1,185 @@
+/* pages/skill-detail/skill-detail.wxss */
+
+.skill-detail-page {
+  
+  background-color: var(--bg-secondary);
+  padding-bottom: 140rpx;
+}
+
+/* 技能卡片 */
+.skill-card {
+  background-color: var(--bg-primary);
+  padding: 32rpx;
+  margin-bottom: 16rpx;
+}
+
+/* 头部 */
+.skill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.skill-category {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.category-icon {
+  font-size: 32rpx;
+}
+
+.category-name {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  background-color: rgba(74, 144, 217, 0.1);
+  padding: 6rpx 16rpx;
+  border-radius: 16rpx;
+}
+
+.skill-price {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #FF6B6B;
+}
+
+/* 标题 */
+.skill-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 24rpx;
+  line-height: 1.4;
+}
+
+/* 用户信息 */
+.skill-user-info {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-top: 1rpx solid var(--border-color);
+  border-bottom: 1rpx solid var(--border-color);
+  margin-bottom: 24rpx;
+}
+
+.avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+}
+
+.user-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.post-time {
+  font-size: 24rpx;
+  color: var(--text-placeholder);
+  margin-top: 4rpx;
+}
+
+/* 描述 */
+.skill-desc {
+  margin-bottom: 24rpx;
+}
+
+.desc-label,
+.images-label {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 16rpx;
+}
+
+.desc-content {
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  word-break: break-all;
+}
+
+/* 图片 */
+.skill-images {
+  margin-bottom: 24rpx;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+}
+
+.image-grid image {
+  width: 100%;
+  height: 200rpx;
+  border-radius: 12rpx;
+  object-fit: cover;
+}
+
+/* 统计 */
+.skill-stats {
+  padding-top: 20rpx;
+  border-top: 1rpx solid var(--border-color);
+}
+
+.stat-item {
+  font-size: 26rpx;
+  color: var(--text-placeholder);
+}
+
+/* 底部操作栏 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 32rpx;
+  background-color: var(--bg-primary);
+  border-top: 1rpx solid var(--border-color);
+  z-index: 100;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.view-count {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+}
+
+.contact-btn {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 20rpx 48rpx;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  color: #FFFFFF;
+  font-size: 30rpx;
+  font-weight: 500;
+  border-radius: 40rpx;
+  border: none;
+}
+
+.contact-btn::after {
+  border: none;
+}
+
+.phone-icon {
+  width: 36rpx;
+  height: 36rpx;
+}

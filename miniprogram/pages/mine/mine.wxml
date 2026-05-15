@@ -1,0 +1,127 @@
+<!--pages/mine/mine.wxml-->
+<view class="page">
+  <!-- 顶部渐变背景 -->
+  <view class="header-bg">
+    <view class="header-wave"></view>
+  </view>
+  
+  <!-- 顶部占位 -->
+  <view class="status-bar"></view>
+  
+  <!-- 用户区域（覆盖在渐变上） -->
+  <view class="user-section">
+    <!-- 未登录 -->
+    <view class="user-row" wx:if="{{!isLoggedIn}}">
+      <view class="avatar-wrap">
+        <view class="avatar-guest">
+          <text class="avatar-icon">👤</text>
+        </view>
+      </view>
+      <view class="user-detail">
+        <text class="user-name">新朋友</text>
+        <text class="user-sub">登录后解锁更多功能</text>
+      </view>
+    </view>
+    
+    <!-- 已登录 -->
+    <view class="user-row" wx:else bindtap="onEditTap">
+      <view class="avatar-wrap">
+        <image class="avatar-img" src="{{userInfo.avatarUrl || '/assets/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <view class="avatar-badge">编辑</view>
+      </view>
+      <view class="user-detail">
+        <text class="user-name">{{userInfo.nickName || '设置昵称'}}</text>
+        <view class="user-tags" wx:if="{{userInfo.phase || userInfo.building}}">
+          <text class="u-tag" wx:if="{{userInfo.phase}}">{{userInfo.phase}}</text>
+          <text class="u-tag" wx:if="{{userInfo.building}}">{{userInfo.building}}</text>
+        </view>
+      </view>
+      <text class="edit-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 登录按钮（未登录时突出显示） -->
+  <view class="login-area" wx:if="{{!isLoggedIn}}">
+    <button class="login-btn" bindtap="onLogin">
+      <text class="login-label">微信一键登录</text>
+    </button>
+  </view>
+
+  <!-- 数据统计（已登录） -->
+  <view class="stats-card" wx:if="{{isLoggedIn}}">
+    <view class="stat" bindtap="onMyPostsTap">
+      <text class="stat-val">{{stats.postCount || 0}}</text>
+      <text class="stat-key">发布</text>
+    </view>
+    <view class="stat" bindtap="onMyLikesTap">
+      <text class="stat-val">{{stats.likeCount || 0}}</text>
+      <text class="stat-key">点赞</text>
+    </view>
+    <view class="stat" bindtap="onMySkillsTap">
+      <text class="stat-val">{{stats.skillCount || 0}}</text>
+      <text class="stat-key">技能</text>
+    </view>
+    <view class="stat" bindtap="onMyCarpoolsTap">
+      <text class="stat-val">{{stats.carpoolCount || 0}}</text>
+      <text class="stat-key">拼车</text>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-card">
+    <view class="menu-item" bindtap="onContactTap">
+      <view class="menu-icon-wrap"><text class="iconfont icon-kefu"></text></view>
+      <text class="menu-name">联系开发者</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="onAboutTap">
+      <view class="menu-icon-wrap"><text class="iconfont icon-bangzhuzhongxin"></text></view>
+      <text class="menu-name">关于我们</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" wx:if="{{isAdmin}}" bindtap="onAdminTap">
+      <view class="menu-icon-wrap admin"><text class="iconfont icon-shouye"></text></view>
+      <text class="menu-name">管理后台</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 退出 -->
+  <view class="logout-card" wx:if="{{isLoggedIn}}" bindtap="onLogout">
+    <text class="logout-text">退出登录</text>
+  </view>
+</view>
+
+<!-- 编辑弹窗 -->
+<mp-half-screen-dialog
+  show="{{showEditDialog}}"
+  maskClosable
+  closable
+  bindclose="onCloseEditDialog"
+>
+  <view slot="title" class="dialog-title">
+    <text>编辑资料</text>
+    <text class="dialog-save" bindtap="onSaveUserInfo">保存</text>
+  </view>
+  <view slot="desc" class="dialog-body">
+    <view class="form-row">
+      <text class="form-label">头像</text>
+      <button class="avatar-picker" open-type="chooseAvatar" bindchooseavatar="onChooseAvatarEdit">
+        <image class="avatar-preview" src="{{editForm.avatarUrl || '/assets/images/default-avatar.png'}}"></image>
+      </button>
+    </view>
+    <view class="form-row">
+      <text class="form-label">昵称</text>
+      <input class="form-input" placeholder="请输入" value="{{editForm.nickName}}" bindinput="onNickNameInput" maxlength="20" />
+    </view>
+    <view class="form-row">
+      <text class="form-label">房号</text>
+      <picker mode="multiSelector" range="{{phaseBuildingRange}}" value="{{phaseBuildingValue}}" bindchange="onPhaseBuildingChange">
+        <view class="form-picker">
+          <text>{{editForm.phase && editForm.building ? editForm.phase + ' ' + editForm.building : '请选择'}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+  </view>
+</mp-half-screen-dialog>

@@ -1,0 +1,213 @@
+/* pages/admin/notice/notice.wxss */
+
+.page {
+  padding: 20rpx;
+  background: #f5f7fa;
+}
+
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 20rpx;
+}
+
+.count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.add-btn {
+  height: 56rpx;
+  line-height: 56rpx;
+  padding: 0 24rpx;
+  font-size: 26rpx;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  color: #fff;
+  border-radius: 28rpx;
+  border: none;
+}
+
+.add-btn::after {
+  border: none;
+}
+
+.list {
+  background: #fff;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.list-item {
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.item-main {
+  margin-bottom: 12rpx;
+}
+
+.item-title {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-time {
+  font-size: 24rpx;
+  color: #bbb;
+}
+
+.item-status {
+  font-size: 22rpx;
+  color: #bbb;
+  background: #f5f5f5;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+}
+
+.item-status.active {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+
+.item-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 24rpx;
+  font-size: 24rpx;
+}
+
+.btn-link {
+  color: #4A90D9;
+}
+
+.btn-danger {
+  color: #ff4d4f;
+}
+
+.empty {
+  text-align: center;
+  padding: 80rpx 0;
+  color: #bbb;
+  font-size: 26rpx;
+}
+
+/* 半屏弹窗 */
+.dialog-title-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100%;
+  position: relative;
+}
+
+.dialog-title {
+  font-size: 32rpx;
+  font-weight: 500;
+}
+
+.save-btn-top {
+  position: absolute;
+  right: -106rpx;
+  padding: 14rpx 32rpx;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  border: none;
+  line-height: 1.4;
+}
+
+.save-btn-top::after {
+  border: none;
+}
+
+.dialog-body {
+  padding: 16rpx 24rpx 32rpx;
+}
+
+.form-section {
+  margin-bottom: 28rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 12rpx;
+  font-weight: 500;
+}
+
+.required {
+  color: #ff4d4f;
+  margin-left: 4rpx;
+}
+
+/* 输入框 - 确保placeholder完整显示 */
+.form-input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 24rpx;
+  background: #f5f7fa;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #333;
+  box-sizing: border-box;
+  line-height: 88rpx;
+}
+
+/* placeholder样式 */
+.form-input::placeholder {
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 多行文本框 */
+.form-textarea {
+  width: 100%;
+  min-height: 200rpx;
+  padding: 24rpx;
+  background: #f5f7fa;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.form-textarea::placeholder {
+  color: #999;
+  font-size: 28rpx;
+}
+
+.word-count {
+  text-align: right;
+  font-size: 24rpx;
+  color: #bbb;
+  margin-top: 8rpx;
+}
+
+/* 开关 */
+.form-switch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  background: #f5f7fa;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #666;
+}

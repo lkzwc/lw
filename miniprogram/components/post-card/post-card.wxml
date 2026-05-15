@@ -1,0 +1,42 @@
+<!--components/post-card/post-card.wxml-->
+<view class="post-card" bindtap="onTap" data-id="{{post._id}}">
+  <!-- 用户信息 -->
+  <view class="post-header">
+    <image class="avatar" src="{{post.userInfo.avatarUrl || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
+    <view class="user-info">
+      <view class="nick-name">{{post.userInfo.nickName || '匿名用户'}}</view>
+      <view class="post-time">{{post.createTimeStr}}</view>
+    </view>
+  </view>
+
+  <!-- 内容 -->
+  <view class="post-content">
+    <text class="content-text">{{post.content}}</text>
+  </view>
+
+  <!-- 图片 -->
+  <view class="post-images image-grid" wx:if="{{post.images && post.images.length > 0}}">
+    <image wx:for="{{post.images}}" wx:key="*this" src="{{item}}" mode="aspectFill" catchtap="onPreviewImage" data-url="{{item}}" data-urls="{{post.images}}"></image>
+  </view>
+
+  <!-- 标签 -->
+  <view class="post-tags" wx:if="{{post.tags && post.tags.length > 0}}">
+    <text class="tag" wx:for="{{post.tags}}" wx:key="*this">#{{item}}</text>
+  </view>
+
+  <!-- 操作栏 -->
+  <view class="post-actions" catchtap="stopPropagation">
+    <view class="action-item {{isLiked ? 'liked' : ''}}" catchtap="onLike">
+      <text class="iconfont {{isLiked ? 'icon-dianzan1' : 'icon-dianzan'}} action-icon-font"></text>
+      <text class="action-text">{{post.likeCount || 0}}</text>
+    </view>
+    <view class="action-item" catchtap="onComment">
+      <text class="iconfont icon-pinglun action-icon-font"></text>
+      <text class="action-text">{{post.commentCount || 0}}</text>
+    </view>
+    <button class="action-item share-btn" open-type="share" data-id="{{post._id}}" catchtap="stopPropagation">
+      <text class="iconfont icon-zhuanfa action-icon-font"></text>
+      <text class="action-text">分享</text>
+    </button>
+  </view>
+</view>

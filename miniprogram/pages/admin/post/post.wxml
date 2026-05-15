@@ -1,0 +1,35 @@
+<!--pages/admin/post/post.wxml-->
+<view class="page">
+  <!-- 统计条 -->
+  <view class="stat-bar">
+    <text>共 {{totalCount}} 条</text>
+    <text>今日 +{{todayCount}}</text>
+  </view>
+
+  <!-- 列表 -->
+  <view class="list">
+    <view class="list-item" wx:for="{{posts}}" wx:key="_id">
+      <view class="item-main" bindtap="onViewPost" data-id="{{item._id}}">
+        <view class="item-row">
+          <text class="item-user">{{item.userInfo.nickName || '邻居'}}</text>
+          <text class="item-time">{{item.createTimeStr}}</text>
+        </view>
+        <view class="item-content">{{item.content}}</view>
+        <view class="item-meta">
+          <text>👍{{item.likeCount || 0}}</text>
+          <text>💬{{item.commentCount || 0}}</text>
+        </view>
+      </view>
+      <view class="item-actions">
+        <text class="btn-link" catchtap="onViewPost" data-id="{{item._id}}">详情</text>
+        <text class="btn-danger" catchtap="onDeletePost" data-id="{{item._id}}">删除</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{!loading && posts.length === 0}}">
+    <text>暂无数据</text>
+  </view>
+</view>
+
+<loading wx:if="{{loading}}"></loading>

@@ -1,0 +1,226 @@
+/* app.wxss - 全局样式 */
+/* 引入主题样式 */
+@import '/theme/theme.wxss';
+/* 引入 iconfont 字体图标 */
+@import '/styles/iconfont.wxss';
+
+/* ========== 页面基础 ========== */
+page {
+  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+}
+
+/* ========== 按钮规范 ========== */
+/* 主要按钮 - 主题色渐变 */
+.btn-primary {
+  width: 100%;
+  height: 88rpx;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  color: #FFFFFF;
+  font-size: var(--font-base);
+  font-weight: 500;
+  border-radius: var(--radius-lg);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+.btn-primary[disabled] {
+  opacity: 0.5;
+}
+
+/* 次要按钮 - 白底主题色边框 */
+.btn-secondary {
+  width: 100%;
+  height: 88rpx;
+  background: #FFFFFF;
+  color: #4A90D9;
+  font-size: var(--font-base);
+  font-weight: 500;
+  border-radius: var(--radius-lg);
+  border: 2rpx solid #4A90D9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-secondary::after {
+  border: none;
+}
+
+/* 文字按钮 - 主题色 */
+.btn-text {
+  background: transparent;
+  color: #4A90D9;
+  font-size: var(--font-base);
+  padding: 0;
+  border: none;
+}
+
+.btn-text::after {
+  border: none;
+}
+
+/* ========== 表单规范 ========== */
+/* 所有输入框必须遵循以下规范，确保placeholder完整显示 */
+
+/* 单行输入框 */
+.form-input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
+  color: var(--text-primary);
+  border: 1rpx solid transparent;
+  transition: all var(--duration-fast);
+  box-sizing: border-box;
+  line-height: 88rpx;
+}
+
+.form-input:focus {
+  border-color: var(--color-primary);
+  background: var(--bg-card);
+}
+
+.form-input::placeholder {
+  color: var(--text-placeholder) !important;
+  font-size: var(--font-base) !important;
+  overflow: visible !important;
+}
+
+/* 多行文本框 */
+.form-textarea {
+  width: 100%;
+  min-height: 200rpx;
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+  border: 1rpx solid transparent;
+  transition: all var(--duration-fast);
+  box-sizing: border-box;
+}
+
+.form-textarea:focus {
+  border-color: var(--color-primary);
+  background: var(--bg-card);
+}
+
+.form-textarea::placeholder {
+  color: var(--text-placeholder) !important;
+  font-size: var(--font-base) !important;
+  overflow: visible !important;
+}
+
+/* 表单标签 */
+.form-label {
+  display: block;
+  font-size: var(--font-base);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  font-weight: 500;
+}
+
+/* 表单分组 */
+.form-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* ========== 半屏弹框高度调整 ========== */
+.weui-half-screen-dialog {
+  height: 70vh !important;
+  max-height: 70vh !important;
+}
+
+.publish-dialog .weui-half-screen-dialog__bd {
+  height: calc(70vh - 100rpx) !important;
+  max-height: calc(70vh - 100rpx) !important;
+  overflow-y: auto;
+}
+
+/* 隐藏半屏弹框右侧的"更多"按钮 */
+.publish-dialog .weui-half-screen-dialog__hd__side:last-child,
+.profile-dialog .weui-half-screen-dialog__hd__side:last-child {
+  display: none !important;
+}
+
+/* ========== 图片网格 ========== */
+.image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: var(--spacing-sm);
+}
+
+.image-grid image {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: var(--radius-md);
+  margin-right: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  object-fit: cover;
+}
+
+.image-grid image:nth-child(3n) {
+  margin-right: 0;
+}
+
+/* ========== 动画类 ========== */
+/* 淡入 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn var(--duration-normal) ease-out;
+}
+
+/* 上滑淡入 */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp var(--duration-normal) ease-out;
+}
+
+/* 缩放 */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.scale-in {
+  animation: scaleIn var(--duration-normal) ease-out;
+}
+
+/* 脉冲 */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}

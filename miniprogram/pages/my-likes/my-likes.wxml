@@ -1,0 +1,4 @@
+<!--pages/my-likes/my-likes.wxml-->
+<view class="my-likes-page">
+  <text>我的点赞 - 开发中</text>
+</view>

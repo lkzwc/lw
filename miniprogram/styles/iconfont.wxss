@@ -1,0 +1,67 @@
+/* ========== iconfont 字体图标 ========== */
+
+/* 字体引入 */
+@font-face {
+  font-family: 'iconfont';
+  src: url('/assets/fonts/iconfont.woff2?t=1778686293891') format('woff2'),
+       url('/assets/fonts/iconfont.woff?t=1778686293891') format('woff'),
+       url('/assets/fonts/iconfont.ttf?t=1778686293891') format('truetype');
+}
+
+/* 基础样式 */
+.iconfont {
+  font-family: 'iconfont' !important;
+  font-size: 40rpx;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== 图标类名 ========== */
+
+/* 帖子操作栏 */
+.icon-dianzan:before { content: '\e653'; }     /* 点赞（空心） */
+.icon-dianzan1:before { content: '\e66e'; }    /* 点赞（实心） */
+.icon-dianzan2:before { content: '\e768'; }    /* 点赞（另一款） */
+.icon-pinglun:before { content: '\e767'; }     /* 评论 */
+.icon-pinglun1:before { content: '\e618'; }    /* 评论（另一款） */
+.icon-zhuanfa:before { content: '\e6c4'; }     /* 转发 */
+.icon-share:before { content: '\e738'; }       /* share */
+.icon-fenxianghaibao:before { content: '\e72c'; } /* 分享海报 */
+
+/* 首页功能入口 */
+.icon-wuyebaoxiu:before { content: '\e727'; }  /* 物业报修 */
+.icon-baojing:before { content: '\e705'; }     /* 报警 */
+.icon-jiduhuodong:before { content: '\e72d'; } /* 季度活动 */
+.icon-yewujieshao-chengjipinche:before { content: '\e603'; } /* 城际拼车 */
+.icon-xinwen:before { content: '\e7f7'; }     /* 新闻 */
+.icon-richangjilu:before { content: '\e735'; } /* 日常记录 */
+.icon-shouye:before { content: '\e737'; }      /* 首页 */
+
+/* 通用功能 */
+.icon-dingwei:before { content: '\e609'; }     /* 定位 */
+.icon-shangchuantupian:before { content: '\e60c'; } /* 上传图片 */
+.icon-shangchuantupian1:before { content: '\e600'; } /* 图片 */
+.icon-shangchuanwenjian:before { content: '\e69e'; } /* 上传文件 */
+.icon-naozhong_huaban1:before { content: '\e610'; } /* 时间/闹钟 */
+.icon-jilu:before { content: '\e686'; }        /* 记录 */
+.icon-pingjia:before { content: '\e60a'; }     /* 评价 */
+.icon-pingjia1:before { content: '\e60e'; }    /* 评价（另一款） */
+.icon-pingjia2:before { content: '\e736'; }    /* 评价（第三款） */
+.icon-bangzhuzhongxin:before { content: '\e733'; } /* 帮助中心 */
+.icon-kefu:before { content: '\e734'; }        /* 客服 */
+.icon-1:before { content: '\e602'; }           /* 数字1 */
+
+/* ========== 图标尺寸变体 ========== */
+.iconfont-sm { font-size: 32rpx; }
+.iconfont-md { font-size: 40rpx; }
+.iconfont-lg { font-size: 48rpx; }
+.iconfont-xl { font-size: 56rpx; }
+
+/* ========== 图标颜色变体 ========== */
+.iconfont-primary { color: #4A90D9; }
+.iconfont-active { color: #4A90D9; }
+.iconfont-secondary { color: #999999; }
+.iconfont-disabled { color: #CCCCCC; }
+.iconfont-white { color: #FFFFFF; }
+.iconfont-liked { color: #FF6B6B; }

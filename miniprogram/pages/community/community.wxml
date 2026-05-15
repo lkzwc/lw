@@ -1,0 +1,151 @@
+<!--pages/community/community.wxml - 按设计图重构-->
+<view class="community-page">
+  
+  <!-- 顶部标题栏 -->
+  <view class="page-header">
+    <!-- 背景图 -->
+    <image class="page-header-bg" src="/assets/images/homebg.jpeg" mode="aspectFill"></image>
+    <!-- 渐变蒙层 -->
+    <view class="page-header-mask"></view>
+    <!-- 动态光效 -->
+    <view class="page-header-glow"></view>
+    <!-- 内容层 -->
+    <view class="header-content">
+      <text class="page-title">社区动态</text>
+      <text class="page-subtitle">分享生活，连接邻里</text>
+    </view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-section">
+    <view class="search-bar" bindtap="onSearchTap">
+      <text class="search-icon">🔍</text>
+      <text class="search-placeholder">搜索帖子、话题...</text>
+    </view>
+  </view>
+
+  <!-- 标签筛选 -->
+  <view class="filter-tabs">
+    <view class="filter-tab {{currentTag === '' ? 'active' : ''}}" bindtap="onTagTap" data-tag="">全部</view>
+    <view class="filter-tab {{currentTag === '求助' ? 'active' : ''}}" bindtap="onTagTap" data-tag="求助">求助</view>
+    <view class="filter-tab {{currentTag === '分享' ? 'active' : ''}}" bindtap="onTagTap" data-tag="分享">分享</view>
+    <view class="filter-tab {{currentTag === '闲聊' ? 'active' : ''}}" bindtap="onTagTap" data-tag="闲聊">闲聊</view>
+  </view>
+
+  <!-- 帖子列表 -->
+  <view class="posts-list">
+    <view class="post-card" wx:for="{{posts}}" wx:key="_id" bindtap="onPostTap" data-id="{{item._id}}">
+      <view class="post-header">
+        <image class="post-avatar" src="{{item.userInfo.avatarUrl || '/assets/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <view class="post-user">
+          <text class="post-name">{{item.userInfo.nickName}}</text>
+          <text class="post-time">{{item.timeStr}}</text>
+        </view>
+        <view class="post-tag" wx:if="{{item.tag}}">#{{item.tag}}</view>
+      </view>
+      
+      <text class="post-content">{{item.content}}</text>
+      
+      <!-- 图片 -->
+      <view class="post-images" wx:if="{{item.images && item.images.length > 0}}">
+        <image 
+          class="post-image {{item.images.length === 1 ? 'single' : ''}}" 
+          wx:for="{{item.images}}" 
+          wx:for-item="img" 
+          wx:key="*this" 
+          src="{{img}}" 
+          mode="aspectFill"
+          bindtap="onImageTap"
+          data-images="{{item.images}}"
+          data-current="{{img}}"
+        ></image>
+      </view>
+      
+      <!-- 互动区 -->
+      <view class="post-footer">
+        <view class="post-stat {{item.isLiked ? 'liked' : ''}}" bindtap="onLikeTap" data-id="{{item._id}}">
+          <text class="iconfont {{item.isLiked ? 'icon-dianzan1' : 'icon-dianzan'}} stat-icon-font"></text>
+          <text class="stat-num">{{item.likeCount || 0}}</text>
+        </view>
+        <view class="post-stat">
+          <text class="iconfont icon-pinglun stat-icon-font"></text>
+          <text class="stat-num">{{item.commentCount || 0}}</text>
+        </view>
+        <button class="post-stat share-btn" open-type="share">
+          <text class="iconfont icon-zhuanfa stat-icon-font"></text>
+          <text class="stat-num">转发</text>
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{posts.length === 0 && !loading}}">
+    <text class="empty-icon">📝</text>
+    <text class="empty-text">暂无帖子</text>
+    <text class="empty-hint">点击右下角发布第一条帖子</text>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{posts.length > 0 && hasMore}}">
+    <text>{{loadingMore ? '加载中...' : '上拉加载更多'}}</text>
+  </view>
+
+  <!-- 没有更多 -->
+  <view class="no-more" wx:if="{{posts.length > 0 && !hasMore}}">
+    <text>没有更多了</text>
+  </view>
+
+</view>
+
+<!-- 发布按钮 -->
+<view class="publish-btn" bindtap="onPublishTap">
+  <text class="publish-icon">+</text>
+</view>
+
+<!-- 发布帖子半屏弹窗 -->
+<mp-half-screen-dialog
+  ext-class="publish-dialog"
+  show="{{showPublishDialog}}"
+  maskClosable="{{true}}"
+  closable="{{true}}"
+  bindclose="onClosePublishDialog"
+>
+  <view slot="title" class="dialog-title-row">
+    <text class="dialog-title">发布帖子</text>
+    <view class="dialog-submit-btn {{publishForm.content ? '' : 'disabled'}}" bindtap="onSubmitPost">
+      <text>发布</text>
+    </view>
+  </view>
+  <view slot="desc" class="dialog-body">
+    <view class="form-item">
+      <text class="form-label">帖子内容</text>
+      <textarea class="form-textarea" placeholder="分享你的生活点滴..." value="{{publishForm.content}}" bindinput="onContentInput" maxlength="500"></textarea>
+      <text class="form-count">{{publishForm.content.length || 0}}/500</text>
+    </view>
+    <view class="form-item">
+      <text class="form-label">添加标签</text>
+      <view class="tag-options">
+        <view class="tag-option {{publishForm.tag === '求助' ? 'active' : ''}}" bindtap="onTagSelect" data-tag="求助">求助</view>
+        <view class="tag-option {{publishForm.tag === '分享' ? 'active' : ''}}" bindtap="onTagSelect" data-tag="分享">分享</view>
+        <view class="tag-option {{publishForm.tag === '闲聊' ? 'active' : ''}}" bindtap="onTagSelect" data-tag="闲聊">闲聊</view>
+      </view>
+    </view>
+    <view class="form-item">
+      <text class="form-label">添加图片</text>
+      <view class="image-upload">
+        <view class="image-item" wx:for="{{publishForm.images}}" wx:key="*this">
+          <image class="preview-image" src="{{item}}" mode="aspectFill"></image>
+          <view class="delete-btn" bindtap="onDeleteImage" data-index="{{index}}">×</view>
+        </view>
+        <view class="image-add" wx:if="{{publishForm.images.length < 9}}" bindtap="onAddImage">
+          <text class="add-icon">+</text>
+          <text class="add-text">添加图片</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</mp-half-screen-dialog>
+
+<!-- 加载状态 -->
+<loading wx:if="{{loading}}"></loading>

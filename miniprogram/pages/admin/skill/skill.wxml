@@ -1,0 +1,77 @@
+<!--pages/admin/skill/skill.wxml-->
+<view class="page">
+  <!-- 统计条 -->
+  <view class="stat-bar">
+    <text>共 {{totalCount}} 条</text>
+    <text>首页展示 {{homeCount}}</text>
+  </view>
+
+  <!-- 列表 -->
+  <view class="list">
+    <view class="list-item" wx:for="{{skills}}" wx:key="_id">
+      <view class="item-main" bindtap="onEditSkill" data-id="{{item._id}}">
+        <view class="item-row">
+          <text class="item-title">{{item.title}}</text>
+          <text class="item-price">¥{{item.price}}/{{item.unit || '次'}}</text>
+        </view>
+        <view class="item-row sub">
+          <text class="item-user">{{item.userInfo.nickName || '邻居'}}</text>
+          <text class="item-category">{{item.category}}</text>
+        </view>
+      </view>
+      <view class="item-actions">
+        <switch checked="{{item.showHome}}" catchtap="onToggleHome" data-id="{{item._id}}" color="#4A90D9" />
+        <text class="btn-danger" catchtap="onDeleteSkill" data-id="{{item._id}}">删除</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{!loading && skills.length === 0}}">
+    <text>暂无数据</text>
+  </view>
+</view>
+
+<!-- 编辑弹窗 -->
+<view class="modal-mask" wx:if="{{showModal}}" bindtap="onCloseModal">
+  <view class="modal" catchtap="">
+    <view class="modal-head">
+      <text class="modal-title">编辑技能</text>
+      <text class="modal-close" bindtap="onCloseModal">×</text>
+    </view>
+    <view class="modal-body">
+      <view class="form-row">
+        <text class="label">标题</text>
+        <input class="input" placeholder="技能标题" value="{{formData.title}}" bindinput="onTitleInput" />
+      </view>
+      <view class="form-row">
+        <text class="label">分类</text>
+        <picker mode="selector" range="{{categories}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+          <view class="picker">{{formData.category || '选择分类'}} ></view>
+        </picker>
+      </view>
+      <view class="form-row">
+        <text class="label">价格</text>
+        <input class="input" type="digit" placeholder="价格" value="{{formData.price}}" bindinput="onPriceInput" />
+        <input class="input short" placeholder="单位" value="{{formData.unit}}" bindinput="onUnitInput" />
+      </view>
+      <view class="form-row">
+        <text class="label">描述</text>
+        <textarea class="textarea" placeholder="技能描述" value="{{formData.description}}" bindinput="onDescInput" maxlength="200"></textarea>
+      </view>
+      <view class="form-row">
+        <text class="label">电话</text>
+        <input class="input" type="number" placeholder="联系电话" value="{{formData.phone}}" bindinput="onPhoneInput" />
+      </view>
+      <view class="form-row">
+        <text class="label">首页</text>
+        <switch checked="{{formData.showHome}}" bindchange="onShowHomeChange" color="#4A90D9" />
+      </view>
+    </view>
+    <view class="modal-foot">
+      <button class="btn cancel" bindtap="onCloseModal">取消</button>
+      <button class="btn primary" bindtap="onSaveSkill">保存</button>
+    </view>
+  </view>
+</view>
+
+<loading wx:if="{{loading}}"></loading>

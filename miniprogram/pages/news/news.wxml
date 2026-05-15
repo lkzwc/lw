@@ -1,0 +1,33 @@
+<!--pages/news/news.wxml-->
+<view class="news-page">
+  <!-- 分类标签 -->
+  <view class="news-tabs">
+    <view class="tab-item {{currentTab === 'domestic' ? 'active' : ''}}" bindtap="onTabChange" data-tab="domestic">国内</view>
+    <view class="tab-item {{currentTab === 'international' ? 'active' : ''}}" bindtap="onTabChange" data-tab="international">国际</view>
+  </view>
+
+  <!-- 新闻列表 -->
+  <view class="news-list">
+    <view class="news-item" wx:for="{{newsList}}" wx:key="id" bindtap="onNewsTap" data-url="{{item.url}}" data-title="{{item.title}}">
+      <image class="news-cover" src="{{item.cover || '/assets/default-goods-image.png'}}" mode="aspectFill" wx:if="{{item.cover}}"></image>
+      <view class="news-content">
+        <view class="news-title">{{item.title}}</view>
+        <view class="news-meta">
+          <text class="news-source">{{item.source}}</text>
+          <text class="news-time">{{item.time}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{newsList.length === 0 && !loading}}">
+    <text class="empty-icon">📰</text>
+    <text class="empty-text">暂无新闻</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>

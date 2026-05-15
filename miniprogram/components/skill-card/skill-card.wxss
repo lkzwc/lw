@@ -1,0 +1,99 @@
+/* components/skill-card/skill-card.wxss */
+
+.skill-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+/* 标题 + 标签 + 报价 一行 */
+.skill-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.skill-title {
+  flex: 1;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 12rpx;
+}
+
+.skill-tag {
+  font-size: 20rpx;
+  color: #667eea;
+  background: #f0f3ff;
+  padding: 4rpx 10rpx;
+  border-radius: 4rpx;
+  margin-right: 10rpx;
+  white-space: nowrap;
+}
+
+.skill-price {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #ff6b6b;
+  white-space: nowrap;
+}
+
+/* 描述 */
+.skill-desc {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 16rpx;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 图片 */
+.skill-images {
+  display: flex;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.skill-images image {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 12rpx;
+  object-fit: cover;
+}
+
+/* 底部 */
+.skill-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skill-user {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+}
+
+.user-name {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.skill-meta {
+  font-size: 22rpx;
+  color: #bbb;
+}

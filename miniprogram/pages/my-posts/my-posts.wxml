@@ -1,0 +1,4 @@
+<!--pages/my-posts/my-posts.wxml-->
+<view class="my-posts-page">
+  <text>我的发布 - 开发中</text>
+</view>

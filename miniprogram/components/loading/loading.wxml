@@ -1,0 +1,5 @@
+<!--components/loading/loading.wxml-->
+<view class="loading-wrap">
+  <view class="loading-spinner"></view>
+  <text class="loading-text">{{text || '加载中...'}}</text>
+</view>

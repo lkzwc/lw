@@ -1,0 +1,78 @@
+<!-- iconfont 图标使用示例 -->
+
+<!-- ========== 基础用法 ========== -->
+
+<!-- 1. 最简单的用法 -->
+<text class="iconfont icon-like"></text>
+
+<!-- 2. 指定颜色 -->
+<text class="iconfont icon-like iconfont-primary"></text>
+<text class="iconfont icon-like iconfont-active"></text>
+
+<!-- 3. 指定尺寸 -->
+<text class="iconfont icon-like iconfont-sm"></text>  <!-- 32rpx -->
+<text class="iconfont icon-like iconfont-md"></text>  <!-- 40rpx -->
+<text class="iconfont icon-like iconfont-lg"></text>  <!-- 48rpx -->
+<text class="iconfont icon-like iconfont-xl"></text>  <!-- 56rpx -->
+
+<!-- 4. 自定义样式 -->
+<text class="iconfont icon-like" style="color: #FF6B6B; font-size: 44rpx;"></text>
+
+
+<!-- ========== 实际应用场景 ========== -->
+
+<!-- 帖子操作栏 -->
+<view class="post-actions">
+  <view class="action-item">
+    <text class="iconfont icon-like action-icon-font"></text>
+    <text class="action-text">12</text>
+  </view>
+  <view class="action-item">
+    <text class="iconfont icon-comment action-icon-font"></text>
+    <text class="action-text">5</text>
+  </view>
+  <view class="action-item">
+    <text class="iconfont icon-share action-icon-font"></text>
+    <text class="action-text">分享</text>
+  </view>
+</view>
+
+<!-- tabBar 图标 -->
+<view class="tabbar-item">
+  <text class="iconfont icon-home tabbar-icon"></text>
+  <text class="tabbar-text">首页</text>
+</view>
+<view class="tabbar-item active">
+  <text class="iconfont icon-home-active tabbar-icon-active"></text>
+  <text class="tabbar-text">首页</text>
+</view>
+
+<!-- 公告图标 -->
+<view class="notice-card">
+  <text class="iconfont icon-noticeboard iconfont-primary"></text>
+  <text class="notice-text">公告内容</text>
+</view>
+
+<!-- 发送按钮 -->
+<button class="send-btn">
+  <text class="iconfont icon-send iconfont-white"></text>
+  <text class="send-text">发送</text>
+</button>
+
+<!-- 联系电话 -->
+<view class="contact-btn">
+  <text class="iconfont icon-phone iconfont-white"></text>
+  <text>联系TA</text>
+</view>
+
+
+<!-- ========== 替换现有 PNG 图标 ========== -->
+
+<!-- 原来的 PNG 方式 -->
+<!-- <image class="action-icon" src="/assets/icons/like.png" mode="aspectFit"></image> -->
+
+<!-- 替换为 iconfont -->
+<text class="iconfont icon-like action-icon-font"></text>
+
+<!-- 优点：可以通过 CSS color 统一修改颜色 -->
+<!-- .action-icon-font { color: var(--primary-color); } -->

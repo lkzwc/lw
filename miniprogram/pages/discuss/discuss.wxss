@@ -1,0 +1,472 @@
+/* pages/discuss/discuss.wxss - 业主议事厅（头像两侧，吸顶） */
+
+.discuss-page {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== 自定义导航栏 ========== */
+.custom-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+}
+
+.nav-placeholder {
+  width: 100%;
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 var(--spacing-md);
+}
+
+.nav-back {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-back-icon {
+  font-size: 52rpx;
+  color: #FFFFFF;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.nav-right {
+  width: 72rpx;
+}
+
+/* ========== 吸顶区域 ========== */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* ========== 议题概要区域 ========== */
+.topic-header {
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  padding: var(--spacing-lg);
+  padding-top: calc(88rpx + env(safe-area-inset-top));
+  border-radius: 0 0 32rpx 32rpx;
+}
+
+.topic-info {
+  margin-bottom: var(--spacing-sm);
+}
+
+.topic-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.topic-title {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.topic-status {
+  font-size: var(--font-sm);
+  padding: 6rpx 16rpx;
+  border-radius: 16rpx;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
+.topic-desc {
+  display: block;
+  font-size: var(--font-base);
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-sm);
+}
+
+.topic-meta {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.topic-author,
+.topic-time {
+  font-size: var(--font-sm);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ========== 投票进度条（精简版） ========== */
+.vote-progress {
+  background: #FFFFFF;
+  margin: var(--spacing-md);
+  border-radius: 16rpx;
+  padding: var(--spacing-md);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.vote-header {
+  margin-bottom: var(--spacing-md);
+}
+
+.vote-title {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.vote-deadline {
+  font-size: var(--font-sm);
+  color: var(--text-placeholder);
+  font-weight: 400;
+}
+
+.vote-bar {
+  display: flex;
+  height: 48rpx;
+  border-radius: 24rpx;
+  background: #F0F0F0;
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+}
+
+.vote-approve {
+  background: linear-gradient(90deg, #52C41A 0%, #73D13D 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60rpx;
+  transition: width 0.3s ease;
+}
+
+.vote-reject {
+  background: linear-gradient(90deg, #FF4D4F 0%, #FF7875 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60rpx;
+  transition: width 0.3s ease;
+}
+
+.vote-percent {
+  font-size: var(--font-sm);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.vote-actions {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.vote-btn {
+  flex: 1;
+  height: 80rpx;
+  border-radius: 40rpx;
+  font-size: var(--font-md);
+  font-weight: 600;
+  border: none;
+}
+
+.vote-btn::after {
+  border: none;
+}
+
+.vote-btn.approve {
+  background: linear-gradient(135deg, #52C41A 0%, #73D13D 100%);
+  color: #FFFFFF;
+}
+
+.vote-btn.reject {
+  background: linear-gradient(135deg, #FF4D4F 0%, #FF7875 100%);
+  color: #FFFFFF;
+}
+
+.vote-result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  
+  border-radius: 12rpx;
+}
+
+.result-icon {
+  font-size: 32rpx;
+}
+
+.result-text {
+  font-size: var(--font-base);
+  color: var(--text-secondary);
+}
+
+/* ========== 发起投票按钮 ========== */
+.start-vote-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  margin: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(74, 144, 217, 0.3);
+}
+
+.btn-icon {
+  font-size: 32rpx;
+}
+
+.btn-text {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+/* ========== 群聊消息区域（头像两侧） ========== */
+.chat-area {
+  flex: 1;
+  padding: var(--spacing-md);
+  padding-bottom: 120rpx;
+}
+
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+}
+
+.time-divider {
+  text-align: center;
+  padding: var(--spacing-md) 0;
+}
+
+.time-divider text {
+  font-size: var(--font-xs);
+  color: var(--text-placeholder);
+  
+  padding: 8rpx 24rpx;
+  border-radius: 20rpx;
+}
+
+.message-item {
+  margin-bottom: var(--spacing-md);
+}
+
+.message-content {
+  display: flex;
+  align-items: flex-start;
+}
+
+.message-item.mine .message-content {
+  flex-direction: row-reverse;
+}
+
+.message-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  margin: 0 var(--spacing-sm);
+}
+
+.message-body {
+  max-width: 70%;
+}
+
+.message-name {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.message-item.mine .message-name {
+  text-align: right;
+}
+
+.message-bubble {
+  background: #FFFFFF;
+  padding: var(--spacing-md);
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.message-item.mine .message-bubble {
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+}
+
+.message-text {
+  font-size: var(--font-base);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.message-item.mine .message-text {
+  color: #FFFFFF;
+}
+
+.message-time {
+  font-size: var(--font-xs);
+  color: var(--text-placeholder);
+  margin-top: 8rpx;
+  display: block;
+}
+
+.message-item.mine .message-time {
+  text-align: right;
+}
+
+.load-more-tip,
+.no-more-tip {
+  text-align: center;
+  padding: var(--spacing-md);
+  font-size: var(--font-sm);
+  color: var(--text-placeholder);
+}
+
+/* ========== 消息输入区域 ========== */
+.input-area {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #FFFFFF;
+  padding: var(--spacing-md);
+  padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom));
+  border-top: 1rpx solid #F0F0F0;
+}
+
+.input-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.message-input {
+  flex: 1;
+  height: 80rpx;
+  
+  border-radius: 40rpx;
+  padding: 0 var(--spacing-md);
+  font-size: var(--font-base);
+}
+
+.send-btn {
+  width: 120rpx;
+  height: 80rpx;
+  background: #E8E8E8;
+  border-radius: 40rpx;
+  font-size: var(--font-base);
+  color: var(--text-placeholder);
+  border: none;
+}
+
+.send-btn::after {
+  border: none;
+}
+
+.send-btn.active {
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  color: #FFFFFF;
+}
+
+/* ========== 半屏弹窗样式 ========== */
+.dialog-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.dialog-title {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dialog-submit-btn {
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  color: #FFFFFF;
+  padding: 12rpx 32rpx;
+  border-radius: 32rpx;
+  font-size: var(--font-base);
+  font-weight: 500;
+}
+
+.dialog-submit-btn.disabled {
+  background: #E8E8E8;
+  color: var(--text-placeholder);
+}
+
+.dialog-body {
+  padding: var(--spacing-md) 0;
+}
+
+.form-item {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-label {
+  display: block;
+  font-size: var(--font-base);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  height: 88rpx;
+  
+  border-radius: 12rpx;
+  padding: 0 var(--spacing-md);
+  font-size: var(--font-base);
+}
+
+.form-picker {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 88rpx;
+  
+  border-radius: 12rpx;
+  padding: 0 var(--spacing-md);
+}
+
+.picker-text {
+  font-size: var(--font-base);
+  color: var(--text-primary);
+}
+
+.picker-arrow {
+  font-size: var(--font-xl);
+  color: var(--text-placeholder);
+}
+
+.form-textarea {
+  width: 100%;
+  height: 160rpx;
+  
+  border-radius: 12rpx;
+  padding: var(--spacing-md);
+  font-size: var(--font-base);
+}

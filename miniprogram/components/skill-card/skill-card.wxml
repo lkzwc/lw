@@ -1,0 +1,28 @@
+<!--components/skill-card/skill-card.wxml-->
+<view class="skill-card" bindtap="onTap" data-id="{{skill._id}}">
+  <!-- 标题 + 标签 + 报价 -->
+  <view class="skill-header">
+    <text class="skill-title">{{skill.title}}</text>
+    <text class="skill-tag">{{categoryIcon}} {{skill.categoryName}}</text>
+    <text class="skill-price" wx:if="{{skill.price}}">{{skill.price}}</text>
+  </view>
+  
+  <!-- 描述 -->
+  <view class="skill-desc" wx:if="{{skill.description}}">{{skill.description}}</view>
+  
+  <!-- 图片 -->
+  <view class="skill-images" wx:if="{{skill.images && skill.images.length > 0}}">
+    <image wx:for="{{skill.images}}" wx:key="*this" src="{{item}}" mode="aspectFill"></image>
+  </view>
+  
+  <!-- 底部 -->
+  <view class="skill-footer">
+    <view class="skill-user">
+      <image class="avatar" src="{{skill.userInfo.avatarUrl || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
+      <text class="user-name">{{skill.userInfo.nickName || '邻居'}}</text>
+    </view>
+    <view class="skill-meta">
+      <text>👁 {{skill.viewCount || 0}}</text>
+    </view>
+  </view>
+</view>

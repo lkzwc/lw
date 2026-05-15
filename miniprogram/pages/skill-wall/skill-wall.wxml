@@ -1,0 +1,117 @@
+<!--pages/skill-wall/skill-wall.wxml-->
+<view class="skill-wall-page">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="nav-back-btn" bindtap="onBackTap">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="search-input-wrap">
+      <text class="search-icon">🔍</text>
+      <input class="search-input" placeholder="搜索技能" value="{{keyword}}" bindinput="onSearchInput" bindconfirm="onSearch" />
+    </view>
+  </view>
+
+  <!-- 分类筛选 -->
+  <scroll-view class="category-scroll" scroll-x enable-flex>
+    <view class="category-list">
+      <view class="category-item {{currentCategory === '' ? 'active' : ''}}" bindtap="onCategoryTap" data-category="">全部</view>
+      <view class="category-item {{currentCategory === item.id ? 'active' : ''}}" wx:for="{{categories}}" wx:key="id" bindtap="onCategoryTap" data-category="{{item.id}}">
+        <text class="category-icon">{{item.icon}}</text>
+        <text>{{item.name}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 技能列表 -->
+  <view class="skill-list">
+    <skill-card wx:for="{{skills}}" wx:key="_id" skill="{{item}}" bindtap="onSkillTap" data-id="{{item._id}}"></skill-card>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{skills.length === 0 && !loading}}">
+    <view class="empty-icon">🛠️</view>
+    <text class="empty-text">暂无技能</text>
+    <button class="btn-primary mt-24" bindtap="onPublishTap">发布第一个技能</button>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{skills.length > 0 && hasMore}}">
+    <text>{{loadingMore ? '加载中...' : '上拉加载更多'}}</text>
+  </view>
+</view>
+
+<!-- 发布按钮 -->
+<view class="publish-btn" bindtap="onPublishTap">
+  <text class="publish-icon">➕</text>
+</view>
+
+<!-- 发布技能半屏弹窗 -->
+<mp-half-screen-dialog
+  ext-class="publish-dialog"
+  show="{{showPublishDialog}}"
+  maskClosable="{{true}}"
+  closable="{{true}}"
+  bindclose="onClosePublishDialog"
+>
+  <view slot="title" class="dialog-title-row">
+    <text class="dialog-title">发布技能</text>
+    <view class="dialog-submit-btn {{canSubmit ? '' : 'disabled'}}" bindtap="onSubmit">
+      <text>{{submitting ? '发布中' : '发布'}}</text>
+    </view>
+  </view>
+  <view slot="desc" class="dialog-body">
+    <!-- 技能标题 -->
+    <view class="form-section">
+      <view class="form-label">技能标题 <text class="required">*</text></view>
+      <input class="form-input" placeholder="如：家庭水电维修" value="{{title}}" bindinput="onTitleInput" maxlength="30" />
+    </view>
+
+    <!-- 技能分类 -->
+    <view class="form-section">
+      <view class="form-label">技能分类 <text class="required">*</text></view>
+      <scroll-view class="category-select" scroll-x enable-flex>
+        <view class="category-option {{category === item.id ? 'selected' : ''}}" wx:for="{{categories}}" wx:key="id" bindtap="onSelectCategory" data-id="{{item.id}}">
+          <text class="category-icon">{{item.icon}}</text>
+          <text>{{item.name}}</text>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 详细描述 -->
+    <view class="form-section">
+      <view class="form-label">详细描述</view>
+      <textarea class="form-textarea" placeholder="描述你的技能特长、服务范围等" value="{{description}}" bindinput="onDescriptionInput" maxlength="200" auto-height></textarea>
+      <view class="word-count">{{description.length}}/200</view>
+    </view>
+
+    <!-- 报价 -->
+    <view class="form-section">
+      <view class="form-label">报价</view>
+      <input class="form-input" placeholder="如：50元/次、面议" value="{{price}}" bindinput="onPriceInput" maxlength="20" />
+    </view>
+
+    <!-- 联系电话 -->
+    <view class="form-section">
+      <view class="form-label">联系电话 <text class="required">*</text></view>
+      <input class="form-input" type="number" placeholder="请输入手机号" value="{{phone}}" bindinput="onPhoneInput" maxlength="11" />
+    </view>
+
+    <!-- 作品图 -->
+    <view class="form-section">
+      <view class="form-label">作品图（可选）</view>
+      <view class="image-grid">
+        <view class="image-item" wx:for="{{images}}" wx:key="*this">
+          <image src="{{item}}" mode="aspectFill" bindtap="onPreviewImage" data-url="{{item}}"></image>
+          <view class="delete-btn" bindtap="onDeleteImage" data-index="{{index}}">✕</view>
+        </view>
+        <view class="image-add" wx:if="{{images.length < 9}}" bindtap="onChooseImage">
+          <image class="add-icon" src="/assets/icons/uploadimage.png" mode="aspectFit"></image>
+          <text class="add-text">添加图片</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</mp-half-screen-dialog>
+
+<!-- 加载状态 -->
+<loading wx:if="{{loading}}"></loading>

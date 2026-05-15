@@ -1,0 +1,131 @@
+<!--pages/timeline/timeline.wxml - 时间线模式（不是帖子）-->
+<view class="timeline-page">
+  
+  <!-- 顶部标题栏 -->
+  <view class="page-header">
+    <view class="nav-back-btn" bindtap="onBackTap">
+      <text class="back-icon">‹</text>
+    </view>
+    <text class="page-title">小区时间线</text>
+    <text class="page-subtitle">记录小区点滴变化</text>
+  </view>
+
+  <!-- 筛选标签 -->
+  <view class="filter-tabs">
+    <view class="filter-tab {{currentFilter === 'all' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="all">全部</view>
+    <view class="filter-tab {{currentFilter === 'issue' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="issue">问题反馈</view>
+    <view class="filter-tab {{currentFilter === 'notice' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="notice">小区通知</view>
+    <view class="filter-tab {{currentFilter === 'improve' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="improve">改善建议</view>
+  </view>
+
+  <!-- 时间线列表 -->
+  <view class="timeline-list">
+    <view class="timeline-item" wx:for="{{timelines}}" wx:key="_id" bindtap="onTimelineTap" data-id="{{item._id}}">
+      <!-- 左侧时间轴 -->
+      <view class="timeline-axis">
+        <view class="axis-dot"></view>
+        <view class="axis-line"></view>
+      </view>
+      
+      <!-- 右侧内容卡片 -->
+      <view class="timeline-card">
+        <view class="card-header">
+          <text class="card-title">{{item.title}}</text>
+          <view class="card-status status-{{item.status}}" wx:if="{{item.type === 'issue'}}">{{item.statusLabel}}</view>
+        </view>
+        
+        <text class="card-desc" wx:if="{{item.desc}}">{{item.desc}}</text>
+        
+        <!-- 图片 -->
+        <view class="card-images" wx:if="{{item.images && item.images.length > 0}}">
+          <image class="card-image" wx:for="{{item.images}}" wx:for-item="img" wx:key="*this" src="{{img}}" mode="aspectFill"></image>
+        </view>
+        
+        <!-- 底部信息 -->
+        <view class="card-footer">
+          <text class="footer-date">{{item.date}}</text>
+          <view class="footer-discuss">
+            <text class="discuss-icon">💬</text>
+            <text class="discuss-num">{{item.commentCount}}人讨论</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{timelines.length === 0}}">
+    <text class="empty-icon">📍</text>
+    <text class="empty-text">暂无时间线内容</text>
+    <text class="empty-hint">点击右下角上报问题</text>
+  </view>
+
+  <!-- 发布按钮 -->
+  <view class="publish-btn" bindtap="onPublishTap">
+    <text class="publish-icon">📝</text>
+    <text class="publish-text">上报问题</text>
+  </view>
+
+</view>
+
+<!-- 发布时间线半屏弹窗 -->
+<mp-half-screen-dialog
+  ext-class="publish-dialog"
+  show="{{showPublishDialog}}"
+  maskClosable="{{true}}"
+  closable="{{true}}"
+  bindclose="onClosePublishDialog"
+>
+  <view slot="title" class="dialog-title-row">
+    <text class="dialog-title">上报问题</text>
+    <view class="dialog-submit-btn {{canSubmit ? '' : 'disabled'}}" bindtap="onSubmit">
+      <text>{{submitting ? '发布中' : '发布'}}</text>
+    </view>
+  </view>
+  <view slot="desc" class="dialog-body">
+    <!-- 类型选择 -->
+    <view class="form-section">
+      <view class="form-label">发布类型</view>
+      <view class="type-selector">
+        <view 
+          class="type-option {{publishForm.type === item.value ? 'active' : ''}}" 
+          wx:for="{{typeOptions}}" 
+          wx:key="value"
+          bindtap="onTypeChange"
+          data-type="{{item.value}}"
+        >
+          <text class="type-icon">{{item.icon}}</text>
+          <text class="type-text">{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 标题 -->
+    <view class="form-section">
+      <view class="form-label">标题 <text class="required">*</text></view>
+      <input class="form-input" placeholder="请输入标题" value="{{publishForm.title}}" bindinput="onTitleInput" maxlength="50" />
+    </view>
+    
+    <!-- 详细描述 -->
+    <view class="form-section">
+      <view class="form-label">详细描述 <text class="required">*</text></view>
+      <textarea class="form-textarea" placeholder="请详细描述问题或建议..." value="{{publishForm.desc}}" bindinput="onDescInput" maxlength="500" auto-height></textarea>
+      <text class="form-count">{{publishForm.desc.length || 0}}/500</text>
+    </view>
+    
+    <!-- 图片上传 -->
+    <view class="form-section">
+      <view class="form-label">图片（可选）</view>
+      <view class="image-upload">
+        <view class="image-item" wx:for="{{publishForm.images}}" wx:key="*this">
+          <image class="image-preview" src="{{item}}" mode="aspectFill"></image>
+          <view class="image-delete" bindtap="onDeleteImage" data-index="{{index}}">×</view>
+        </view>
+        <view class="upload-btn" bindtap="onChooseImage" wx:if="{{publishForm.images.length < 9}}">
+          <text class="upload-icon">+</text>
+          <text class="upload-text">添加图片</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</mp-half-screen-dialog>

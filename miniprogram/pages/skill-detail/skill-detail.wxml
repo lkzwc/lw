@@ -1,0 +1,67 @@
+<!--pages/skill-detail/skill-detail.wxml-->
+<view class="skill-detail-page">
+  <!-- 技能信息 -->
+  <view class="skill-card" wx:if="{{skill}}">
+    <!-- 头部 -->
+    <view class="skill-header">
+      <view class="skill-category">
+        <text class="category-icon">{{categoryIcon}}</text>
+        <text class="category-name">{{skill.categoryName}}</text>
+      </view>
+      <view class="skill-price">{{skill.price}}</view>
+    </view>
+
+    <!-- 标题 -->
+    <view class="skill-title">{{skill.title}}</view>
+
+    <!-- 用户信息 -->
+    <view class="skill-user-info">
+      <image class="avatar" src="{{skill.userInfo.avatarUrl || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
+      <view class="user-detail">
+        <text class="user-name">{{skill.userInfo.nickName || '匿名用户'}}</text>
+        <text class="post-time">{{skill.createTimeStr}}</text>
+      </view>
+    </view>
+
+    <!-- 描述 -->
+    <view class="skill-desc" wx:if="{{skill.description}}">
+      <view class="desc-label">详细描述</view>
+      <text class="desc-content">{{skill.description}}</text>
+    </view>
+
+    <!-- 图片 -->
+    <view class="skill-images" wx:if="{{skill.images && skill.images.length > 0}}">
+      <view class="images-label">作品展示</view>
+      <view class="image-grid">
+        <image 
+          wx:for="{{skill.images}}" 
+          wx:key="*this" 
+          src="{{item}}" 
+          mode="aspectFill"
+          bindtap="onPreviewImage"
+          data-url="{{item}}"
+          data-urls="{{skill.images}}"
+        ></image>
+      </view>
+    </view>
+
+    <!-- 浏览量 -->
+    <view class="skill-stats">
+      <text class="stat-item">👁️ {{skill.viewCount || 0}} 次浏览</text>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar">
+    <view class="stat-info">
+      <text class="view-count">{{skill.viewCount || 0}} 人看过</text>
+    </view>
+    <button class="contact-btn" bindtap="onCallPhone">
+      <image class="phone-icon" src="/assets/icons/phone.png" mode="aspectFit"></image>
+      <text>拨打电话</text>
+    </button>
+  </view>
+</view>
+
+<!-- 加载状态 -->
+<loading wx:if="{{loading}}"></loading>

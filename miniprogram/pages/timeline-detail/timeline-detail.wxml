@@ -1,0 +1,74 @@
+<!--pages/timeline-detail/timeline-detail.wxml-->
+<view class="detail-page">
+  
+  <view class="detail-content">
+    
+    <!-- 顶部卡片 -->
+    <view class="header-card">
+      <view class="header-top">
+        <image class="header-avatar" src="{{detail.avatar || '/assets/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <view class="header-user">
+          <text class="header-name">{{detail.userName}}</text>
+          <text class="header-time">{{detail.timeStr}}</text>
+        </view>
+        <view class="header-type type-{{detail.type}}">{{detail.typeLabel}}</view>
+      </view>
+      <text class="header-title">{{detail.title}}</text>
+      <text class="header-desc">{{detail.desc}}</text>
+    </view>
+    
+    <!-- 图片 -->
+    <view class="images-section" wx:if="{{detail.images && detail.images.length > 0}}">
+      <view class="images-grid">
+        <image 
+          class="image-item" 
+          wx:for="{{detail.images}}" 
+          wx:key="*this" 
+          src="{{item}}" 
+          mode="aspectFill"
+          bindtap="onImageTap"
+          data-images="{{detail.images}}"
+          data-current="{{item}}"
+        ></image>
+      </view>
+    </view>
+    
+    <!-- 状态卡片 -->
+    <view class="status-card" wx:if="{{detail.status}}">
+      <view class="status-row">
+        <text class="status-label">处理状态</text>
+        <view class="status-badge {{detail.status}}">
+          {{detail.statusText}}
+        </view>
+      </view>
+    </view>
+    
+    <!-- 评论区 -->
+    <view class="comments-section">
+      <text class="section-title">评论 ({{comments.length}})</text>
+      
+      <view class="comment-item" wx:for="{{comments}}" wx:key="_id">
+        <image class="comment-avatar" src="{{item.avatar || '/assets/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <view class="comment-body">
+          <text class="comment-name">{{item.userName}}</text>
+          <text class="comment-text">{{item.content}}</text>
+          <text class="comment-time">{{item.timeStr}}</text>
+        </view>
+      </view>
+      
+      <view class="empty-comments" wx:if="{{comments.length === 0}}">
+        <text>暂无评论，快来抢沙发吧~</text>
+      </view>
+    </view>
+    
+  </view>
+  
+  <!-- 底部操作栏 -->
+  <view class="action-bar">
+    <input class="comment-input" placeholder="发表评论..." value="{{commentInput}}" bindinput="onCommentInput" bindconfirm="onSendComment" />
+    <button class="send-btn" bindtap="onSendComment">发送</button>
+  </view>
+  
+</view>
+
+<loading wx:if="{{loading}}"></loading>

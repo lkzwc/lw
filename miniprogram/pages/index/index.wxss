@@ -1,0 +1,417 @@
+/* pages/index/index.wxss - 高科麓湾未来感首页 */
+
+/* ========== 全局变量 ========== */
+page {
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --card-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  --card-shadow-lg: 0 16rpx 48rpx rgba(0, 0, 0, 0.12);
+}
+
+.index-page {
+  
+  
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+}
+
+/* ========== 顶部Hero区域 ========== */
+.hero-section {
+  position: relative;
+  height: 520rpx;
+  overflow: hidden;
+}
+
+/* 背景图 */
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 内容层 */
+.hero-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  padding: var(--spacing-xl);
+  padding-top: calc(88rpx + env(safe-area-inset-top));
+  display: flex;
+  flex-direction: column;
+}
+
+/* 项目名称 */
+.hero-title-area {
+  margin-bottom: var(--spacing-xl);
+}
+
+.hero-title {
+  display: block;
+  font-size: 56rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 8rpx;
+  text-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.3);
+  margin-bottom: 12rpx;
+}
+
+.hero-subtitle {
+  display: block;
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 4rpx;
+  font-weight: 300;
+}
+
+/* 天气卡片（毛玻璃效果） */
+.weather-card {
+  display: inline-flex;
+  align-items: center;
+  width: 50%;
+  opacity: 0.7;
+  background: white;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 32rpx;
+  padding: 20rpx 28rpx;
+}
+
+.weather-main {
+  display: flex;
+  align-items: center;
+  margin-right: 24rpx;
+  padding-right: 24rpx;
+  border-right: 1rpx solid rgba(255, 255, 255, 0.3);
+}
+
+.weather-icon {
+  font-size: 48rpx;
+  margin-right: 12rpx;
+}
+
+.weather-temp-area {
+  display: flex;
+  align-items: baseline;
+}
+
+.weather-temp {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.weather-unit {
+  font-size: 24rpx;
+  color: #666;
+  margin-left: 4rpx;
+}
+
+.weather-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-desc {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.weather-air {
+  font-size: 22rpx;
+  color: #52C41A;
+  margin-top: 4rpx;
+}
+
+/* ========== 快捷入口卡片 ========== */
+.quick-menu-card {
+  margin: -60rpx var(--spacing-md) var(--spacing-md);
+  background: #FFFFFF;
+  border-radius: 36rpx;
+  padding: var(--spacing-lg);
+  box-shadow: var(--card-shadow-lg);
+  position: relative;
+  z-index: 10;
+}
+
+.menu-row {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: var(--spacing-md);
+}
+
+.menu-row:last-child {
+  margin-bottom: 0;
+}
+
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.menu-icon-wrap {
+  width: 96rpx;
+  height: 96rpx;
+  background: linear-gradient(135deg, #F8FAFC 0%, #EEF2F7 100%);
+  border-radius: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12rpx;
+  box-shadow: 
+    0 4rpx 12rpx rgba(0, 0, 0, 0.06),
+    inset 0 2rpx 4rpx rgba(255, 255, 255, 0.8);
+}
+
+.menu-icon-wrap .iconfont {
+  font-size: 44rpx;
+  color: #4A90D9;
+}
+
+.menu-name {
+  font-size: 24rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* ========== 公告模块 ========== */
+.notice-card {
+  margin: 0 var(--spacing-md) var(--spacing-md);
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 20rpx 24rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: var(--card-shadow);
+}
+
+.notice-icon {
+  width: 44rpx;
+  height: 44rpx;
+  margin-right: 12rpx;
+}
+
+.notice-tag {
+  background: linear-gradient(135deg, #4A90D9 0%, #5BA0E9 100%);
+  color: #FFFFFF;
+  font-size: 22rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 16rpx;
+  margin-right: 16rpx;
+  font-weight: 500;
+}
+
+.notice-swiper {
+  flex: 1;
+  height: 40rpx;
+}
+
+.notice-text {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 40rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notice-arrow {
+  font-size: 32rpx;
+  color: #CCC;
+  margin-left: 12rpx;
+}
+
+/* ========== 功能卡片通用样式 ========== */
+.section-card {
+  margin: 0 var(--spacing-md) var(--spacing-md);
+  background: #FFFFFF;
+  border-radius: 36rpx;
+  padding: var(--spacing-lg);
+  box-shadow: var(--card-shadow);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.section-more {
+  display: flex;
+  align-items: center;
+  font-size: 26rpx;
+  color: #999;
+}
+
+.more-arrow {
+  margin-left: 4rpx;
+  font-size: 28rpx;
+}
+
+/* ========== 最新技能（小红书风格） ========== */
+.skill-scroll {
+  margin: 0 calc(-1 * var(--spacing-md));
+  padding: 0 var(--spacing-md);
+}
+
+.skill-list {
+  display: flex;
+  gap: 20rpx;
+  padding-right: var(--spacing-md);
+}
+
+.skill-card {
+  flex-shrink: 0;
+  width: 260rpx;
+  background: #FAFAFA;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+.skill-cover {
+  width: 100%;
+  height: 200rpx;
+  background: linear-gradient(135deg, #E8F4FD 0%, #F0E8FF 100%);
+}
+
+.skill-info {
+  padding: 16rpx;
+}
+
+.skill-title {
+  display: block;
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skill-meta {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.skill-avatar {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  margin-right: 8rpx;
+  background: #EEE;
+}
+
+.skill-author {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.skill-stats {
+  display: flex;
+}
+
+.skill-likes {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* ========== 活动日历（Apple风格） ========== */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.activity-card {
+  display: flex;
+  background: #FAFAFA;
+  border-radius: 24rpx;
+  overflow: hidden;
+}
+
+.activity-cover {
+  width: 160rpx;
+  height: 160rpx;
+  background: linear-gradient(135deg, #E8F4FD 0%, #FFF0E6 100%);
+}
+
+.activity-content {
+  flex: 1;
+  padding: 16rpx;
+  display: flex;
+  align-items: center;
+}
+
+.activity-date-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80rpx;
+  height: 80rpx;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  border-radius: 16rpx;
+  margin-right: 16rpx;
+}
+
+.activity-month {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.activity-day {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.activity-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-title {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 8rpx;
+}
+
+.activity-location,
+.activity-time {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 4rpx;
+}
+
+.activity-action {
+  display: flex;
+  align-items: center;
+}
+
+.join-btn {
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  color: #FFFFFF;
+  font-size: 24rpx;
+  padding: 12rpx 28rpx;
+  border-radius: 24rpx;
+  font-weight: 500;
+}
+
+.join-btn.joined {
+  background: #F0F0F0;
+  color: #999;
+}

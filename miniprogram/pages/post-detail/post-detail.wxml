@@ -1,0 +1,133 @@
+<!--pages/post-detail/post-detail.wxml-->
+<view class="post-detail-page">
+  <!-- 帖子内容 -->
+  <view class="post-card" wx:if="{{post}}">
+    <!-- 用户信息 -->
+    <view class="post-header">
+      <image class="avatar" src="{{post.userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <view class="user-info">
+        <text class="nickname">{{post.userInfo.nickName || '邻居'}}</text>
+        <text class="time">{{post.createTimeStr}}</text>
+      </view>
+      <view class="more-btn" bindtap="onMoreTap" wx:if="{{isOwner}}">
+        <text>···</text>
+      </view>
+    </view>
+
+    <!-- 帖子内容 -->
+    <view class="post-content">
+      <text class="content-text">{{post.content}}</text>
+    </view>
+
+    <!-- 图片列表 -->
+    <view class="post-images" wx:if="{{post.images.length > 0}}">
+      <view class="image-grid {{post.images.length === 1 ? 'single' : ''}}">
+        <image 
+          wx:for="{{post.images}}" 
+          wx:key="*this"
+          class="post-image" 
+          src="{{item}}" 
+          mode="{{post.images.length === 1 ? 'widthFix' : 'aspectFill'}}"
+          bindtap="onPreviewImage"
+          data-url="{{item}}"
+        ></image>
+      </view>
+    </view>
+
+    <!-- 标签 -->
+    <view class="post-tags" wx:if="{{post.tags.length > 0}}">
+      <text class="tag" wx:for="{{post.tags}}" wx:key="*this" bindtap="onTagTap" data-tag="{{item}}">#{{item}}</text>
+    </view>
+
+    <!-- 附件 -->
+    <view class="post-files" wx:if="{{post.files.length > 0}}">
+      <view class="file-item" wx:for="{{post.files}}" wx:key="fileID" bindtap="onDownloadFile" data-file="{{item}}">
+        <image class="file-icon" src="/assets/icons/file.png" mode="aspectFit"></image>
+        <text class="file-name">{{item.name}}</text>
+      </view>
+    </view>
+
+    <!-- 互动栏 -->
+    <view class="post-actions">
+      <view class="action-item {{isLiked ? 'liked' : ''}}" bindtap="onLikeTap">
+        <text class="iconfont {{isLiked ? 'icon-dianzan1' : 'icon-dianzan'}} action-icon-font"></text>
+        <text class="action-count">{{post.likeCount || 0}}</text>
+      </view>
+      <view class="action-item" bindtap="onCommentTap">
+        <text class="iconfont icon-pinglun action-icon-font"></text>
+        <text class="action-count">{{post.commentCount || 0}}</text>
+      </view>
+      <button class="action-item share-btn" open-type="share">
+        <text class="iconfont icon-zhuanfa action-icon-font"></text>
+        <text class="action-count">分享</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 评论列表 -->
+  <view class="comments-section">
+    <view class="section-header">
+      <text class="section-title">评论 ({{comments.length}})</text>
+    </view>
+
+    <!-- 评论列表 -->
+    <view class="comments-list" wx:if="{{comments.length > 0}}">
+      <view class="comment-item" wx:for="{{comments}}" wx:key="_id">
+        <image class="comment-avatar" src="{{item.userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <view class="comment-body">
+          <view class="comment-header">
+            <text class="comment-nickname">{{item.userInfo.nickName || '邻居'}}</text>
+            <text class="comment-time">{{item.createTimeStr}}</text>
+          </view>
+          <text class="comment-content">{{item.content}}</text>
+          
+          <!-- 回复列表 -->
+          <view class="replies" wx:if="{{item.replies && item.replies.length > 0}}">
+            <view class="reply-item" wx:for="{{item.replies}}" wx:for-item="reply" wx:key="_id">
+              <text class="reply-nickname">{{reply.userInfo.nickName || '邻居'}}</text>
+              <text class="reply-arrow">→</text>
+              <text class="reply-to" wx:if="{{reply.replyToName}}">@{{reply.replyToName}}</text>
+              <text class="reply-content">{{reply.content}}</text>
+            </view>
+          </view>
+          
+          <!-- 回复按钮 -->
+          <view class="comment-actions">
+            <text class="reply-btn" bindtap="onReplyTap" data-comment="{{item}}">回复</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-comments" wx:if="{{comments.length === 0 && !loading}}">
+      <text class="empty-text">暂无评论，来说点什么吧~</text>
+    </view>
+  </view>
+
+  <!-- 底部评论输入 -->
+  <view class="comment-input-bar">
+    <input 
+      class="comment-input" 
+      placeholder="{{replyTo ? '回复 ' + replyTo.nickName + '...' : '说点什么...'}}" 
+      value="{{commentContent}}"
+      bindinput="onCommentInput"
+      adjust-position="{{true}}"
+    />
+    <button class="send-btn" bindtap="onSubmitComment">
+      <image class="send-icon" src="/assets/icons/send.png" mode="aspectFit"></image>
+      <text class="send-text">发送</text>
+    </button>
+  </view>
+</view>
+
+<!-- 加载状态 -->
+<loading wx:if="{{loading}}"></loading>
+
+<!-- 操作菜单 -->
+<action-sheet 
+  wx:if="{{showActionSheet}}" 
+  actions="{{actions}}" 
+  bindactiontap="onActionTap"
+  bindcancel="onCancelAction"
+/>
