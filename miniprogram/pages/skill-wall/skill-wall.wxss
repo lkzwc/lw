@@ -198,7 +198,7 @@
 
 /* 半屏弹窗内容 */
 .dialog-body {
-  padding: 8rpx 16rpx 16rpx;
+  padding: 8rpx 16rpx 0;
   overflow-x: hidden;
 }
 
@@ -221,7 +221,8 @@
 .form-input {
   width: 100%;
   padding: 16rpx;
-  background-color: #f5f7fa;
+  background-color: #FFFFFF;
+  border: 2rpx solid #E0E4EA;
   border-radius: 12rpx;
   font-size: 28rpx;
   box-sizing: border-box;
@@ -233,7 +234,8 @@
   width: 100%;
   min-height: 120rpx;
   padding: 16rpx;
-  background-color: #f5f7fa;
+  background-color: #FFFFFF;
+  border: 2rpx solid #E0E4EA;
   border-radius: 12rpx;
   font-size: 28rpx;
   line-height: 1.6;

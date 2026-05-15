@@ -288,24 +288,36 @@
 }
 
 /* ========== 弹窗 ========== */
-.dialog-title {
+.dialog-title-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  font-size: 34rpx;
-  font-weight: 600;
-  color: #000000;
 }
 
-.dialog-save {
-  font-size: 32rpx;
-  color: #4A90D9;
+.dialog-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.dialog-submit-btn {
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  color: #FFFFFF;
+  padding: 12rpx 32rpx;
+  border-radius: 32rpx;
+  font-size: 28rpx;
   font-weight: 500;
 }
 
+.dialog-submit-btn.disabled {
+  background: #E8E8E8;
+  color: #999;
+}
+
 .dialog-body {
-  padding: 32rpx 0;
+  padding: 16rpx 0 0;
+  overflow-x: hidden;
 }
 
 .form-row {

@@ -99,9 +99,11 @@
   closable
   bindclose="onCloseEditDialog"
 >
-  <view slot="title" class="dialog-title">
-    <text>编辑资料</text>
-    <text class="dialog-save" bindtap="onSaveUserInfo">保存</text>
+  <view slot="title" class="dialog-title-row">
+    <text class="dialog-title">编辑资料</text>
+    <view class="dialog-submit-btn" bindtap="onSaveUserInfo">
+      <text>保存</text>
+    </view>
   </view>
   <view slot="desc" class="dialog-body">
     <view class="form-row">

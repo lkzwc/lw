@@ -296,11 +296,11 @@
 
 .dialog-body {
   overflow-x: hidden;
-  padding: 0 8rpx;
+  padding: 0 8rpx 0;
 }
 
 .form-section {
-  margin-bottom: 32rpx;
+  margin-bottom: 20rpx;
 }
 
 .form-label {
@@ -319,7 +319,8 @@
   width: 100%;
   height: 80rpx;
   padding: 0 24rpx;
-  background: var(--bg-secondary);
+  background: #FFFFFF;
+  border: 2rpx solid #E0E4EA;
   border-radius: 16rpx;
   font-size: 28rpx;
   box-sizing: border-box;
@@ -331,7 +332,8 @@
   align-items: center;
   height: 80rpx;
   padding: 0 24rpx;
-  background: var(--bg-secondary);
+  background: #FFFFFF;
+  border: 2rpx solid #E0E4EA;
   border-radius: 16rpx;
   font-size: 28rpx;
   box-sizing: border-box;
