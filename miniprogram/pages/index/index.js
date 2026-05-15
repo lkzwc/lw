@@ -121,30 +121,6 @@ Page({
       console.error('加载活动失败', err)
     }
   },
-      activities: [
-        { 
-          _id: '1', 
-          title: '亲子运动会', 
-          cover: '', 
-          month: '5月', 
-          day: '15', 
-          location: '中央广场', 
-          timeStr: '09:00-12:00',
-          isJoined: false
-        },
-        { 
-          _id: '2', 
-          title: '社区读书会', 
-          cover: '', 
-          month: '5月', 
-          day: '18', 
-          location: '社区图书馆', 
-          timeStr: '14:00-16:00',
-          isJoined: true
-        }
-      ]
-    })
-  },
 
   // 格式化日期
   formatDate: function (timestamp) {
