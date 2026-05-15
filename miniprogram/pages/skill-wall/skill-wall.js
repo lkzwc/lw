@@ -34,9 +34,7 @@ Page({
 
   onShow: function () {
     // 每次显示时刷新列表，确保发布后能看到
-    if (this.data.skills.length > 0) {
-      this.loadSkills()
-    }
+    this.loadSkills()
   },
 
   onPullDownRefresh: function () {

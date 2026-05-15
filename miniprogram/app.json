@@ -19,7 +19,8 @@
     "pages/timeline/timeline",
     "pages/timeline-detail/timeline-detail",
     "pages/discuss/discuss",
-    "pages/webview/webview"
+    "pages/webview/webview",
+    "pages/notice-detail/notice-detail"
   ],
   "window": {
     "backgroundColor": "#F4F7FB",

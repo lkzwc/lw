@@ -1,0 +1,61 @@
+<!--pages/notice-detail/notice-detail.wxml - 公告详情（支持Markdown渲染）-->
+<view class="notice-detail-page">
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">公告详情</text>
+      <view class="nav-right"></view>
+    </view>
+  </view>
+
+  <!-- 自定义导航栏占位 -->
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
+
+  <!-- 公告内容 -->
+  <view class="notice-content" wx:if="{{notice}}">
+    <view class="notice-header">
+      <text class="notice-title">{{notice.title}}</text>
+      <view class="notice-meta">
+        <text class="notice-date">{{notice.dateStr}}</text>
+        <view class="notice-tag" wx:if="{{notice.category}}">{{notice.category}}</view>
+      </view>
+    </view>
+
+    <!-- 封面图 -->
+    <image class="notice-cover" wx:if="{{notice.cover}}" src="{{notice.cover}}" mode="widthFix"></image>
+
+    <!-- Markdown渲染内容 -->
+    <view class="notice-body">
+      <block wx:for="{{renderedContent}}" wx:key="index">
+        <!-- 标题 -->
+        <view class="md-h2" wx:if="{{item.type === 'h2'}}">{{item.text}}</view>
+        <view class="md-h3" wx:if="{{item.type === 'h3'}}">{{item.text}}</view>
+        <!-- 段落 -->
+        <view class="md-p" wx:if="{{item.type === 'p'}}">
+          <block wx:for="{{item.segments}}" wx:for-item="seg" wx:key="idx">
+            <text class="md-bold" wx:if="{{seg.bold}}">{{seg.text}}</text>
+            <text wx:else>{{seg.text}}</text>
+          </block>
+        </view>
+        <!-- 列表 -->
+        <view class="md-li" wx:if="{{item.type === 'li'}}">
+          <text class="li-dot">•</text>
+          <text class="li-text">{{item.text}}</text>
+        </view>
+        <!-- 图片 -->
+        <image class="md-image" wx:if="{{item.type === 'image'}}" src="{{item.src}}" mode="widthFix" bindtap="onImageTap" data-src="{{item.src}}"></image>
+        <!-- 分割线 -->
+        <view class="md-hr" wx:if="{{item.type === 'hr'}}"></view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>

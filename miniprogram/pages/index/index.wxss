@@ -178,50 +178,65 @@ page {
 }
 
 /* ========== 公告模块 ========== */
-.notice-card {
+/* ========== 公告模块 - 卡片列表 ========== */
+.notice-section .section-card {
   margin: 0 var(--spacing-md) var(--spacing-md);
   background: #FFFFFF;
   border-radius: 24rpx;
-  padding: 20rpx 24rpx;
-  display: flex;
-  align-items: center;
+  padding: var(--spacing-md);
   box-shadow: var(--card-shadow);
 }
 
-.notice-icon {
-  width: 44rpx;
-  height: 44rpx;
+.notice-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.notice-icon-text {
+  font-size: 32rpx;
+}
+
+.notice-list {
+  margin-top: 8rpx;
+}
+
+.notice-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #F5F5F5;
+}
+
+.notice-item:last-child {
+  border-bottom: none;
+}
+
+.notice-item-tag {
+  font-size: 20rpx;
+  color: #4A90D9;
+  background: rgba(74, 144, 217, 0.08);
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
   margin-right: 12rpx;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.notice-tag {
-  background: linear-gradient(135deg, #4A90D9 0%, #5BA0E9 100%);
-  color: #FFFFFF;
-  font-size: 22rpx;
-  padding: 6rpx 16rpx;
-  border-radius: 16rpx;
-  margin-right: 16rpx;
-  font-weight: 500;
-}
-
-.notice-swiper {
+.notice-item-title {
   flex: 1;
-  height: 40rpx;
-}
-
-.notice-text {
   font-size: 26rpx;
   color: #333;
-  line-height: 40rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.notice-arrow {
-  font-size: 32rpx;
-  color: #CCC;
-  margin-left: 12rpx;
+.notice-item-date {
+  font-size: 22rpx;
+  color: #BBB;
+  margin-left: 16rpx;
+  flex-shrink: 0;
 }
 
 /* ========== 功能卡片通用样式 ========== */
