@@ -142,6 +142,8 @@ Page({
               ...userRes.data[0],
               ...userInfo
             }
+            // 保存到本地存储
+            wx.setStorageSync('userInfo', app.globalData.userInfo)
           } else {
             // 创建新用户
             const newUser = {
@@ -195,6 +197,7 @@ Page({
         name: 'getOpenId',
         success: (res) => {
           getApp().globalData.openid = res.result.openid
+          wx.setStorageSync('openid', res.result.openid)
           resolve(res.result.openid)
         },
         fail: reject
@@ -309,6 +312,8 @@ Page({
           ...userRes.data[0],
           ...editForm
         }
+        // 更新本地存储
+        wx.setStorageSync('userInfo', app.globalData.userInfo)
       } else {
         // 创建新用户
         await db.collection('users').add({
