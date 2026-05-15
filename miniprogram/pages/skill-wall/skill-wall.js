@@ -27,14 +27,15 @@ Page({
   },
 
   onLoad: function () {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
     this.loadSkills()
   },
 
   onShow: function () {
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({
-        selected: 2
-      })
+    // 每次显示时刷新列表，确保发布后能看到
+    if (this.data.skills.length > 0) {
+      this.loadSkills()
     }
   },
 
@@ -213,7 +214,7 @@ Page({
   // 选择图片
   onChooseImage: function () {
     wx.chooseMedia({
-      count: 9 - this.data.images.length,
+      count: 6 - this.data.images.length,
       mediaType: ['image'],
       sourceType: ['album', 'camera'],
       success: async (res) => {

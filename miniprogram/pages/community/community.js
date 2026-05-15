@@ -15,7 +15,8 @@ Page({
     publishForm: {
       content: '',
       tag: '',
-      images: []
+      images: [],
+      detectedTags: []
     }
   },
 
@@ -167,7 +168,8 @@ Page({
       publishForm: {
         content: '',
         tag: '',
-        images: []
+        images: [],
+        detectedTags: []
       }
     })
   },
@@ -177,10 +179,22 @@ Page({
     this.setData({ showPublishDialog: false })
   },
 
-  // 输入内容
+  // 输入内容 - 自动识别#标签
   onContentInput: function (e) {
+    const content = e.detail.value
+    // 自动识别 #标签
+    const tagRegex = /#([^\s#]+)/g
+    const detectedTags = []
+    let match
+    while ((match = tagRegex.exec(content)) !== null) {
+      const tag = match[1]
+      if (!detectedTags.includes(tag)) {
+        detectedTags.push(tag)
+      }
+    }
     this.setData({
-      'publishForm.content': e.detail.value
+      'publishForm.content': content,
+      'publishForm.detectedTags': detectedTags
     })
   },
 
@@ -194,7 +208,7 @@ Page({
 
   // 添加图片
   onAddImage: function () {
-    const count = 9 - this.data.publishForm.images.length
+    const count = 6 - this.data.publishForm.images.length
     wx.chooseMedia({
       count,
       mediaType: ['image'],
@@ -215,11 +229,17 @@ Page({
 
   // 提交帖子
   onSubmitPost: function () {
-    const { content, tag, images } = this.data.publishForm
+    const { content, tag, images, detectedTags } = this.data.publishForm
     
     if (!content.trim()) {
       util.showToast('请输入帖子内容')
       return
+    }
+    
+    // 合并自动识别标签和手动选择标签
+    const allTags = [...detectedTags]
+    if (tag && !allTags.includes(tag)) {
+      allTags.push(tag)
     }
     
     wx.showLoading({ title: '发布中...' })

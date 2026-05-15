@@ -26,6 +26,8 @@ Page({
   },
 
   onLoad: function () {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
     this.loadTimelines()
   },
 
@@ -168,7 +170,7 @@ Page({
 
   // 选择图片
   onChooseImage: function () {
-    const count = 9 - this.data.publishForm.images.length
+    const count = 6 - this.data.publishForm.images.length
     if (count <= 0) {
       util.showToast('最多上传9张图片')
       return

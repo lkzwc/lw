@@ -6,40 +6,59 @@
   padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
 }
 
-/* 页面头部 */
-.page-header {
+/* ========== 自定义导航栏 ========== */
+.custom-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
   background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-  padding: var(--spacing-lg);
-  padding-top: calc(88rpx + env(safe-area-inset-top));
-  border-radius: 0 0 40rpx 40rpx;
-  position: relative;
 }
 
-.nav-back-btn {
-  position: absolute;
-  top: calc(env(safe-area-inset-top) + 8rpx);
-  left: 16rpx;
+.nav-placeholder {
+  width: 100%;
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 var(--spacing-md);
+}
+
+.nav-back {
   width: 72rpx;
   height: 72rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
 }
 
-.back-icon {
+.nav-back-icon {
   font-size: 52rpx;
   color: #FFFFFF;
   font-weight: 300;
   line-height: 1;
 }
 
-.page-title {
-  display: block;
-  font-size: var(--font-xl);
-  font-weight: 700;
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-lg);
+  font-weight: 600;
   color: #FFFFFF;
-  margin-bottom: 8rpx;
+}
+
+.nav-right {
+  width: 72rpx;
+}
+
+/* 页面标题区 */
+.page-header {
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
+  border-radius: 0 0 40rpx 40rpx;
 }
 
 .page-subtitle {

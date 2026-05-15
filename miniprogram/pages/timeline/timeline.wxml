@@ -1,12 +1,23 @@
 <!--pages/timeline/timeline.wxml - 时间线模式（不是帖子）-->
 <view class="timeline-page">
   
-  <!-- 顶部标题栏 -->
-  <view class="page-header">
-    <view class="nav-back-btn" bindtap="onBackTap">
-      <text class="back-icon">‹</text>
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">小区时间线</text>
+      <view class="nav-right"></view>
     </view>
-    <text class="page-title">小区时间线</text>
+  </view>
+
+  <!-- 自定义导航栏占位 -->
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
+
+  <!-- 页面标题区 -->
+  <view class="page-header">
     <text class="page-subtitle">记录小区点滴变化</text>
   </view>
 
@@ -121,7 +132,7 @@
           <image class="image-preview" src="{{item}}" mode="aspectFill"></image>
           <view class="image-delete" bindtap="onDeleteImage" data-index="{{index}}">×</view>
         </view>
-        <view class="upload-btn" bindtap="onChooseImage" wx:if="{{publishForm.images.length < 9}}">
+        <view class="upload-btn" bindtap="onChooseImage" wx:if="{{publishForm.images.length < 6}}">
           <text class="upload-icon">+</text>
           <text class="upload-text">添加图片</text>
         </view>

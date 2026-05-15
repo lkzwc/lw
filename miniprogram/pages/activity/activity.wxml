@@ -1,12 +1,23 @@
 <!--pages/activity/activity.wxml - 按设计图重构-->
 <view class="activity-page">
   
-  <!-- 顶部标题栏 -->
-  <view class="page-header">
-    <view class="nav-back-btn" bindtap="onBackTap">
-      <text class="back-icon">‹</text>
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">活动日历</text>
+      <view class="nav-right"></view>
     </view>
-    <text class="page-title">活动日历</text>
+  </view>
+
+  <!-- 自定义导航栏占位 -->
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
+
+  <!-- 页面标题区 -->
+  <view class="page-header">
     <text class="page-subtitle">发现精彩社区生活</text>
   </view>
 

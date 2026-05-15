@@ -5,35 +5,60 @@
   background: linear-gradient(180deg, #F0F3FF 0%, #F8F8F8 200rpx);
 }
 
-/* 搜索栏 */
-.search-bar {
-  background-color: #fff;
-  padding: 24rpx;
-  padding-top: calc(88rpx + env(safe-area-inset-top));
-  position: sticky;
+/* ========== 自定义导航栏 ========== */
+.custom-nav {
+  position: fixed;
   top: 0;
-  z-index: 100;
-  border-radius: 0 0 32rpx 32rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: #FFFFFF;
 }
 
-.nav-back-btn {
-  position: absolute;
-  top: calc(env(safe-area-inset-top) + 8rpx);
-  left: 16rpx;
+.nav-placeholder {
+  width: 100%;
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 var(--spacing-md);
+}
+
+.nav-back {
   width: 72rpx;
   height: 72rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
 }
 
-.back-icon {
+.nav-back-icon {
   font-size: 52rpx;
   color: #333333;
   font-weight: 300;
   line-height: 1;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: #333333;
+}
+
+.nav-right {
+  width: 72rpx;
+}
+
+/* 搜索栏 */
+.search-bar {
+  background-color: #fff;
+  padding: 24rpx;
+  border-radius: 0 0 32rpx 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
 }
 
 .search-input-wrap {

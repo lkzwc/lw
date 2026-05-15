@@ -28,6 +28,8 @@ Page({
   },
 
   onLoad: function () {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
     const today = util.formatDate(new Date(), 'YYYY-MM-DD')
     this.setData({ today })
     this.initCalendar()

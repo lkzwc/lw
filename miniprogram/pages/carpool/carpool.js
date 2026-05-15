@@ -26,6 +26,8 @@ Page({
   },
 
   onLoad: function (options) {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
     this.initTimeRange()
     this.loadRoutes()
   },
