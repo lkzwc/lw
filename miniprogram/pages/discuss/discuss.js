@@ -34,48 +34,7 @@ Page({
     },
     
     // 消息列表
-    messages: [
-      {
-        _id: '1',
-        nickName: '王先生',
-        avatar: '',
-        content: '我觉得方案整体不错，但临时停车收费是不是太高了？',
-        timeStr: '2024-05-12 11:00',
-        displayTime: '11:00',
-        showTime: true,
-        isMine: false
-      },
-      {
-        _id: '2',
-        nickName: '李女士',
-        avatar: '',
-        content: '同意，访客停车专区这个想法很好，解决了之前访客乱停的问题',
-        timeStr: '2024-05-12 11:15',
-        displayTime: '11:15',
-        showTime: true,
-        isMine: false
-      },
-      {
-        _id: '3',
-        nickName: '我',
-        avatar: '',
-        content: '我赞成这个方案，按住户比例分配更公平',
-        timeStr: '2024-05-12 11:30',
-        displayTime: '11:30',
-        showTime: true,
-        isMine: true
-      },
-      {
-        _id: '4',
-        nickName: '赵阿姨',
-        avatar: '',
-        content: '但是有些住户家里车多，按比例分配会不会不公平？',
-        timeStr: '2024-05-12 12:00',
-        displayTime: '12:00',
-        showTime: true,
-        isMine: false
-      }
-    ],
+    messages: [],
     
     scrollToView: '',
     hasMore: true,

@@ -61,18 +61,11 @@ Page({
         .limit(20)
         .get()
 
-      let posts = res.data
-
-      // 如果云数据库没有数据，使用模拟数据兜底
-      if (posts.length === 0) {
-        posts = this.getMockPosts()
-      } else {
-        posts = posts.map(p => ({
-          ...p,
-          timeStr: util.formatTime(new Date(p.createTime)),
-          isLiked: false
-        }))
-      }
+      let posts = res.data.map(p => ({
+        ...p,
+        timeStr: util.formatTime(new Date(p.createTime)),
+        isLiked: false
+      }))
 
       this.setData({
         posts,
@@ -81,54 +74,14 @@ Page({
       })
     } catch (err) {
       console.error('加载帖子失败', err)
-      // 兜底模拟数据
       this.setData({
-        posts: this.getMockPosts(),
+        posts: [],
         hasMore: false,
         page: 1
       })
     } finally {
       this.setData({ loading: false })
     }
-  },
-
-  // 模拟数据
-  getMockPosts: function () {
-    return [
-      {
-        _id: '1',
-        userInfo: { nickName: '王先生', avatarUrl: '' },
-        content: '今天小区绿化修剪，大家注意避让！物业通知周六上午进行。',
-        images: [],
-        tag: '分享',
-        likeCount: 12,
-        commentCount: 3,
-        isLiked: false,
-        timeStr: '今天 14:30'
-      },
-      {
-        _id: '2',
-        userInfo: { nickName: '李女士', avatarUrl: '' },
-        content: '请问有人知道3号楼的快递柜在哪里吗？刚搬来不太熟悉。',
-        images: [],
-        tag: '求助',
-        likeCount: 5,
-        commentCount: 8,
-        isLiked: true,
-        timeStr: '今天 10:20'
-      },
-      {
-        _id: '3',
-        userInfo: { nickName: '张大爷', avatarUrl: '' },
-        content: '明天早上6点有人一起晨跑吗？从小区门口出发，绕公园两圈。',
-        images: [],
-        tag: '活动',
-        likeCount: 28,
-        commentCount: 15,
-        isLiked: false,
-        timeStr: '昨天 20:15'
-      }
-    ]
   },
 
   // 加载更多

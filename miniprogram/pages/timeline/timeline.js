@@ -42,61 +42,20 @@ Page({
     this.setData({ loading: true })
     
     try {
-      // 模拟数据
-      const mockTimelines = [
-        {
-          _id: '1',
-          type: 'issue',
-          title: '3号楼电梯故障',
-          desc: '3号楼东侧电梯运行时有异响，请物业尽快安排检修。',
-          images: [],
-          date: '2024-05-15',
-          status: 'processing',
-          statusLabel: '处理中',
-          commentCount: 5
-        },
-        {
-          _id: '2',
-          type: 'notice',
-          title: '停水通知',
-          desc: '因管网维修，5月16日上午9:00-12:00，小区1-5号楼将暂停供水。',
-          images: [],
-          date: '2024-05-14',
-          status: 'resolved',
-          statusLabel: '已完成',
-          commentCount: 3
-        },
-        {
-          _id: '3',
-          type: 'improve',
-          title: '建议增加儿童游乐设施',
-          desc: '小区儿童较多，建议在小区广场东侧增设滑梯、秋千等游乐设施。',
-          images: [],
-          date: '2024-05-12',
-          status: 'pending',
-          statusLabel: '待处理',
-          commentCount: 18
-        },
-        {
-          _id: '4',
-          type: 'issue',
-          title: '地下车库照明不足',
-          desc: 'B2层车库部分区域灯光昏暗，存在安全隐患。',
-          images: [],
-          date: '2024-05-10',
-          status: 'resolved',
-          statusLabel: '已解决',
-          commentCount: 2
-        }
-      ]
+      const db = wx.cloud.database()
+      const _ = db.command
       
-      // 根据筛选类型过滤
-      let filteredTimelines = mockTimelines
+      let query = db.collection('timeline').where({
+        status: _.neq('deleted')
+      })
+      
       if (this.data.currentFilter !== 'all') {
-        filteredTimelines = mockTimelines.filter(t => t.type === this.data.currentFilter)
+        query = query.where({ type: this.data.currentFilter })
       }
       
-      this.setData({ timelines: filteredTimelines })
+      const res = await query.orderBy('createTime', 'desc').get()
+      
+      this.setData({ timelines: res.data })
     } catch (err) {
       console.error('加载时间线失败', err)
     } finally {

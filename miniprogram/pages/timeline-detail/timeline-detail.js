@@ -39,17 +39,6 @@ Page({
       wx.navigateBack()
     }
   },
-        {
-          _id: '2',
-          userName: '物业管理处',
-          avatar: '',
-          content: '已收到反馈，明天上午安排维保单位上门检查',
-          timeStr: '今天 15:30'
-        }
-      ],
-      loading: false
-    })
-  },
 
   // 输入评论
   onCommentInput: function (e) {
