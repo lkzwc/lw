@@ -63,8 +63,12 @@ Page({
   loadNotices: async function () {
     try {
       const db = wx.cloud.database()
+      const _ = db.command
+      
       const res = await db.collection('notices')
-        .where({ status: 'published' })
+        .where({
+          status: _.in(['active', 'published'])
+        })
         .orderBy('createTime', 'desc')
         .limit(3)
         .get()
@@ -77,7 +81,6 @@ Page({
       this.setData({ notices })
     } catch (err) {
       console.error('加载公告失败', err)
-      // 不再使用兜底数据
     }
   },
 
@@ -85,8 +88,12 @@ Page({
   loadSkills: async function () {
     try {
       const db = wx.cloud.database()
+      const _ = db.command
+      
       const res = await db.collection('skills')
-        .where({ status: 'active', showHome: true })
+        .where({
+          status: _.in(['active', 'published'])
+        })
         .orderBy('createTime', 'desc')
         .limit(3)
         .get()
@@ -100,8 +107,12 @@ Page({
   loadActivities: async function () {
     try {
       const db = wx.cloud.database()
+      const _ = db.command
+      
       const res = await db.collection('activities')
-        .where({ status: 'active' })
+        .where({
+          status: _.in(['active', 'published', 'upcoming', 'ongoing'])
+        })
         .orderBy('createTime', 'desc')
         .limit(3)
         .get()
