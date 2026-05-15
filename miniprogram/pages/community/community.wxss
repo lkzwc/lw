@@ -1,6 +1,7 @@
 /* pages/community/community.wxss - 统一浅蓝色主题 */
 
 .community-page {
+  overflow-x: hidden;
   padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
 }
 
@@ -332,6 +333,7 @@
 
 .dialog-body {
   padding: var(--spacing-md) 0;
+  overflow-x: hidden;
 }
 
 /* 发布内容区 - Twitter风格 */
@@ -424,6 +426,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-sm);
+  overflow: hidden;
 }
 
 .image-item {

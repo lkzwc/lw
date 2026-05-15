@@ -1,6 +1,7 @@
 /* pages/skill-wall/skill-wall.wxss */
 
 .skill-wall-page {
+  overflow-x: hidden;
   padding-bottom: 120rpx;
   background: linear-gradient(180deg, #F0F3FF 0%, #F8F8F8 200rpx);
 }
@@ -198,6 +199,7 @@
 /* 半屏弹窗内容 */
 .dialog-body {
   padding: 8rpx 16rpx 16rpx;
+  overflow-x: hidden;
 }
 
 .form-section {

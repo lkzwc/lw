@@ -1,6 +1,7 @@
 /* pages/activity/activity.wxss - 统一暖橙色主题 */
 
 .activity-page {
+  overflow-x: hidden;
   
   
   padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
@@ -353,6 +354,7 @@
 }
 
 .dialog-body {
+  overflow-x: hidden;
   padding: 0 8rpx;
 }
 
@@ -379,6 +381,7 @@
   background: var(--bg-secondary);
   border-radius: 16rpx;
   font-size: 28rpx;
+  box-sizing: border-box;
 }
 
 .form-picker {
@@ -390,6 +393,7 @@
   background: var(--bg-secondary);
   border-radius: 16rpx;
   font-size: 28rpx;
+  box-sizing: border-box;
 }
 
 .form-picker .placeholder {
@@ -409,6 +413,7 @@
   border-radius: 16rpx;
   font-size: 28rpx;
   line-height: 1.6;
+  box-sizing: border-box;
 }
 
 .form-count {

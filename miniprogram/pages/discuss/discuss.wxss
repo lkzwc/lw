@@ -1,6 +1,7 @@
 /* pages/discuss/discuss.wxss - 业主议事厅（头像两侧，吸顶） */
 
 .discuss-page {
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -419,6 +420,7 @@
 }
 
 .dialog-body {
+  overflow-x: hidden;
   padding: var(--spacing-md) 0;
 }
 
@@ -437,10 +439,10 @@
 .form-input {
   width: 100%;
   height: 88rpx;
-  
   border-radius: 12rpx;
   padding: 0 var(--spacing-md);
   font-size: var(--font-base);
+  box-sizing: border-box;
 }
 
 .form-picker {
@@ -448,9 +450,9 @@
   justify-content: space-between;
   align-items: center;
   height: 88rpx;
-  
   border-radius: 12rpx;
   padding: 0 var(--spacing-md);
+  box-sizing: border-box;
 }
 
 .picker-text {
@@ -466,8 +468,8 @@
 .form-textarea {
   width: 100%;
   height: 160rpx;
-  
   border-radius: 12rpx;
   padding: var(--spacing-md);
   font-size: var(--font-base);
+  box-sizing: border-box;
 }

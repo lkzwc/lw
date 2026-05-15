@@ -1,6 +1,7 @@
 /* pages/timeline/timeline.wxss - 时间线模式 */
 
 .timeline-page {
+  overflow-x: hidden;
   
   
   padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
@@ -307,6 +308,7 @@
 }
 
 .dialog-body {
+  overflow-x: hidden;
   padding: 0 8rpx;
 }
 
@@ -333,6 +335,7 @@
   background: var(--bg-secondary);
   border-radius: 16rpx;
   font-size: 28rpx;
+  box-sizing: border-box;
 }
 
 .form-textarea {
@@ -343,6 +346,7 @@
   border-radius: 16rpx;
   font-size: 28rpx;
   line-height: 1.6;
+  box-sizing: border-box;
 }
 
 .form-count {
@@ -396,6 +400,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 16rpx;
+  overflow: hidden;
 }
 
 .image-item {
