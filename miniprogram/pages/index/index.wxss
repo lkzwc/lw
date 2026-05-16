@@ -193,6 +193,11 @@ page {
   gap: 8rpx;
 }
 
+.notice-icon{
+  width: 60rpx;
+  height: 40rpx;
+}
+
 .notice-icon-text {
   font-size: 32rpx;
 }
@@ -255,6 +260,17 @@ page {
   margin-bottom: var(--spacing-md);
 }
 
+.section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.section-title-icon {
+  font-size: 32rpx;
+  color: #4A90D9;
+}
+
 .section-title {
   font-size: 32rpx;
   font-weight: 600;
@@ -303,21 +319,33 @@ page {
   padding: 16rpx;
 }
 
+.skill-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14rpx;
+}
+
 .skill-title {
-  display: block;
+  flex: 1;
   font-size: 26rpx;
   color: #333;
   font-weight: 500;
-  margin-bottom: 12rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin-right: 10rpx;
+}
+
+.skill-likes {
+  font-size: 22rpx;
+  color: #999;
+  flex-shrink: 0;
 }
 
 .skill-meta {
   display: flex;
   align-items: center;
-  margin-bottom: 8rpx;
 }
 
 .skill-avatar {
@@ -329,15 +357,6 @@ page {
 }
 
 .skill-author {
-  font-size: 22rpx;
-  color: #999;
-}
-
-.skill-stats {
-  display: flex;
-}
-
-.skill-likes {
   font-size: 22rpx;
   color: #999;
 }
@@ -369,22 +388,6 @@ page {
   align-items: center;
 }
 
-.activity-date-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 80rpx;
-  height: 80rpx;
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-  border-radius: 16rpx;
-  margin-right: 16rpx;
-}
-
-.activity-month {
-  font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.9);
-}
 
 .activity-day {
   font-size: 32rpx;
@@ -398,11 +401,27 @@ page {
   flex-direction: column;
 }
 
+.activity-title-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.activity-icon {
+  font-size: 28rpx;
+  color: #4A90D9;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
 .activity-title {
   font-size: 28rpx;
   color: #333;
   font-weight: 500;
-  margin-bottom: 8rpx;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .activity-location,

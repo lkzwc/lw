@@ -2,8 +2,21 @@
 
 /**
  * 格式化时间
+ * 兼容云数据库 serverDate 对象（{$date: timestamp}）、Date 对象、时间戳、字符串
  */
-const formatTime = (date) => {
+const formatTime = (input) => {
+  let date
+  if (!input) return ''
+  if (input instanceof Date) {
+    date = input
+  } else if (typeof input === 'object' && input.$date) {
+    // 云数据库 serverDate 格式
+    date = new Date(input.$date)
+  } else {
+    date = new Date(input)
+  }
+  if (isNaN(date.getTime())) return ''
+
   const year = date.getFullYear()
   const month = date.getMonth() + 1
   const day = date.getDate()
@@ -20,19 +33,47 @@ const formatNumber = n => {
 }
 
 /**
- * 格式化相对时间
+ * 按模板格式化日期
  */
-const formatRelativeTime = (dateStr) => {
+const formatDate = (date, format = 'YYYY-MM-DD') => {
+  const d = new Date(date)
+  const values = {
+    YYYY: d.getFullYear(),
+    MM: formatNumber(d.getMonth() + 1),
+    DD: formatNumber(d.getDate()),
+    HH: formatNumber(d.getHours()),
+    mm: formatNumber(d.getMinutes()),
+    ss: formatNumber(d.getSeconds())
+  }
+
+  return format.replace(/YYYY|MM|DD|HH|mm|ss/g, key => values[key])
+}
+
+/**
+ * 格式化相对时间
+ * 兼容云数据库 serverDate 对象
+ */
+const formatRelativeTime = (input) => {
+  if (!input) return ''
+  let date
+  if (input instanceof Date) {
+    date = input
+  } else if (typeof input === 'object' && input.$date) {
+    date = new Date(input.$date)
+  } else {
+    date = new Date(input)
+  }
+  if (isNaN(date.getTime())) return ''
+
   const now = new Date()
-  const date = new Date(dateStr)
   const diff = now - date
-  
+
   const minute = 60 * 1000
   const hour = 60 * minute
   const day = 24 * hour
   const week = 7 * day
   const month = 30 * day
-  
+
   if (diff < minute) {
     return '刚刚'
   } else if (diff < hour) {
@@ -174,6 +215,7 @@ const previewImage = (urls, current = '') => {
 
 module.exports = {
   formatTime,
+  formatDate,
   formatRelativeTime,
   debounce,
   checkContentSecurity,

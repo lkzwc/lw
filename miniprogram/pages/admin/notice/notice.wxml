@@ -36,22 +36,19 @@
   closable="{{true}}"
   bindclose="onCloseModal"
 >
-  <view slot="title" class="dialog-title-bar">
+  <view slot="title" class="dialog-title-row">
     <text class="dialog-title">{{editId ? '编辑公告' : '新增公告'}}</text>
-    <button class="save-btn-top" bindtap="onSaveNotice">保存</button>
+    <view class="dialog-submit-btn" bindtap="onSaveNotice">保存</view>
   </view>
   <view slot="desc" class="dialog-body">
     <view class="form-section">
-      <view class="form-label">标题 <text class="required">*</text></view>
-      <input class="form-input" placeholder="请输入公告标题" value="{{formData.title}}" bindinput="onTitleInput" maxlength="50" />
+      <input class="form-input" placeholder="公告标题（必填）" value="{{formData.title}}" bindinput="onTitleInput" maxlength="50" />
     </view>
     <view class="form-section">
-      <view class="form-label">内容 <text class="required">*</text></view>
-      <textarea class="form-textarea" placeholder="请输入公告内容" value="{{formData.content}}" bindinput="onContentInput" maxlength="500" auto-height></textarea>
+      <textarea class="form-textarea" placeholder="公告内容（必填）" value="{{formData.content}}" bindinput="onContentInput" maxlength="500" auto-height></textarea>
       <view class="word-count">{{formData.content.length || 0}}/500</view>
     </view>
     <view class="form-section">
-      <view class="form-label">状态</view>
       <view class="form-switch">
         <text>{{formData.status === 'active' ? '已发布' : '草稿'}}</text>
         <switch checked="{{formData.status === 'active'}}" bindchange="onStatusChange" color="#4A90D9" />

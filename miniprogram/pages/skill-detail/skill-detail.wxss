@@ -47,11 +47,12 @@
 
 /* 标题 */
 .skill-title {
+  flex: 1;
   font-size: 36rpx;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 24rpx;
   line-height: 1.4;
+  margin-right: 20rpx;
 }
 
 /* 用户信息 */
@@ -152,14 +153,28 @@
   z-index: 100;
 }
 
-.stat-info {
+/* 点赞按钮 */
+.like-btn {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100rpx;
+  gap: 4rpx;
 }
 
-.view-count {
-  font-size: 26rpx;
+.like-icon {
+  font-size: 44rpx;
+  line-height: 1;
+}
+
+.like-count {
+  font-size: 22rpx;
   color: var(--text-secondary);
+}
+
+.like-btn.liked .like-count {
+  color: #FF6B6B;
 }
 
 .contact-btn {

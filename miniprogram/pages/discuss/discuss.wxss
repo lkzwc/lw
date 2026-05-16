@@ -4,6 +4,7 @@
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  background: #F5F7FA;
 }
 
 /* ========== 自定义导航栏 ========== */
@@ -15,10 +16,13 @@
   z-index: 200;
   overflow: hidden;
   background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  box-shadow: none;
+  border-bottom: none;
 }
 
 .nav-placeholder {
   width: 100%;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
 }
 
 .nav-bar {
@@ -209,7 +213,7 @@
   justify-content: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
-  
+
   border-radius: 12rpx;
 }
 
@@ -265,7 +269,7 @@
 .time-divider text {
   font-size: var(--font-xs);
   color: var(--text-placeholder);
-  
+
   padding: 8rpx 24rpx;
   border-radius: 20rpx;
 }
@@ -366,7 +370,7 @@
 .message-input {
   flex: 1;
   height: 80rpx;
-  
+
   border-radius: 40rpx;
   padding: 0 var(--spacing-md);
   font-size: var(--font-base);

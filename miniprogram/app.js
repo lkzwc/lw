@@ -59,20 +59,26 @@ App({
           // 获取openid
           wx.cloud.callFunction({
             name: 'getOpenId',
-            success: (openidRes) => {
+            success: async (openidRes) => {
               const openid = openidRes.result.openid;
               
-              // 保存用户信息
-              this.saveUserInfo(userInfo, openid);
-              
-              this.globalData.userInfo = userInfo;
+              // 保存用户信息（内部会上传头像到云存储）
+              await this.saveUserInfo(userInfo, openid);
+
+              // 用云存储头像更新 globalData 和本地缓存
+              const db = wx.cloud.database()
+              const userRes = await db.collection('users').where({ _openid: openid }).field({ avatarUrl: true, nickName: true }).get()
+              const savedAvatarUrl = (userRes.data.length > 0 && userRes.data[0].avatarUrl) ? userRes.data[0].avatarUrl : userInfo.avatarUrl
+              const finalUserInfo = { ...userInfo, avatarUrl: savedAvatarUrl }
+
+              this.globalData.userInfo = finalUserInfo;
               this.globalData.openid = openid;
               this.globalData.isLoggedIn = true;
               
-              wx.setStorageSync('userInfo', userInfo);
+              wx.setStorageSync('userInfo', finalUserInfo);
               wx.setStorageSync('openid', openid);
               
-              resolve(userInfo);
+              resolve(finalUserInfo);
             },
             fail: (err) => {
               reject(err);
@@ -86,9 +92,36 @@ App({
     });
   },
 
+  // 上传头像到云存储，返回永久 fileID
+  uploadAvatar: function (avatarUrl, openid) {
+    return new Promise((resolve) => {
+      // 先下载微信头像到本地临时文件
+      wx.downloadFile({
+        url: avatarUrl,
+        success: (downloadRes) => {
+          if (downloadRes.statusCode !== 200) {
+            resolve(avatarUrl) // 下载失败，回退用原 URL
+            return
+          }
+          const cloudPath = `avatars/${openid}.jpg`
+          wx.cloud.uploadFile({
+            cloudPath,
+            filePath: downloadRes.tempFilePath,
+            success: (uploadRes) => resolve(uploadRes.fileID),
+            fail: () => resolve(avatarUrl) // 上传失败，回退用原 URL
+          })
+        },
+        fail: () => resolve(avatarUrl) // 下载失败，回退用原 URL
+      })
+    })
+  },
+
   // 保存用户信息到数据库
-  saveUserInfo: function (userInfo, openid) {
+  saveUserInfo: async function (userInfo, openid) {
     const db = wx.cloud.database();
+
+    // 将头像上传到云存储，获取永久链接
+    const avatarUrl = await this.uploadAvatar(userInfo.avatarUrl, openid)
 
     // 检查用户是否已存在
     db.collection('users').where({
@@ -99,18 +132,18 @@ App({
         db.collection('users').add({
           data: {
             nickName: userInfo.nickName,
-            avatarUrl: userInfo.avatarUrl,
+            avatarUrl,
             isAdmin: false,
             createTime: db.serverDate(),
             updateTime: db.serverDate()
           }
         });
       } else {
-        // 更新用户信息
+        // 更新用户信息（头像每次登录都刷新，确保最新）
         db.collection('users').doc(res.data[0]._id).update({
           data: {
             nickName: userInfo.nickName,
-            avatarUrl: userInfo.avatarUrl,
+            avatarUrl,
             updateTime: db.serverDate()
           }
         });

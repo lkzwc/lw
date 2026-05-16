@@ -2,8 +2,7 @@
 
 .activity-page {
   overflow-x: hidden;
-  
-  
+  background: #F5F7FA;
   padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
 }
 
@@ -16,10 +15,13 @@
   z-index: 200;
   overflow: hidden;
   background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  box-shadow: none;
+  border-bottom: none;
 }
 
 .nav-placeholder {
   width: 100%;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
 }
 
 .nav-bar {
@@ -81,7 +83,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 18rpx;
 }
 
 .calendar-nav {
@@ -90,7 +92,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   border-radius: 50%;
   font-size: var(--font-lg);
   color: var(--text-secondary);
@@ -102,53 +104,44 @@
   color: var(--text-primary);
 }
 
-.calendar-weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  margin-bottom: var(--spacing-sm);
-}
-
-.weekday {
-  text-align: center;
-  font-size: var(--font-sm);
-  color: var(--text-placeholder);
-  padding: 8rpx 0;
-}
-
-.calendar-days {
+.week-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 8rpx;
 }
 
-.calendar-day {
-  aspect-ratio: 1;
+.week-day {
+  min-height: 112rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 12rpx;
+  border-radius: 18rpx;
   position: relative;
+  background: #F7F9FC;
 }
 
-.calendar-day.other-month .day-text {
+.weekday-text {
+  font-size: 22rpx;
   color: var(--text-placeholder);
+  margin-bottom: 8rpx;
 }
 
-.calendar-day.today {
+.week-day.today {
   background: rgba(74, 144, 217, 0.1);
 }
 
-.calendar-day.today .day-text {
+.week-day.today .day-text {
   color: #4A90D9;
   font-weight: 600;
 }
 
-.calendar-day.selected {
+.week-day.selected {
   background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
 }
 
-.calendar-day.selected .day-text {
+.week-day.selected .day-text,
+.week-day.selected .weekday-text {
   color: #FFFFFF;
 }
 
@@ -165,7 +158,7 @@
   margin-top: 4rpx;
 }
 
-.calendar-day.selected .activity-dot {
+.week-day.selected .activity-dot {
   background: #FFFFFF;
 }
 
@@ -238,7 +231,7 @@
 }
 
 .status-ended {
-  
+
   color: var(--text-placeholder);
 }
 

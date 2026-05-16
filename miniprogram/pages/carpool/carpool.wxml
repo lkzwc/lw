@@ -8,7 +8,7 @@
       <view class="nav-back" bindtap="onBackTap">
         <text class="nav-back-icon">‹</text>
       </view>
-      <text class="nav-title">牛马专线</text>
+      <text class="nav-title">捎一段</text>
       <view class="nav-right"></view>
     </view>
   </view>
@@ -23,9 +23,9 @@
 
   <!-- 筛选标签 -->
   <view class="filter-tabs">
-    <view class="filter-tab {{currentFilter === 'all' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="all">全部</view>
-    <view class="filter-tab {{currentFilter === 'long' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="long">长期路线</view>
-    <view class="filter-tab {{currentFilter === 'once' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="once">临时路线</view>
+    <view class="filter-tab {{filterType === 'all' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="all">全部</view>
+    <view class="filter-tab {{filterType === 'long' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="long">长期路线</view>
+    <view class="filter-tab {{filterType === 'once' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="once">临时路线</view>
   </view>
 
   <!-- 路线列表 -->
@@ -37,15 +37,9 @@
       </view>
       
       <view class="route-path">
-        <view class="path-point">
-          <view class="point-dot start"></view>
-          <text class="point-text">{{item.start}}</text>
-        </view>
-        <view class="path-line"></view>
-        <view class="path-point">
-          <view class="point-dot end"></view>
-          <text class="point-text">{{item.end}}</text>
-        </view>
+        <text class="path-text">{{item.start}}</text>
+        <text class="iconfont icon-arrow-right path-arrow"></text>
+        <text class="path-text">{{item.end}}</text>
       </view>
       
       <view class="route-footer">
@@ -93,7 +87,6 @@
   <view slot="desc" class="dialog-body">
     <!-- 路线类型 -->
     <view class="form-section">
-      <view class="form-label">路线类型</view>
       <view class="type-selector">
         <view class="type-option {{publishForm.type === 'long' ? 'active' : ''}}" bindtap="onTypeChange" data-type="long">
           <text class="type-icon">🔄</text>
@@ -108,22 +101,19 @@
     
     <!-- 出发地 -->
     <view class="form-section">
-      <view class="form-label">出发地 <text class="required">*</text></view>
-      <input class="form-input" placeholder="请输入出发地点" value="{{publishForm.start}}" bindinput="onStartInput" />
+      <input class="form-input" placeholder="出发地（必填）" value="{{publishForm.start}}" bindinput="onStartInput" />
     </view>
     
     <!-- 目的地 -->
     <view class="form-section">
-      <view class="form-label">目的地 <text class="required">*</text></view>
-      <input class="form-input" placeholder="请输入目的地点" value="{{publishForm.end}}" bindinput="onEndInput" />
+      <input class="form-input" placeholder="目的地（必填）" value="{{publishForm.end}}" bindinput="onEndInput" />
     </view>
     
     <!-- 出发时间 -->
     <view class="form-section" wx:if="{{publishForm.type === 'once'}}">
-      <view class="form-label">出发时间 <text class="required">*</text></view>
       <picker mode="multiSelector" range="{{timeRange}}" value="{{timeIndex}}" bindchange="onTimeChange">
         <view class="form-picker">
-          <text class="{{publishForm.timeStr ? '' : 'placeholder'}}">{{publishForm.timeStr || '请选择出发时间'}}</text>
+          <text class="{{publishForm.timeStr ? '' : 'placeholder'}}">{{publishForm.timeStr || '出发时间（必填）'}}</text>
           <text class="picker-arrow">›</text>
         </view>
       </picker>
@@ -131,13 +121,11 @@
     
     <!-- 行驶时间（长期） -->
     <view class="form-section" wx:if="{{publishForm.type === 'long'}}">
-      <view class="form-label">行驶时间 <text class="required">*</text></view>
-      <input class="form-input" placeholder="如：工作日 8:00" value="{{publishForm.schedule}}" bindinput="onScheduleInput" />
+      <input class="form-input" placeholder="行驶时间（如：工作日 8:00）" value="{{publishForm.schedule}}" bindinput="onScheduleInput" />
     </view>
     
     <!-- 座位数 -->
     <view class="form-section">
-      <view class="form-label">剩余座位</view>
       <view class="seat-selector">
         <view class="seat-btn" bindtap="onSeatMinus">-</view>
         <text class="seat-value">{{publishForm.seats}}</text>
@@ -147,8 +135,7 @@
     
     <!-- 联系电话 -->
     <view class="form-section">
-      <view class="form-label">联系电话 <text class="required">*</text></view>
-      <input class="form-input" type="number" placeholder="请输入联系电话" value="{{publishForm.phone}}" bindinput="onPhoneInput" />
+      <input class="form-input" type="number" placeholder="联系电话（必填）" value="{{publishForm.phone}}" bindinput="onPhoneInput" />
     </view>
   </view>
 </mp-half-screen-dialog>

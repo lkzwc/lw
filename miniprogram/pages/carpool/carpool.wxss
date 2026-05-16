@@ -2,8 +2,7 @@
 
 .carpool-page {
   overflow-x: hidden;
-  
-  
+  background: #F5F7FA;
   padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
 }
 
@@ -16,10 +15,13 @@
   z-index: 200;
   overflow: hidden;
   background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  box-shadow: none;
+  border-bottom: none;
 }
 
 .nav-placeholder {
   width: 100%;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
 }
 
 .nav-bar {

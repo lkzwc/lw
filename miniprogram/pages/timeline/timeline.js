@@ -4,14 +4,23 @@ const util = require('../../utils/util')
 
 Page({
   data: {
-    currentFilter: 'all',
     timelines: [],
     loading: true,
-    
+
     // 发布弹窗
     showPublishDialog: false,
     submitting: false,
     canSubmit: false,
+
+    // 期数筛选
+    phaseOptions: [
+      { value: 'phase1', label: '一期' },
+      { value: 'phase2', label: '二期' },
+      { value: 'phase3', label: '三期' },
+      { value: 'phase4', label: '四期' }
+    ],
+    currentPhase: 'phase1',
+
     typeOptions: [
       { value: 'issue', label: '问题反馈', icon: '🔴' },
       { value: 'notice', label: '小区通知', icon: '📢' },
@@ -19,7 +28,6 @@ Page({
     ],
     publishForm: {
       type: 'issue',
-      title: '',
       desc: '',
       images: []
     }
@@ -40,22 +48,19 @@ Page({
   // 加载时间线列表
   loadTimelines: async function () {
     this.setData({ loading: true })
-    
+
     try {
       const db = wx.cloud.database()
       const _ = db.command
-      
-      let query = db.collection('timeline').where({
-        status: _.neq('deleted')
+
+      const query = db.collection('timeline').where({
+        status: _.neq('deleted'),
+        phase: this.data.currentPhase
       })
-      
-      if (this.data.currentFilter !== 'all') {
-        query = query.where({ type: this.data.currentFilter })
-      }
-      
+
       const res = await query.orderBy('createTime', 'desc').get()
-      
-      this.setData({ timelines: res.data })
+
+      this.setData({ timelines: this.formatTimelines(res.data) })
     } catch (err) {
       console.error('加载时间线失败', err)
     } finally {
@@ -63,11 +68,25 @@ Page({
     }
   },
 
-  // 切换筛选
-  onFilterChange: function (e) {
-    const filter = e.currentTarget.dataset.filter
-    this.setData({ currentFilter: filter })
-    this.loadTimelines()
+  // 格式化时间线展示字段
+  formatTimelines: function (timelines) {
+    const typeMap = this.data.typeOptions.reduce((map, item) => {
+      map[item.value] = item.label
+      return map
+    }, {})
+    const statusMap = {
+      pending: '待处理',
+      processing: '处理中',
+      resolved: '已解决'
+    }
+
+    return timelines.map(item => ({
+      ...item,
+      title: item.title || typeMap[item.type] || '时间线',
+      statusLabel: item.statusLabel || statusMap[item.status] || '',
+      date: item.date || util.formatRelativeTime(item.createTime),
+      commentCount: item.commentCount || 0
+    }))
   },
 
   // 点击时间线
@@ -80,7 +99,7 @@ Page({
 
   // 打开发布弹窗
   onPublishTap: function () {
-    if (!app.globalData.isLoggedIn) {
+    if (!app.globalData.isLoggedIn || !app.globalData.openid) {
       wx.showModal({
         title: '提示',
         content: '上报问题需要先登录',
@@ -95,7 +114,7 @@ Page({
       })
       return
     }
-    
+
     this.setData({ showPublishDialog: true })
   },
 
@@ -107,19 +126,21 @@ Page({
   // 检查是否可以提交
   checkCanSubmit: function () {
     const { publishForm } = this.data
-    const canSubmit = publishForm.title.trim() && publishForm.desc.trim()
+    const canSubmit = publishForm.desc.trim()
     this.setData({ canSubmit })
+  },
+
+  // 切换期数筛选
+  onPhaseChange: function (e) {
+    const phase = e.currentTarget.dataset.phase
+    this.setData({ currentPhase: phase })
+    this.loadTimelines()
   },
 
   // 切换类型
   onTypeChange: function (e) {
     const type = e.currentTarget.dataset.type
     this.setData({ 'publishForm.type': type })
-  },
-
-  // 输入标题
-  onTitleInput: function (e) {
-    this.setData({ 'publishForm.title': e.detail.value }, this.checkCanSubmit)
   },
 
   // 输入描述
@@ -131,10 +152,10 @@ Page({
   onChooseImage: function () {
     const count = 6 - this.data.publishForm.images.length
     if (count <= 0) {
-      util.showToast('最多上传9张图片')
+      util.showToast('最多上传6张图片')
       return
     }
-    
+
     wx.chooseMedia({
       count: count,
       mediaType: ['image'],
@@ -158,19 +179,43 @@ Page({
   // 提交发布
   onSubmit: async function () {
     if (!this.data.canSubmit || this.data.submitting) return
-    
+
     this.setData({ submitting: true })
-    
+
     try {
-      // TODO: 提交到云数据库
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
+      const db = wx.cloud.database()
+      const { publishForm, currentPhase } = this.data
+
+      // 上传图片
+      const uploadedImages = []
+      for (const img of publishForm.images) {
+        if (img.startsWith('cloud://')) {
+          uploadedImages.push(img)
+        } else {
+          const ext = img.split('.').pop()
+          const cloudPath = `timeline/${Date.now()}_${Math.random().toString(36).substr(2, 8)}.${ext}`
+          const uploadRes = await wx.cloud.uploadFile({ cloudPath, filePath: img })
+          uploadedImages.push(uploadRes.fileID)
+        }
+      }
+
+      await db.collection('timeline').add({
+        data: {
+          type: publishForm.type,
+          phase: currentPhase,
+          desc: publishForm.desc.trim(),
+          images: uploadedImages,
+          status: 'pending',
+          createTime: db.serverDate(),
+          updateTime: db.serverDate()
+        }
+      })
+
       util.showToast('发布成功')
-      this.setData({ 
+      this.setData({
         showPublishDialog: false,
         publishForm: {
           type: 'issue',
-          title: '',
           desc: '',
           images: []
         }
@@ -178,7 +223,7 @@ Page({
       this.loadTimelines()
     } catch (err) {
       console.error('发布失败', err)
-      util.showToast('发布失败')
+      util.showToast(err.errMsg || err.message || '发布失败')
     } finally {
       this.setData({ submitting: false })
     }

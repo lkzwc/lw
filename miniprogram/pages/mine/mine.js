@@ -144,6 +144,8 @@ Page({
             }
             // 保存到本地存储
             wx.setStorageSync('userInfo', app.globalData.userInfo)
+
+            app.globalData.isAdmin = !!userRes.data[0].isAdmin
           } else {
             // 创建新用户
             const newUser = {
@@ -157,10 +159,11 @@ Page({
             
             await db.collection('users').add({ data: newUser })
             app.globalData.userInfo = newUser
+            wx.setStorageSync('userInfo', app.globalData.userInfo)
+            app.globalData.isAdmin = false
           }
           
-          // 检查是否是管理员（这里可以根据实际需求设置）
-          app.globalData.isAdmin = false // 可根据数据库字段判断
+          app.checkAdminStatus(app.globalData.openid)
           app.globalData.isLoggedIn = true
           
           wx.hideLoading()
@@ -177,15 +180,9 @@ Page({
       fail: (err) => {
         wx.hideLoading()
         console.log('用户拒绝授权:', err)
-        // 用户拒绝时使用游客模式
-        app.globalData.isLoggedIn = true
-        app.globalData.userInfo = {
-          avatarUrl: '/assets/images/default-avatar.png',
-          nickName: '游客',
-          phase: '',
-          building: ''
-        }
+        app.logout()
         this.checkLoginStatus()
+        util.showToast('登录已取消')
       }
     })
   },
@@ -415,8 +412,7 @@ Page({
       confirmColor: '#FF4D4F',
       success: (res) => {
         if (res.confirm) {
-          app.globalData.isLoggedIn = false
-          app.globalData.userInfo = null
+          app.logout()
           
           this.checkLoginStatus()
           util.showToast('已退出登录')

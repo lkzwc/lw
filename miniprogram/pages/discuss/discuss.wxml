@@ -1,6 +1,6 @@
 <!--pages/discuss/discuss.wxml - 业主议事厅（头像两侧，概述投票吸顶）-->
 <view class="discuss-page">
-  
+
   <!-- 自定义导航栏 -->
   <view class="custom-nav">
     <view class="nav-placeholder" style="height: {{statusBarHeight}}px;"></view>
@@ -64,16 +64,16 @@
   </view>
 
   <!-- 群聊消息区域（头像在两侧） -->
-  <scroll-view 
-    class="chat-area" 
-    scroll-y 
+  <scroll-view
+    class="chat-area"
+    scroll-y
     scroll-into-view="{{scrollToView}}"
     bindscrolltoupper="onScrollToUpper"
   >
     <view class="chat-messages">
-      <view 
-        class="message-item {{item.isMine ? 'mine' : 'other'}}" 
-        wx:for="{{messages}}" 
+      <view
+        class="message-item {{item.isMine ? 'mine' : 'other'}}"
+        wx:for="{{messages}}"
         wx:key="_id"
         id="msg-{{item._id}}"
       >
@@ -81,7 +81,7 @@
           <text>{{item.timeStr}}</text>
         </view>
         <view class="message-content">
-          <image class="message-avatar" src="{{item.avatar || '/assets/images/default-avatar.png'}}" mode="aspectFill"></image>
+          <image class="message-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
           <view class="message-body">
             <text class="message-name" wx:if="{{!item.isMine}}">{{item.nickName}}</text>
             <view class="message-bubble">
@@ -127,22 +127,19 @@
     </view>
   </view>
   <view slot="desc" class="dialog-body">
-    <view class="form-item">
-      <text class="form-label">投票议题</text>
-      <input class="form-input" placeholder="请输入投票议题" value="{{voteForm.title}}" bindinput="onVoteTitleInput" />
+    <view class="form-section">
+      <input class="form-input" placeholder="投票议题（必填）" value="{{voteForm.title}}" bindinput="onVoteTitleInput" />
     </view>
-    <view class="form-item">
-      <text class="form-label">截止时间</text>
+    <view class="form-section">
       <picker mode="multiSelector" range="{{timeRange}}" value="{{voteForm.timeIndex}}" bindchange="onTimePick">
         <view class="form-picker">
-          <text class="picker-text">{{voteForm.deadline || '请选择截止时间'}}</text>
+          <text class="picker-text {{voteForm.deadline ? '' : 'placeholder'}}">{{voteForm.deadline || '截止时间'}}</text>
           <text class="picker-arrow">›</text>
         </view>
       </picker>
     </view>
-    <view class="form-item">
-      <text class="form-label">投票说明（可选）</text>
-      <textarea class="form-textarea" placeholder="补充说明..." value="{{voteForm.description}}" bindinput="onVoteDescInput" />
+    <view class="form-section">
+      <textarea class="form-textarea" placeholder="投票说明（可选）" value="{{voteForm.description}}" bindinput="onVoteDescInput" />
     </view>
   </view>
 </mp-half-screen-dialog>

@@ -20,26 +20,30 @@
 /* ========== 图标类名 ========== */
 
 /* 帖子操作栏 */
-.icon-dianzan:before { content: '\e653'; }     /* 点赞（空心） */
-.icon-dianzan1:before { content: '\e66e'; }    /* 点赞（实心） */
-.icon-dianzan2:before { content: '\e768'; }    /* 点赞（另一款） */
+.icon-dianzan:before { content: '\e768'; }     /* 点赞（空心，用 dianzan2） */
+.icon-dianzan1:before { content: '\e768'; }    /* 点赞（实心，颜色由 CSS 区分） */
+.icon-dianzan2:before { content: '\e768'; }    /* 点赞 */
 .icon-pinglun:before { content: '\e767'; }     /* 评论 */
 .icon-pinglun1:before { content: '\e618'; }    /* 评论（另一款） */
 .icon-zhuanfa:before { content: '\e6c4'; }     /* 转发 */
 .icon-share:before { content: '\e738'; }       /* share */
 .icon-fenxianghaibao:before { content: '\e72c'; } /* 分享海报 */
+.icon-fasong:before { content: '\10207'; }    /* 发送 */
+.icon-send:before { content: '\10207'; }      /* 发送（别名） */
 
 /* 首页功能入口 */
 .icon-wuyebaoxiu:before { content: '\e727'; }  /* 物业报修 */
 .icon-baojing:before { content: '\e705'; }     /* 报警 */
 .icon-jiduhuodong:before { content: '\e72d'; } /* 季度活动 */
 .icon-yewujieshao-chengjipinche:before { content: '\e603'; } /* 城际拼车 */
-.icon-xinwen:before { content: '\e7f7'; }     /* 新闻 */
+.icon-xinwen:before { content: '\e7f7'; }      /* 新闻 */
 .icon-richangjilu:before { content: '\e735'; } /* 日常记录 */
 .icon-shouye:before { content: '\e737'; }      /* 首页 */
 
 /* 通用功能 */
 .icon-dingwei:before { content: '\e609'; }     /* 定位 */
+.icon-location:before { content: '\e7f7'; }    /* 定位/位置（新） */
+.icon-arrow-right:before { content: '\e604'; } /* 箭头向右 */
 .icon-shangchuantupian:before { content: '\e60c'; } /* 上传图片 */
 .icon-shangchuantupian1:before { content: '\e600'; } /* 图片 */
 .icon-shangchuanwenjian:before { content: '\e69e'; } /* 上传文件 */
@@ -65,3 +69,6 @@
 .iconfont-disabled { color: #CCCCCC; }
 .iconfont-white { color: #FFFFFF; }
 .iconfont-liked { color: #FF6B6B; }
+
+/* 点赞已激活状态 */
+.icon-dianzan1 { color: #FF6B6B; }

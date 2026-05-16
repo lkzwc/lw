@@ -4,15 +4,14 @@ const util = require('../../utils/util')
 
 Page({
   data: {
-    currentYear: 2026,
-    currentMonth: 5,
-    weekdays: ['日', '一', '二', '三', '四', '五', '六'],
-    calendarDays: [],
+    weekStartDate: '',
+    weekTitle: '',
+    weekDays: [],
     selectedDate: '',
     selectedDateStr: '',
     activities: [],
     loading: true,
-    
+
     // 发布弹窗
     showPublishDialog: false,
     submitting: false,
@@ -33,11 +32,10 @@ Page({
     const today = util.formatDate(new Date(), 'YYYY-MM-DD')
     this.setData({ today })
     this.initCalendar()
-    this.loadActivities()
   },
 
   onPullDownRefresh: function () {
-    this.loadActivities().then(() => {
+    this.loadWeek(this.data.weekStartDate).then(() => {
       wx.stopPullDownRefresh()
     })
   },
@@ -45,155 +43,188 @@ Page({
   // 初始化日历
   initCalendar: function () {
     const now = new Date()
-    const year = now.getFullYear()
-    const month = now.getMonth() + 1
-    
+    const today = util.formatDate(now, 'YYYY-MM-DD')
+
     this.setData({
-      currentYear: year,
-      currentMonth: month,
-      selectedDate: util.formatDate(now, 'YYYY-MM-DD'),
+      weekStartDate: today,
+      selectedDate: today,
       selectedDateStr: '今天'
     })
-    
-    this.generateCalendarDays(year, month)
+
+    this.loadWeek(today)
   },
 
-  // 生成日历天数
-  generateCalendarDays: function (year, month) {
-    const days = []
-    const firstDay = new Date(year, month - 1, 1)
-    const lastDay = new Date(year, month, 0)
-    const firstDayWeek = firstDay.getDay()
-    const totalDays = lastDay.getDate()
-    
-    // 上月补充天数
-    const prevMonthLastDay = new Date(year, month - 1, 0).getDate()
-    for (let i = firstDayWeek - 1; i >= 0; i--) {
-      const day = prevMonthLastDay - i
-      const prevMonth = month - 1 === 0 ? 12 : month - 1
-      const prevYear = month - 1 === 0 ? year - 1 : year
-      days.push({
-        day,
-        date: `${prevYear}-${prevMonth}-${day}`,
-        isCurrentMonth: false,
-        isToday: false,
-        isSelected: false,
+  // 加载一周日期和活动标记
+  loadWeek: async function (startDate) {
+    const weekDays = this.buildWeekDays(startDate)
+    const weekTitle = this.formatWeekTitle(weekDays)
+
+    this.setData({ weekStartDate: startDate, weekTitle, weekDays })
+    await this.loadActivityMarkers()
+    await this.loadActivities()
+  },
+
+  // 构建连续七天
+  buildWeekDays: function (startDate) {
+    const weekNames = ['日', '一', '二', '三', '四', '五', '六']
+    const start = this.parseDate(startDate)
+    const today = this.data.today || util.formatDate(new Date(), 'YYYY-MM-DD')
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(start)
+      date.setDate(start.getDate() + index)
+      const dateStr = util.formatDate(date, 'YYYY-MM-DD')
+
+      return {
+        day: date.getDate(),
+        weekday: weekNames[date.getDay()],
+        date: dateStr,
+        isToday: dateStr === today,
+        isSelected: dateStr === this.data.selectedDate,
         hasActivity: false
-      })
-    }
-    
-    // 当月天数
-    const today = new Date()
-    for (let i = 1; i <= totalDays; i++) {
-      const date = `${year}-${month}-${i}`
-      const isToday = today.getFullYear() === year && 
-                      today.getMonth() + 1 === month && 
-                      today.getDate() === i
-      const isSelected = this.data.selectedDate === util.formatDate(new Date(year, month - 1, i), 'YYYY-MM-DD')
-      
-      days.push({
-        day: i,
-        date: util.formatDate(new Date(year, month - 1, i), 'YYYY-MM-DD'),
-        isCurrentMonth: true,
-        isToday,
-        isSelected,
-        hasActivity: this.checkHasActivity(date)
-      })
-    }
-    
-    // 下月补充天数
-    const remainingDays = 42 - days.length
-    for (let i = 1; i <= remainingDays; i++) {
-      const nextMonth = month + 1 === 13 ? 1 : month + 1
-      const nextYear = month + 1 === 13 ? year + 1 : year
-      days.push({
-        day: i,
-        date: `${nextYear}-${nextMonth}-${i}`,
-        isCurrentMonth: false,
-        isToday: false,
-        isSelected: false,
-        hasActivity: false
-      })
-    }
-    
-    this.setData({ calendarDays: days })
+      }
+    })
   },
 
-  // 检查是否有活动（模拟）
-  checkHasActivity: function (date) {
-    const activityDates = ['2026-05-15', '2026-05-20', '2026-05-28']
-    return activityDates.includes(date)
+  // 格式化周标题
+  formatWeekTitle: function (weekDays) {
+    if (!weekDays.length) return ''
+
+    const first = this.parseDate(weekDays[0].date)
+    const last = this.parseDate(weekDays[weekDays.length - 1].date)
+    const firstText = util.formatDate(first, 'MM月DD日')
+    const lastText = util.formatDate(last, 'MM月DD日')
+    return `${firstText} - ${lastText}`
   },
 
-  // 上个月
-  onPrevMonth: function () {
-    let { currentYear, currentMonth } = this.data
-    if (currentMonth === 1) {
-      currentYear -= 1
-      currentMonth = 12
-    } else {
-      currentMonth -= 1
-    }
-    this.setData({ currentYear, currentMonth })
-    this.generateCalendarDays(currentYear, currentMonth)
-    this.loadActivities()
+  // 上一周
+  onPrevWeek: function () {
+    const start = this.parseDate(this.data.weekStartDate)
+    start.setDate(start.getDate() - 7)
+    const startDate = util.formatDate(start, 'YYYY-MM-DD')
+    this.setData({
+      selectedDate: startDate,
+      selectedDateStr: this.formatSelectedDate(startDate)
+    })
+    this.loadWeek(startDate)
   },
 
-  // 下个月
-  onNextMonth: function () {
-    let { currentYear, currentMonth } = this.data
-    if (currentMonth === 12) {
-      currentYear += 1
-      currentMonth = 1
-    } else {
-      currentMonth += 1
-    }
-    this.setData({ currentYear, currentMonth })
-    this.generateCalendarDays(currentYear, currentMonth)
-    this.loadActivities()
+  // 下一周
+  onNextWeek: function () {
+    const start = this.parseDate(this.data.weekStartDate)
+    start.setDate(start.getDate() + 7)
+    const startDate = util.formatDate(start, 'YYYY-MM-DD')
+    this.setData({
+      selectedDate: startDate,
+      selectedDateStr: this.formatSelectedDate(startDate)
+    })
+    this.loadWeek(startDate)
   },
 
   // 选择日期
   onDayTap: function (e) {
     const date = e.currentTarget.dataset.date
-    const dayObj = this.data.calendarDays.find(d => d.date === date)
-    
+
     // 更新选中状态
-    const calendarDays = this.data.calendarDays.map(d => ({
+    const weekDays = this.data.weekDays.map(d => ({
       ...d,
       isSelected: d.date === date
     }))
-    
+
     this.setData({
       selectedDate: date,
-      selectedDateStr: dayObj.isToday ? '今天' : util.formatDate(new Date(date), 'MM月DD日'),
-      calendarDays
+      selectedDateStr: this.formatSelectedDate(date),
+      weekDays
     })
-    
+
     this.loadActivities()
+  },
+
+  // 选中日期标题
+  formatSelectedDate: function (date) {
+    return date === this.data.today ? '今天' : util.formatDate(this.parseDate(date), 'MM月DD日')
+  },
+
+  // 避免不同机型对 YYYY-MM-DD 解析不一致
+  parseDate: function (date) {
+    if (date instanceof Date) return new Date(date)
+    const [year, month, day] = date.split('-').map(Number)
+    return new Date(year, month - 1, day)
+  },
+
+  // 加载当前周活动标记
+  loadActivityMarkers: async function () {
+    try {
+      const db = wx.cloud.database()
+      const _ = db.command
+      const dates = this.data.weekDays.map(item => item.date)
+
+      const res = await db.collection('activities')
+        .where({
+          status: _.neq('deleted'),
+          date: _.in(dates)
+        })
+        .field({ date: true })
+        .get()
+
+      const activityDateSet = {}
+      res.data.forEach(item => {
+        activityDateSet[item.date] = true
+      })
+
+      this.setData({
+        weekDays: this.data.weekDays.map(item => ({
+          ...item,
+          hasActivity: !!activityDateSet[item.date]
+        }))
+      })
+    } catch (err) {
+      console.error('加载活动标记失败', err)
+    }
   },
 
   // 加载活动列表
   loadActivities: async function () {
     this.setData({ loading: true })
-    
+
     try {
       const db = wx.cloud.database()
       const _ = db.command
-      
+
       const res = await db.collection('activities')
         .where({
-          status: _.neq('deleted')
+          status: _.neq('deleted'),
+          date: this.data.selectedDate
         })
         .orderBy('createTime', 'desc')
         .get()
-      
-      this.setData({ activities: res.data })
+
+      this.setData({ activities: this.formatActivities(res.data) })
     } catch (err) {
       console.error('加载活动失败', err)
     } finally {
       this.setData({ loading: false })
     }
+  },
+
+  // 格式化活动展示字段
+  formatActivities: function (activities) {
+    const statusMap = {
+      upcoming: '未开始',
+      ongoing: '进行中',
+      ended: '已结束',
+      active: '未开始',
+      published: '未开始'
+    }
+
+    return activities.map(item => ({
+      ...item,
+      status: item.status === 'active' || item.status === 'published' ? 'upcoming' : item.status,
+      statusLabel: item.statusLabel || statusMap[item.status] || '未开始',
+      time: item.time || item.date || '',
+      joinCount: item.joinCount || 0,
+      joinAvatars: item.joinAvatars || []
+    }))
   },
 
   // 点击活动
@@ -208,7 +239,7 @@ Page({
   onJoinTap: function (e) {
     const id = e.currentTarget.dataset.id
     const isJoined = e.currentTarget.dataset.joined
-    
+
     if (isJoined) {
       wx.showModal({
         title: '取消报名',
@@ -236,7 +267,7 @@ Page({
         })
         return
       }
-      
+
       this.updateJoinStatus(id, true)
     }
   },
@@ -253,14 +284,14 @@ Page({
       }
       return a
     })
-    
+
     this.setData({ activities })
     util.showToast(isJoined ? '报名成功' : '已取消报名')
   },
 
   // 打开发布弹窗
   onPublishTap: function () {
-    if (!app.globalData.userInfo) {
+    if (!app.globalData.isLoggedIn || !app.globalData.openid) {
       wx.showModal({
         title: '提示',
         content: '发起活动需要先登录',
@@ -275,7 +306,7 @@ Page({
       })
       return
     }
-    
+
     this.setData({ showPublishDialog: true })
   },
 
@@ -287,8 +318,8 @@ Page({
   // 检查是否可以提交
   checkCanSubmit: function () {
     const { publishForm } = this.data
-    const canSubmit = publishForm.title.trim() && 
-                      publishForm.date && 
+    const canSubmit = publishForm.title.trim() &&
+                      publishForm.date &&
                       publishForm.location.trim()
     this.setData({ canSubmit })
   },
@@ -332,16 +363,39 @@ Page({
   // 提交发布
   onSubmit: async function () {
     if (!this.data.canSubmit || this.data.submitting) return
-    
+
     this.setData({ submitting: true })
-    
+
     try {
-      // TODO: 提交到云数据库
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
+      const db = wx.cloud.database()
+      const { publishForm } = this.data
+
+      await db.collection('activities').add({
+        data: {
+          title: publishForm.title.trim(),
+          date: publishForm.date,
+          time: publishForm.date,
+          location: publishForm.location.trim(),
+          desc: publishForm.desc.trim(),
+          maxCount: publishForm.maxCount,
+          joinCount: 0,
+          joinAvatars: [],
+          status: 'upcoming',
+          statusLabel: '未开始',
+          createTime: db.serverDate(),
+          updateTime: db.serverDate()
+        }
+      })
+
       util.showToast('发布成功')
-      this.setData({ 
+      const selected = this.parseDate(publishForm.date)
+      const weekStartDate = util.formatDate(selected, 'YYYY-MM-DD')
+      this.setData({
         showPublishDialog: false,
+        canSubmit: false,
+        weekStartDate,
+        selectedDate: publishForm.date,
+        selectedDateStr: this.formatSelectedDate(publishForm.date),
         publishForm: {
           title: '',
           date: '',
@@ -350,10 +404,10 @@ Page({
           maxCount: 20
         }
       })
-      this.loadActivities()
+      this.loadWeek(weekStartDate)
     } catch (err) {
       console.error('发布失败', err)
-      util.showToast('发布失败')
+      util.showToast(err.errMsg || err.message || '发布失败')
     } finally {
       this.setData({ submitting: false })
     }

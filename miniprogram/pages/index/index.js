@@ -24,7 +24,7 @@ Page({
     // 第二行
     row2Menus: [
       { id: 'discuss', name: '业主议事厅', icon: 'icon-pinglun' },
-      { id: 'carpool', name: '牛马拼车', icon: 'icon-yewujieshao-chengjipinche' },
+      { id: 'carpool', name: '捎一段', icon: 'icon-yewujieshao-chengjipinche' },
       { id: 'news', name: '60秒知天下', icon: 'icon-xinwen' },
       { id: 'timeline', name: '小区时间线', icon: 'icon-richangjilu' }
     ],
@@ -95,9 +95,19 @@ Page({
           status: _.in(['active', 'published'])
         })
         .orderBy('createTime', 'desc')
-        .limit(3)
+        .limit(6)
         .get()
-      this.setData({ skills: res.data })
+
+      const skills = res.data.map(item => ({
+        ...item,
+        // 取第一张图片，没有则用兜底图
+        cover: (item.images && item.images.length > 0) ? item.images[0] : '/assets/icons/skill.png',
+        avatar: (item.userInfo && item.userInfo.avatarUrl) ? item.userInfo.avatarUrl : '/assets/icons/avatar.png',
+        author: (item.userInfo && item.userInfo.nickName) ? item.userInfo.nickName : '邻居',
+        likes: item.likeCount || 0
+      }))
+
+      this.setData({ skills })
     } catch (err) {
       console.error('加载技能失败', err)
     }

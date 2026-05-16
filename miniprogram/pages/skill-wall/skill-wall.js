@@ -33,7 +33,8 @@ Page({
   },
 
   onShow: function () {
-    // 每次显示时刷新列表，确保发布后能看到
+    // 发布弹窗打开时（如选图后返回），不触发列表刷新，避免出现双 loading
+    if (this.data.showPublishDialog) return
     this.loadSkills()
   },
 
@@ -55,11 +56,15 @@ Page({
     this.setData({ loading: true })
 
     try {
-      const { list, hasMore } = await api.skill.getList({
+      const params = {
         page: 1,
         category: this.data.currentCategory,
         keyword: this.data.keyword
-      })
+      }
+      console.log('[loadSkills] 查询参数:', params)
+
+      const { list, hasMore, total } = await api.skill.getList(params)
+      console.log('[loadSkills] 返回数量:', list.length, '总数:', total, 'hasMore:', hasMore)
 
       const formattedList = list.map(item => ({
         ...item,
@@ -73,7 +78,7 @@ Page({
         page: 1
       })
     } catch (err) {
-      console.error('加载技能失败', err)
+      console.error('[loadSkills] 失败:', JSON.stringify(err), err)
       util.showToast('加载失败')
     } finally {
       this.setData({ loading: false })
@@ -143,7 +148,7 @@ Page({
 
   // 打开发布弹窗
   onPublishTap: function () {
-    if (!app.globalData.isLoggedIn) {
+    if (!app.globalData.isLoggedIn || !app.globalData.openid) {
       wx.showModal({
         title: '提示',
         content: '请先登录后再发布',
@@ -265,7 +270,18 @@ Page({
 
   // 发布
   onSubmit: async function () {
-    if (!this.data.canSubmit || this.data.submitting) return
+    if (this.data.submitting) return
+    if (!this.data.canSubmit) {
+      const { title, category, phone } = this.data
+      if (!title.trim()) {
+        util.showToast('请输入技能标题')
+      } else if (!category) {
+        util.showToast('请选择技能分类')
+      } else if (phone.length !== 11) {
+        util.showToast('请输入11位手机号')
+      }
+      return
+    }
 
     // 验证手机号
     const phoneReg = /^1[3-9]\d{9}$/
@@ -278,28 +294,44 @@ Page({
     util.showLoading('发布中...')
 
     try {
-      await api.skill.create({
+      const skillData = {
         title: this.data.title.trim(),
         category: this.data.category,
-        description: this.data.description.trim(),
-        price: this.data.price.trim(),
+        description: (this.data.description || '').trim(),
+        price: (this.data.price || '').trim(),
         phone: this.data.phone,
-        images: this.data.images
-      })
+        images: this.data.images || []
+      }
+      console.log('[发布技能] 提交数据:', skillData)
+
+      const id = await api.skill.create(skillData)
+      console.log('[发布技能] 成功，id:', id)
 
       util.hideLoading()
       util.showToast('发布成功')
 
-      this.setData({ showPublishDialog: false })
+      this.setData({
+        showPublishDialog: false,
+        currentCategory: '',
+        keyword: '',
+        title: '',
+        category: '',
+        description: '',
+        price: '',
+        phone: '',
+        images: [],
+        canSubmit: false
+      })
 
       // 刷新列表
       setTimeout(() => {
         this.loadSkills()
       }, 500)
     } catch (err) {
-      console.error('发布失败', err)
+      console.error('[发布技能] 失败，完整错误:', JSON.stringify(err), err)
       util.hideLoading()
-      util.showToast('发布失败')
+      const msg = err.errMsg || err.message || (typeof err === 'string' ? err : '发布失败，请重试')
+      util.showToast(msg)
     } finally {
       this.setData({ submitting: false })
     }

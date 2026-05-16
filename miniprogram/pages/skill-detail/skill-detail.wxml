@@ -2,17 +2,11 @@
 <view class="skill-detail-page">
   <!-- 技能信息 -->
   <view class="skill-card" wx:if="{{skill}}">
-    <!-- 头部 -->
+    <!-- 头部：左标题 右报价 -->
     <view class="skill-header">
-      <view class="skill-category">
-        <text class="category-icon">{{categoryIcon}}</text>
-        <text class="category-name">{{skill.categoryName}}</text>
-      </view>
+      <view class="skill-title">{{skill.title}}</view>
       <view class="skill-price">{{skill.price}}</view>
     </view>
-
-    <!-- 标题 -->
-    <view class="skill-title">{{skill.title}}</view>
 
     <!-- 用户信息 -->
     <view class="skill-user-info">
@@ -45,16 +39,19 @@
       </view>
     </view>
 
-    <!-- 浏览量 -->
+    <!-- 浏览量 + 点赞数 -->
     <view class="skill-stats">
       <text class="stat-item">👁️ {{skill.viewCount || 0}} 次浏览</text>
+      <text class="stat-item">❤️ {{skill.likeCount || 0}} 人点赞</text>
     </view>
   </view>
 
   <!-- 底部操作栏 -->
   <view class="bottom-bar">
-    <view class="stat-info">
-      <text class="view-count">{{skill.viewCount || 0}} 人看过</text>
+    <!-- 点赞按钮 -->
+    <view class="like-btn {{isLiked ? 'liked' : ''}}" bindtap="onLike">
+      <text class="like-icon">{{isLiked ? '❤️' : '🤍'}}</text>
+      <text class="like-count">{{skill.likeCount || 0}}</text>
     </view>
     <button class="contact-btn" bindtap="onCallPhone">
       <image class="phone-icon" src="/assets/icons/phone.png" mode="aspectFit"></image>

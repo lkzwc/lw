@@ -6,7 +6,7 @@
     <!-- 顶部卡片 -->
     <view class="header-card">
       <view class="header-top">
-        <image class="header-avatar" src="{{detail.avatar || '/assets/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <image class="header-avatar" src="{{detail.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
         <view class="header-user">
           <text class="header-name">{{detail.userName}}</text>
           <text class="header-time">{{detail.timeStr}}</text>
@@ -48,7 +48,7 @@
       <text class="section-title">评论 ({{comments.length}})</text>
       
       <view class="comment-item" wx:for="{{comments}}" wx:key="_id">
-        <image class="comment-avatar" src="{{item.avatar || '/assets/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <image class="comment-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
         <view class="comment-body">
           <text class="comment-name">{{item.userName}}</text>
           <text class="comment-text">{{item.content}}</text>

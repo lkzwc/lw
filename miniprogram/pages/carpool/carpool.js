@@ -1,4 +1,4 @@
-// pages/carpool/carpool.js - 牛马专线
+// pages/carpool/carpool.js - 捎一段
 const app = getApp()
 const util = require('../../utils/util')
 
@@ -87,6 +87,23 @@ Page({
     const type = e.currentTarget.dataset.type
     this.setData({ filterType: type })
     this.loadRoutes()
+  },
+
+  // 联系车主
+  onCallTap: function (e) {
+    const phone = e.currentTarget.dataset.phone
+    if (!phone) {
+      util.showToast('暂无联系电话')
+      return
+    }
+    wx.makePhoneCall({
+      phoneNumber: phone,
+      fail: (err) => {
+        if (err.errMsg.indexOf('cancel') === -1) {
+          util.showToast('拨打失败')
+        }
+      }
+    })
   },
 
   // 点击路线
@@ -206,15 +223,35 @@ Page({
   // 提交发布
   onSubmit: async function () {
     if (!this.data.canSubmit || this.data.submitting) return
-    
+
     this.setData({ submitting: true })
-    
+    wx.showLoading({ title: '发布中...' })
+
     try {
-      // TODO: 提交到云数据库
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
+      const db = wx.cloud.database()
+      const { publishForm } = this.data
+      const userInfo = app.globalData.userInfo || {}
+
+      await db.collection('carpools').add({
+        data: {
+          type: publishForm.type,
+          start: publishForm.start.trim(),
+          end: publishForm.end.trim(),
+          timeStr: publishForm.type === 'once' ? publishForm.timeStr : publishForm.schedule.trim(),
+          schedule: publishForm.schedule.trim(),
+          seats: publishForm.seats,
+          phone: publishForm.phone.trim(),
+          userName: userInfo.nickName || '邻居',
+          avatarUrl: userInfo.avatarUrl || '',
+          status: 'active',
+          createTime: db.serverDate(),
+          updateTime: db.serverDate()
+        }
+      })
+
+      wx.hideLoading()
       util.showToast('发布成功')
-      this.setData({ 
+      this.setData({
         showPublishDialog: false,
         publishForm: {
           type: 'long',
@@ -224,12 +261,14 @@ Page({
           schedule: '',
           seats: 3,
           phone: ''
-        }
+        },
+        canSubmit: false
       })
       this.loadRoutes()
     } catch (err) {
       console.error('发布失败', err)
-      util.showToast('发布失败')
+      wx.hideLoading()
+      util.showToast('发布失败，请重试')
     } finally {
       this.setData({ submitting: false })
     }
@@ -237,7 +276,7 @@ Page({
 
   onShareAppMessage: function () {
     return {
-      title: '牛马专线 - 邻里拼车出行',
+      title: '捎一段 - 邻里顺路搭乘',
       path: '/pages/carpool/carpool'
     }
   },

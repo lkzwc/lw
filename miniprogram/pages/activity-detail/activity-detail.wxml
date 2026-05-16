@@ -2,7 +2,7 @@
 <view class="detail-page">
   
   <!-- 活动封面 -->
-  <image class="detail-cover" src="{{activity.cover || '/assets/images/default-activity.png'}}" mode="aspectFill"></image>
+  <image class="detail-cover" src="{{activity.cover || '/assets/images/homebg.jpeg'}}" mode="aspectFill"></image>
   
   <!-- 活动信息 -->
   <view class="detail-content">
@@ -18,7 +18,7 @@
     <!-- 信息卡片 -->
     <view class="info-card card">
       <view class="info-row">
-        <view class="info-icon">📍</view>
+        <view class="info-icon"><text class="iconfont info-location-icon">&#xe7f7;</text></view>
         <view class="info-text">
           <text class="info-label">活动地点</text>
           <text class="info-value">{{activity.location}}</text>
@@ -50,7 +50,7 @@
     <view class="section" wx:if="{{activity.joinAvatars && activity.joinAvatars.length > 0}}">
       <text class="section-title">已报名邻居</text>
       <view class="join-list">
-        <image class="join-avatar" wx:for="{{activity.joinAvatars}}" wx:key="*this" src="{{item || '/assets/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <image class="join-avatar" wx:for="{{activity.joinAvatars}}" wx:key="*this" src="{{item || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
       </view>
     </view>
     

@@ -134,13 +134,17 @@ page {
   margin-bottom: var(--spacing-lg);
 }
 
-/* ========== 半屏弹框高度调整 ========== */
+/* ========== 半屏弹窗统一规范 ========== */
 .weui-half-screen-dialog {
   height: 70vh !important;
   max-height: 70vh !important;
+  border-radius: 32rpx 32rpx 0 0 !important;
 }
 
-.publish-dialog .weui-half-screen-dialog__bd {
+.publish-dialog .weui-half-screen-dialog__bd,
+.vote-dialog .weui-half-screen-dialog__bd,
+.profile-dialog .weui-half-screen-dialog__bd,
+.notice-dialog .weui-half-screen-dialog__bd {
   height: calc(70vh - 100rpx) !important;
   max-height: calc(70vh - 100rpx) !important;
   overflow-y: auto;
@@ -148,8 +152,91 @@ page {
 
 /* 隐藏半屏弹框右侧的"更多"按钮 */
 .publish-dialog .weui-half-screen-dialog__hd__side:last-child,
-.profile-dialog .weui-half-screen-dialog__hd__side:last-child {
+.vote-dialog .weui-half-screen-dialog__hd__side:last-child,
+.profile-dialog .weui-half-screen-dialog__hd__side:last-child,
+.notice-dialog .weui-half-screen-dialog__hd__side:last-child {
   display: none !important;
+}
+
+.dialog-title-row,
+.dialog-title-bar {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.dialog-title {
+  font-size: 34rpx !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+}
+
+.dialog-submit-btn,
+.save-btn-top {
+  min-width: 112rpx !important;
+  height: 60rpx !important;
+  padding: 0 28rpx !important;
+  border-radius: 30rpx !important;
+  border: none !important;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%) !important;
+  color: #FFFFFF !important;
+  font-size: 26rpx !important;
+  font-weight: 600 !important;
+  line-height: 60rpx !important;
+  text-align: center !important;
+  box-shadow: 0 8rpx 20rpx rgba(74, 144, 217, 0.24) !important;
+}
+
+.dialog-submit-btn.disabled,
+.save-btn-top.disabled {
+  opacity: 0.45 !important;
+  box-shadow: none !important;
+}
+
+.save-btn-top::after {
+  border: none !important;
+}
+
+.dialog-body {
+  padding: 8rpx 16rpx 0 !important;
+  overflow-x: hidden !important;
+}
+
+.dialog-body .form-section,
+.dialog-body .form-item,
+.dialog-body .form-row {
+  margin-bottom: 20rpx !important;
+}
+
+.dialog-body .form-input,
+.dialog-body .form-picker,
+.dialog-body .form-textarea {
+  width: 100% !important;
+  background: #F7F9FC !important;
+  border: 2rpx solid transparent !important;
+  border-radius: 18rpx !important;
+  box-sizing: border-box !important;
+  color: var(--text-primary) !important;
+  font-size: 28rpx !important;
+}
+
+.dialog-body .form-input,
+.dialog-body .form-picker {
+  min-height: 88rpx !important;
+  height: 88rpx !important;
+  padding: 0 28rpx !important;
+  line-height: 88rpx !important;
+}
+
+.dialog-body .form-textarea {
+  min-height: 168rpx !important;
+  padding: 24rpx 28rpx !important;
+  line-height: 1.6 !important;
+}
+
+.dialog-body .placeholder {
+  color: var(--text-placeholder) !important;
 }
 
 /* ========== 图片网格 ========== */

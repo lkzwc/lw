@@ -102,30 +102,6 @@
   color: var(--text-placeholder);
 }
 
-/* 筛选标签 */
-.filter-tabs {
-  display: flex;
-  padding: 0 var(--spacing-md) var(--spacing-md);
-  gap: var(--spacing-sm);
-}
-
-.filter-tab {
-  flex: 1;
-  text-align: center;
-  padding: 16rpx 0;
-  background: #FFFFFF;
-  border-radius: 24rpx;
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
-  transition: all 0.2s;
-}
-
-.filter-tab.active {
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-  color: #FFFFFF;
-  font-weight: 500;
-}
-
 /* 帖子列表 */
 .posts-list {
   padding: 0 var(--spacing-md);
@@ -470,8 +446,8 @@
 }
 
 .upload-icon {
-  width: 48rpx;
-  height: 48rpx;
+  font-size: 48rpx;
+  color: var(--text-placeholder);
   margin-bottom: 8rpx;
 }
 

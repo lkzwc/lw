@@ -116,7 +116,7 @@ const theme = {
     manager: '👨‍💼',    // 一键楼管
     alarm: '🚨',        // 一键报警
     vote: '🗳️',        // 业主议事厅
-    carpool: '🚗',      // 牛马拼车
+    carpool: '🚗',      // 捎一段
     news: '📰',        // 60秒知天下
     timeline: '📅',    // 小区时间线
     skill: '🛠️',       // 技能墙

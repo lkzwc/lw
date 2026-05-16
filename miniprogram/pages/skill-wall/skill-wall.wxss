@@ -15,10 +15,13 @@
   z-index: 200;
   overflow: hidden;
   background: #FFFFFF;
+  box-shadow: none;
+  border-bottom: none;
 }
 
 .nav-placeholder {
   width: 100%;
+  background: #FFFFFF;
 }
 
 .nav-bar {

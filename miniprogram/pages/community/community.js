@@ -1,12 +1,13 @@
 // pages/community/community.js - 按设计图重构
 const app = getApp()
+const api = require('../../utils/api')
 const util = require('../../utils/util')
-const db = wx.cloud.database()
+
+const PAGE_SIZE = 20
 
 Page({
   data: {
     posts: [],
-    currentTag: '',
     page: 1,
     hasMore: true,
     loading: true,
@@ -51,25 +52,21 @@ Page({
     }
   },
 
-  // 加载帖子 - 优先从云数据库读取
+  // 加载帖子
   loadPosts: async function () {
     this.setData({ loading: true })
 
     try {
-      const res = await db.collection('posts')
-        .orderBy('createTime', 'desc')
-        .limit(20)
-        .get()
+      const { list, hasMore } = await api.post.getList({
+        page: 1,
+        pageSize: PAGE_SIZE
+      })
 
-      let posts = res.data.map(p => ({
-        ...p,
-        timeStr: util.formatTime(new Date(p.createTime)),
-        isLiked: false
-      }))
+      const posts = await this.formatPosts(list)
 
       this.setData({
         posts,
-        hasMore: false,
+        hasMore,
         page: 1
       })
     } catch (err) {
@@ -87,21 +84,55 @@ Page({
   // 加载更多
   loadMore: async function () {
     this.setData({ loadingMore: true })
-    setTimeout(() => {
-      this.setData({ loadingMore: false, hasMore: false })
-    }, 1000)
+
+    try {
+      const nextPage = this.data.page + 1
+      const { list, hasMore } = await api.post.getList({
+        page: nextPage,
+        pageSize: PAGE_SIZE
+      })
+
+      const posts = await this.formatPosts(list)
+
+      this.setData({
+        posts: [...this.data.posts, ...posts],
+        hasMore,
+        page: nextPage
+      })
+    } catch (err) {
+      console.error('加载更多失败', err)
+      util.showToast('加载失败')
+    } finally {
+      this.setData({ loadingMore: false })
+    }
+  },
+
+  // 格式化帖子列表
+  formatPosts: async function (posts) {
+    const openid = app.globalData.openid
+
+    return Promise.all(posts.map(async (post) => {
+      let isLiked = false
+      if (openid) {
+        try {
+          isLiked = await api.post.checkLiked(post._id, openid)
+        } catch (err) {
+          console.error('检查点赞状态失败', err)
+        }
+      }
+
+      return {
+        ...post,
+        tag: post.tag || (post.tags && post.tags[0]) || '',
+        timeStr: util.formatRelativeTime(post.createTime),
+        isLiked
+      }
+    }))
   },
 
   // 搜索
   onSearchTap: function () {
     util.showToast('搜索功能开发中')
-  },
-
-  // 标签筛选
-  onTagTap: function (e) {
-    const tag = e.currentTarget.dataset.tag
-    this.setData({ currentTag: tag, page: 1 })
-    this.loadPosts()
   },
 
   // 点击帖子
@@ -121,18 +152,55 @@ Page({
     })
   },
 
-  // 点赞（同时跳转详情页）
-  onLikeTap: function (e) {
+  // 阻止事件冒泡
+  stopPropagation: function () {},
+
+  // 点赞
+  onLikeTap: async function (e) {
+    if (!app.globalData.isLoggedIn || !app.globalData.openid) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再点赞',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.switchTab({ url: '/pages/mine/mine' })
+          }
+        }
+      })
+      return
+    }
+
     const id = e.currentTarget.dataset.id
-    // 跳转到帖子详情
-    wx.navigateTo({
-      url: `/pages/post-detail/post-detail?id=${id}`
+    const posts = this.data.posts
+    const index = posts.findIndex(p => p._id === id)
+    if (index === -1) return
+
+    const post = posts[index]
+    // 乐观更新：先改 UI，再请求接口
+    const newIsLiked = !post.isLiked
+    const newLikeCount = (post.likeCount || 0) + (newIsLiked ? 1 : -1)
+    this.setData({
+      [`posts[${index}].isLiked`]: newIsLiked,
+      [`posts[${index}].likeCount`]: newLikeCount
     })
+
+    try {
+      await api.post.like(id, app.globalData.openid)
+    } catch (err) {
+      // 接口失败则回滚
+      console.error('点赞失败', err)
+      this.setData({
+        [`posts[${index}].isLiked`]: post.isLiked,
+        [`posts[${index}].likeCount`]: post.likeCount
+      })
+      util.showToast('操作失败')
+    }
   },
 
   // 打开发布弹窗
   onPublishTap: function () {
-    if (!app.globalData.isLoggedIn) {
+    if (!app.globalData.isLoggedIn || !app.globalData.openid) {
       wx.showModal({
         title: '提示',
         content: '请先登录后再发布',
@@ -147,7 +215,7 @@ Page({
       })
       return
     }
-    
+
     this.setData({
       showPublishDialog: true,
       submitting: false,
@@ -216,12 +284,12 @@ Page({
   // 提交帖子 - 写入云数据库
   onSubmitPost: async function () {
     const { content, tag, images, detectedTags } = this.data.publishForm
-    
+
     if (!content.trim()) {
       util.showToast('请输入帖子内容')
       return
     }
-    
+
     // 合并自动识别标签和手动选择标签
     const allTags = [...detectedTags]
     if (tag && !allTags.includes(tag)) {
@@ -250,28 +318,16 @@ Page({
         }
       }
 
-      // 写入云数据库
-      const userInfo = app.globalData.userInfo || {}
-      await db.collection('posts').add({
-        data: {
-          content: content.trim(),
-          tag: tag || '',
-          tags: allTags,
-          images: uploadedImages,
-          likeCount: 0,
-          commentCount: 0,
-          userInfo: {
-            nickName: userInfo.nickName || '邻居',
-            avatarUrl: userInfo.avatarUrl || ''
-          },
-          createTime: db.serverDate(),
-          status: 'published'
-        }
+      await api.post.create({
+        content: content.trim(),
+        tag: tag || allTags[0] || '',
+        tags: allTags,
+        images: uploadedImages
       })
 
       wx.hideLoading()
       util.showToast('发布成功')
-      this.setData({ 
+      this.setData({
         showPublishDialog: false,
         submitting: false
       })

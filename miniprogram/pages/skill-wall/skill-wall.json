@@ -1,6 +1,8 @@
 {
   "navigationStyle": "custom",
   "usingComponents": {
+    "skill-card": "/components/skill-card/skill-card",
+    "loading": "/components/loading/loading",
     "mp-half-screen-dialog": "weui-miniprogram/half-screen-dialog/half-screen-dialog"
   }
 }

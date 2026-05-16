@@ -4,7 +4,7 @@
   <view class="post-card" wx:if="{{post}}">
     <!-- 用户信息 -->
     <view class="post-header">
-      <image class="avatar" src="{{post.userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <image class="avatar" src="{{post.userInfo.avatarUrl || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
       <view class="user-info">
         <text class="nickname">{{post.userInfo.nickName || '邻居'}}</text>
         <text class="time">{{post.createTimeStr}}</text>
@@ -73,7 +73,7 @@
     <!-- 评论列表 -->
     <view class="comments-list" wx:if="{{comments.length > 0}}">
       <view class="comment-item" wx:for="{{comments}}" wx:key="_id">
-        <image class="comment-avatar" src="{{item.userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <image class="comment-avatar" src="{{item.userInfo.avatarUrl || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
         <view class="comment-body">
           <view class="comment-header">
             <text class="comment-nickname">{{item.userInfo.nickName || '邻居'}}</text>

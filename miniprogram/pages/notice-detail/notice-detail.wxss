@@ -16,10 +16,13 @@
   overflow: hidden;
   background: #FFFFFF;
   box-shadow: 0 1rpx 0 rgba(0, 0, 0, 0.05);
+  box-shadow: none;
+  border-bottom: none;
 }
 
 .nav-placeholder {
   width: 100%;
+  background: #FFFFFF;
 }
 
 .nav-bar {

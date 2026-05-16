@@ -321,10 +321,9 @@
 }
 
 .form-row {
-  display: flex;
-  align-items: center;
-  padding: 24rpx 0;
-  border-bottom: 1rpx solid #F0F0F0;
+  display: block;
+  padding: 0;
+  border-bottom: none;
 }
 
 .form-row:last-child {
@@ -338,15 +337,12 @@
 }
 
 .form-input {
-  flex: 1;
-  font-size: 32rpx;
-  text-align: right;
+  text-align: left;
 }
 
 .form-picker {
-  flex: 1;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
 }
 
@@ -357,10 +353,17 @@
 }
 
 .avatar-picker {
-  background: transparent;
-  padding: 0;
+  width: 100%;
+  height: 120rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F7F9FC;
+  padding: 0 28rpx;
+  border-radius: 18rpx;
   border: none;
-  margin-left: auto;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 .avatar-picker::after {
@@ -370,6 +373,12 @@
 .avatar-preview {
   width: 80rpx;
   height: 80rpx;
-  border-radius: 8rpx;
+  border-radius: 16rpx;
   background: #F0F0F0;
+}
+
+.avatar-picker-text {
+  font-size: 28rpx;
+  color: #4A90D9;
+  font-weight: 500;
 }
