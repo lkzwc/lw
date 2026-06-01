@@ -13,20 +13,17 @@
     <view class="header-content">
       <text class="page-title">社区动态</text>
       <text class="page-subtitle">分享生活，连接邻里</text>
-    </view>
-  </view>
-
-  <!-- 搜索栏 -->
-  <view class="search-section">
-    <view class="search-bar" bindtap="onSearchTap">
-      <text class="search-icon">🔍</text>
-      <text class="search-placeholder">搜索帖子、话题...</text>
+      <!-- 搜索栏 -->
+      <view class="search-bar" bindtap="onSearchTap" style="margin-top: 24rpx;">
+        <text class="iconfont icon-sousuo search-icon-font"></text>
+        <text class="search-placeholder">搜索帖子、话题...</text>
+      </view>
     </view>
   </view>
 
   <!-- 帖子列表 -->
   <view class="posts-list">
-    <view class="post-card" wx:for="{{posts}}" wx:key="_id" bindtap="onPostTap" data-id="{{item._id}}">
+    <view class="post-card" wx:for="{{posts}}" wx:key="_id" bindtap="onPostTap" data-id="{{item._id}}" data-index="{{index}}">
       <view class="post-header">
         <image class="post-avatar" src="{{item.userInfo.avatarUrl || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
         <view class="post-user">
@@ -47,7 +44,7 @@
           wx:key="*this"
           src="{{img}}"
           mode="aspectFill"
-          bindtap="onImageTap"
+          catchtap="onImageTap"
           data-images="{{item.images}}"
           data-current="{{img}}"
         ></image>
@@ -55,11 +52,11 @@
 
       <!-- 互动区 -->
       <view class="post-footer">
-        <view class="post-stat {{item.isLiked ? 'liked' : ''}}" bindtap="onLikeTap" data-id="{{item._id}}">
+        <view class="post-stat {{item.isLiked ? 'liked' : ''}}" catchtap="onLikeTap" data-id="{{item._id}}">
           <text class="iconfont {{item.isLiked ? 'icon-dianzan1' : 'icon-dianzan'}} stat-icon-font"></text>
           <text class="stat-num">{{item.likeCount || 0}}</text>
         </view>
-        <view class="post-stat">
+        <view class="post-stat" catchtap="onCommentBtnTap" data-id="{{item._id}}" data-index="{{index}}">
           <text class="iconfont icon-pinglun stat-icon-font"></text>
           <text class="stat-num">{{item.commentCount || 0}}</text>
         </view>
@@ -73,7 +70,7 @@
 
   <!-- 空状态 -->
   <view class="empty-state" wx:if="{{posts.length === 0 && !loading}}">
-    <text class="empty-icon">📝</text>
+    <text class="iconfont icon-tiezhi empty-icon-font"></text>
     <text class="empty-text">暂无帖子</text>
     <text class="empty-hint">点击右下角发布第一条帖子</text>
   </view>
@@ -92,7 +89,7 @@
 
 <!-- 发布按钮 -->
 <view class="publish-btn" bindtap="onPublishTap">
-  <text class="publish-icon">+</text>
+  <text class="iconfont icon-tianjia publish-icon-font"></text>
 </view>
 
 <!-- 发布帖子半屏弹窗 - Twitter风格 -->
@@ -156,5 +153,73 @@
   </view>
 </mp-half-screen-dialog>
 
+<!-- ===== 评论半屏弹窗 — 参考 awesome-skyline half-screen 样式 ===== -->
+<mp-half-screen-dialog
+  ext-class="comment-dialog"
+  show="{{showCommentDialog}}"
+  maskClosable="{{true}}"
+  closable="{{true}}"
+  bindclose="onCloseCommentDialog"
+>
+  <view slot="title" class="comment-dialog-title">
+    <text>评论 {{currentPost.commentCount ? '(' + currentPost.commentCount + ')' : ''}}</text>
+  </view>
+
+  <view slot="desc" class="comment-dialog-body">
+
+    <!-- 帖子摘要区 -->
+    <view class="comment-post-summary" wx:if="{{currentPost._id}}">
+      <image class="summary-avatar" src="{{currentPost.userInfo.avatarUrl || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
+      <view class="summary-info">
+        <text class="summary-name">{{currentPost.userInfo.nickName || '邻居'}}</text>
+        <text class="summary-content">{{currentPost.content}}</text>
+      </view>
+    </view>
+
+    <!-- 评论列表区 — 使用 scroll-view 确保可滚动，不溢出到输入区 -->
+    <scroll-view class="comment-scroll-area" scroll-y enhanced show-scrollbar="{{false}}">
+      <!-- 加载中 -->
+      <view class="comment-loading" wx:if="{{commentLoading}}">
+        <text class="comment-loading-text">加载中...</text>
+      </view>
+
+      <!-- 评论条目 — 参考源码横向布局：头像 + (昵称/内容) -->
+      <view class="comment-item" wx:for="{{currentComments}}" wx:key="_id" wx:if="{{!commentLoading}}">
+        <image class="comment-user-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
+        <view class="comment-user-info">
+          <text class="comment-user-name">{{item.userName}}</text>
+          <text class="comment-user-content">{{item.content}}</text>
+          <text class="comment-user-time">{{item.timeStr}}</text>
+        </view>
+      </view>
+
+      <!-- 空评论 -->
+      <view class="comment-empty" wx:if="{{currentComments.length === 0 && !commentLoading}}">
+        <text class="comment-empty-text">还没有评论，来抢沙发~</text>
+      </view>
+    </scroll-view>
+
+  </view>
+
+  <!-- 底部输入区 — footer slot 固定底部，独立于滚动区 -->
+  <view slot="footer" class="comment-input-area">
+    <image class="comment-input-avatar" src="{{userAvatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
+    <input
+      class="comment-input-box"
+      placeholder="说点什么..."
+      value="{{commentInput}}"
+      bindinput="onCommentInput"
+      confirm-type="send"
+      bindconfirm="onSendComment"
+      adjust-position="{{true}}"
+    />
+    <view class="comment-send-btn {{commentInput.trim() ? '' : 'disabled'}}" catchtap="onSendComment">
+      <text>发送</text>
+    </view>
+  </view>
+
+</mp-half-screen-dialog>
+
 <!-- 加载状态 -->
 <loading wx:if="{{loading}}"></loading>
+

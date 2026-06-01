@@ -153,6 +153,15 @@
   z-index: 100;
 }
 
+.stat-icon-inline {
+  font-size: 28rpx;
+  margin-right: 4rpx;
+}
+
+.stat-icon-inline.liked {
+  color: #FF6B6B;
+}
+
 /* 点赞按钮 */
 .like-btn {
   display: flex;
@@ -194,7 +203,7 @@
   border: none;
 }
 
-.phone-icon {
-  width: 36rpx;
-  height: 36rpx;
+.phone-icon-font {
+  font-size: 36rpx;
+  color: #FFFFFF;
 }

@@ -60,7 +60,7 @@
     <view class="section-card">
       <view class="section-header">
         <view class="notice-header-left">
-          <image class="notice-icon" src="/assets/icons/noticeboard.png" mode="aspectFit"></image>
+          <text class="iconfont icon-gonggao notice-icon-font"></text>
           <text class="section-title">社区公告</text>
         </view>
       </view>
@@ -86,11 +86,14 @@
     <scroll-view class="skill-scroll" scroll-x>
       <view class="skill-list">
         <view class="skill-card" wx:for="{{skills}}" wx:key="_id" bindtap="onSkillTap" data-id="{{item._id}}">
-          <image class="skill-cover" src="{{item.cover}}" mode="aspectFill" lazy-load></image>
+          <image class="skill-cover" src="{{item.cover}}" mode="aspectFill" lazy-load wx:if="{{item.cover}}"></image>
+          <view class="skill-cover-placeholder" wx:else>
+            <text class="iconfont icon-gongju skill-placeholder-icon"></text>
+          </view>
           <view class="skill-info">
             <view class="skill-title-row">
               <text class="skill-title">{{item.title}}</text>
-              <text class="skill-likes">❤️ {{item.likes}}</text>
+              <text class="skill-likes"><text class="iconfont icon-aixin"></text> {{item.likes}}</text>
             </view>
             <view class="skill-meta">
               <image class="skill-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
@@ -116,15 +119,18 @@
     </view>
     <view class="activity-list">
       <view class="activity-card" wx:for="{{activities}}" wx:key="_id" bindtap="onActivityTap" data-id="{{item._id}}">
-        <image class="activity-cover" src="{{item.cover || '/assets/images/homebg.jpeg'}}" mode="aspectFill"></image>
+        <image class="activity-cover" src="{{item.cover}}" mode="aspectFill" wx:if="{{item.cover}}"></image>
+        <view class="activity-cover-placeholder-sm" wx:else>
+          <text class="iconfont icon-rili home-placeholder-icon"></text>
+        </view>
         <view class="activity-content">
           <view class="activity-info">
             <view class="activity-title-row">
               <text class="iconfont icon-jiduhuodong activity-icon"></text>
               <text class="activity-title">{{item.title}}</text>
             </view>
-            <text class="activity-location"><text class="iconfont icon-location activity-loc-icon"></text> {{item.location}}</text>
-            <text class="activity-time">🕐 {{item.timeStr}}</text>
+            <text class="activity-location"><text class="iconfont icon-dingwei activity-loc-icon"></text> {{item.location}}</text>
+            <text class="activity-time"><text class="iconfont icon-naozhong_huaban1 activity-time-icon"></text> {{item.timeStr}}</text>
           </view>
           <view class="activity-action">
             <view class="join-btn {{item.isJoined ? 'joined' : ''}}">

@@ -186,12 +186,21 @@ page {
   line-height: 60rpx !important;
   text-align: center !important;
   box-shadow: 0 8rpx 20rpx rgba(74, 144, 217, 0.24) !important;
+  transition: all var(--duration-fast) !important;
+}
+
+.dialog-submit-btn:active:not(.disabled),
+.save-btn-top:active:not(.disabled) {
+  transform: scale(0.94) !important;
+  box-shadow: 0 4rpx 12rpx rgba(74, 144, 217, 0.2) !important;
 }
 
 .dialog-submit-btn.disabled,
 .save-btn-top.disabled {
-  opacity: 0.45 !important;
+  background: #E8EAF0 !important;
+  color: #B0B8C8 !important;
   box-shadow: none !important;
+  opacity: 1 !important;
 }
 
 .save-btn-top::after {

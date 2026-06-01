@@ -380,6 +380,7 @@ Page({
           maxCount: publishForm.maxCount,
           joinCount: 0,
           joinAvatars: [],
+          joinedBy: [],
           status: 'upcoming',
           statusLabel: '未开始',
           createTime: db.serverDate(),

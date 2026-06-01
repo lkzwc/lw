@@ -2,6 +2,7 @@
 const app = getApp()
 const api = require('../../utils/api')
 const util = require('../../utils/util')
+const subscribe = require('../../utils/subscribe') // 订阅消息囤票模块
 
 const PAGE_SIZE = 20
 
@@ -20,11 +21,23 @@ Page({
       tag: '',
       images: [],
       detectedTags: []
-    }
+    },
+    // 评论弹窗
+    showCommentDialog: false,
+    currentPost: {},
+    currentComments: [],
+    commentLoading: false,
+    commentInput: '',
+    userAvatar: ''
   },
 
   onLoad: function () {
     this.loadPosts()
+    // 获取用户头像
+    const userInfo = app.globalData.userInfo
+    if (userInfo) {
+      this.setData({ userAvatar: userInfo.avatarUrl || '' })
+    }
   },
 
   onShow: function () {
@@ -36,6 +49,11 @@ Page({
     // 每次显示刷新列表
     if (this.data.posts.length > 0) {
       this.loadPosts()
+    }
+    // 更新用户头像
+    const userInfo = app.globalData.userInfo
+    if (userInfo) {
+      this.setData({ userAvatar: userInfo.avatarUrl || '' })
     }
   },
 
@@ -62,7 +80,7 @@ Page({
         pageSize: PAGE_SIZE
       })
 
-      const posts = await this.formatPosts(list)
+      const posts = this.formatPosts(list)
 
       this.setData({
         posts,
@@ -92,7 +110,7 @@ Page({
         pageSize: PAGE_SIZE
       })
 
-      const posts = await this.formatPosts(list)
+      const posts = this.formatPosts(list)
 
       this.setData({
         posts: [...this.data.posts, ...posts],
@@ -108,39 +126,179 @@ Page({
   },
 
   // 格式化帖子列表
-  formatPosts: async function (posts) {
+  formatPosts: function (posts) {
     const openid = app.globalData.openid
 
-    return Promise.all(posts.map(async (post) => {
-      let isLiked = false
-      if (openid) {
-        try {
-          isLiked = await api.post.checkLiked(post._id, openid)
-        } catch (err) {
-          console.error('检查点赞状态失败', err)
-        }
-      }
-
-      return {
-        ...post,
-        tag: post.tag || (post.tags && post.tags[0]) || '',
-        timeStr: util.formatRelativeTime(post.createTime),
-        isLiked
-      }
+    return posts.map(post => ({
+      ...post,
+      tag: post.tag || (post.tags && post.tags[0]) || '',
+      timeStr: util.formatRelativeTime(post.createTime),
+      isLiked: openid ? api.post.checkLiked(post, openid) : false
     }))
   },
 
   // 搜索
   onSearchTap: function () {
-    util.showToast('搜索功能开发中')
+    wx.showModal({
+      title: '搜索',
+      content: '输入关键词可搜索帖子内容（功能即将上线）',
+      confirmText: '知道了',
+      showCancel: false
+    })
   },
 
-  // 点击帖子
+  // 点击帖子 → 打开评论半屏
   onPostTap: function (e) {
     const id = e.currentTarget.dataset.id
-    wx.navigateTo({
-      url: `/pages/post-detail/post-detail?id=${id}`
+    const index = e.currentTarget.dataset.index
+    const post = this.data.posts[index]
+    if (!post) return
+
+    this.setData({
+      showCommentDialog: true,
+      currentPost: post,
+      currentComments: [],
+      commentInput: '',
+      commentLoading: true
     })
+
+    wx.hideTabBar()
+    this.loadComments(id)
+
+    // Tier 2 囤票：用户点击帖子查看评论，顺带囤一张票（受频率控制）
+    subscribe.requestLowFrequencySubscribe()
+  },
+
+  // 点击评论按钮（与点击帖子卡片一样效果，catchtap 避免冒泡）
+  onCommentBtnTap: function (e) {
+    const id = e.currentTarget.dataset.id
+    const index = e.currentTarget.dataset.index
+    const post = this.data.posts[index]
+    if (!post) return
+
+    this.setData({
+      showCommentDialog: true,
+      currentPost: post,
+      currentComments: [],
+      commentInput: '',
+      commentLoading: true
+    })
+
+    wx.hideTabBar()
+    this.loadComments(id)
+
+    // Tier 2 囤票：用户点击评论按钮，顺带囤一张票（受频率控制）
+    subscribe.requestLowFrequencySubscribe()
+  },
+
+  // 加载帖子评论（通过 api.comment 使用 comments 集合）
+  loadComments: async function (postId) {
+    try {
+      const list = await api.comment.getList(postId)
+
+      const comments = list.map(item => ({
+        _id: item._id,
+        userName: item.userInfo?.nickName || '邻居',
+        avatar: item.userInfo?.avatarUrl || '',
+        content: item.content || '',
+        timeStr: util.formatRelativeTime(item.createTime)
+      }))
+
+      this.setData({
+        currentComments: comments,
+        commentLoading: false
+      })
+    } catch (err) {
+      console.error('[loadComments] 加载评论失败', err)
+      this.setData({ commentLoading: false })
+      wx.showToast({ title: '评论加载失败', icon: 'none' })
+    }
+  },
+
+  // 关闭评论弹窗
+  onCloseCommentDialog: function () {
+    wx.showTabBar()
+    this.setData({
+      showCommentDialog: false,
+      currentPost: {},
+      currentComments: [],
+      commentInput: ''
+    })
+  },
+
+  // 评论输入
+  onCommentInput: function (e) {
+    this.setData({ commentInput: e.detail.value })
+  },
+
+  // 发送评论
+  onSendComment: async function () {
+    const content = this.data.commentInput.trim()
+    if (!content) {
+      util.showToast('请输入评论内容')
+      return
+    }
+
+    if (!app.globalData.isLoggedIn || !app.globalData.openid) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再评论',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.switchTab({ url: '/pages/mine/mine' })
+          }
+        }
+      })
+      return
+    }
+
+    const postId = this.data.currentPost._id
+    if (!postId) return
+
+    // 乐观更新
+    const newComment = {
+      _id: Date.now().toString(),
+      userName: app.globalData.userInfo?.nickName || '我',
+      avatar: app.globalData.userInfo?.avatarUrl || '',
+      content,
+      timeStr: '刚刚'
+    }
+    const postIndex = this.data.posts.findIndex(p => p._id === postId)
+    const newCount = (this.data.currentPost.commentCount || 0) + 1
+
+    const updates = {
+      currentComments: [...this.data.currentComments, newComment],
+      commentInput: '',
+      'currentPost.commentCount': newCount
+    }
+    if (postIndex !== -1) {
+      updates[`posts[${postIndex}].commentCount`] = newCount
+    }
+    this.setData(updates)
+
+    try {
+      await api.comment.create({ postId, content })
+      util.showToast('评论成功')
+
+      // Tier 1 囤票（必囤）：评论者为自己囤一张票
+      // 这样别人回复该评论时，才能发通知给评论者
+      // force=true 表示每次评论都弹授权窗（评论是用户明确意图，不受频率控制）
+      subscribe.requestCommentReplySubscribe(true)
+    } catch (err) {
+      console.error('评论失败', err)
+      // 回滚
+      this.setData({
+        'currentPost.commentCount': (this.data.currentPost.commentCount || 1) - 1,
+        currentComments: this.data.currentComments.filter(c => c._id !== newComment._id)
+      })
+      if (postIndex !== -1) {
+        this.setData({
+          [`posts[${postIndex}].commentCount`]: (this.data.posts[postIndex].commentCount || 1) - 1
+        })
+      }
+      util.showToast('评论失败，请重试')
+    }
   },
 
   // 图片预览
@@ -347,4 +505,4 @@ Page({
       path: '/pages/community/community'
     }
   }
-})
+});

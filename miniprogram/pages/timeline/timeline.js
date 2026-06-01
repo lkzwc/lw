@@ -22,9 +22,9 @@ Page({
     currentPhase: 'phase1',
 
     typeOptions: [
-      { value: 'issue', label: '问题反馈', icon: '🔴' },
-      { value: 'notice', label: '小区通知', icon: '📢' },
-      { value: 'improve', label: '建议改进', icon: '💡' }
+      { value: 'issue', label: '问题反馈', icon: 'icon-baojing' },
+      { value: 'notice', label: '小区通知', icon: 'icon-gonggao' },
+      { value: 'improve', label: '建议改进', icon: 'icon-pingjia' }
     ],
     publishForm: {
       type: 'issue',

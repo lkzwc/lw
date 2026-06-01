@@ -11,7 +11,7 @@ Page({
     loading: true,
     showModal: false,
     editId: '',
-    categories: ['家政服务', '维修服务', '教育培训', '美容美发', '健身运动', '其他'],
+    categories: ['家政服务', '维修服务', '教育培训', '美容美发', '其他'],
     categoryIndex: 0,
     formData: {
       title: '',

@@ -3,7 +3,7 @@
   <!-- 标题 + 标签 + 报价 -->
   <view class="skill-header">
     <text class="skill-title">{{skill.title}}</text>
-    <text class="skill-tag">{{categoryIcon}} {{skill.categoryName}}</text>
+    <text class="skill-tag"><text class="iconfont {{categoryIcon}}"></text> {{skill.categoryName}}</text>
     <text class="skill-price" wx:if="{{skill.price}}">{{skill.price}}</text>
   </view>
   
@@ -22,7 +22,7 @@
       <text class="user-name">{{skill.userInfo.nickName || '邻居'}}</text>
     </view>
     <view class="skill-meta">
-      <text>👁 {{skill.viewCount || 0}}</text>
+      <text class="iconfont icon-liulan"></text> {{skill.viewCount || 0}}
     </view>
   </view>
 </view>

@@ -226,6 +226,7 @@
 
 .discuss-icon {
   font-size: 24rpx;
+  color: var(--text-secondary);
 }
 
 .discuss-num {
@@ -242,8 +243,9 @@
   padding: 100rpx var(--spacing-lg);
 }
 
-.empty-icon {
+.empty-icon-font {
   font-size: 80rpx;
+  color: #CCCCCC;
   margin-bottom: var(--spacing-md);
 }
 
@@ -274,6 +276,7 @@
 
 .publish-icon {
   font-size: 32rpx;
+  color: #FFFFFF;
 }
 
 .publish-text {
@@ -386,7 +389,12 @@
 
 .type-icon {
   font-size: 40rpx;
+  color: var(--text-secondary);
   margin-bottom: 8rpx;
+}
+
+.type-option.active .type-icon {
+  color: var(--primary-color);
 }
 
 .type-text {

@@ -41,8 +41,8 @@
 
     <!-- 浏览量 + 点赞数 -->
     <view class="skill-stats">
-      <text class="stat-item">👁️ {{skill.viewCount || 0}} 次浏览</text>
-      <text class="stat-item">❤️ {{skill.likeCount || 0}} 人点赞</text>
+      <text class="stat-item"><text class="iconfont icon-liulan stat-icon-inline"></text> {{skill.viewCount || 0}} 次浏览</text>
+      <text class="stat-item"><text class="iconfont icon-aixin stat-icon-inline liked"></text> {{skill.likeCount || 0}} 人点赞</text>
     </view>
   </view>
 
@@ -50,11 +50,11 @@
   <view class="bottom-bar">
     <!-- 点赞按钮 -->
     <view class="like-btn {{isLiked ? 'liked' : ''}}" bindtap="onLike">
-      <text class="like-icon">{{isLiked ? '❤️' : '🤍'}}</text>
+      <text class="like-icon iconfont {{isLiked ? 'icon-aixin iconfont-liked' : 'icon-aixin'}}"></text>
       <text class="like-count">{{skill.likeCount || 0}}</text>
     </view>
     <button class="contact-btn" bindtap="onCallPhone">
-      <image class="phone-icon" src="/assets/icons/phone.png" mode="aspectFit"></image>
+      <text class="iconfont icon-dianhua phone-icon-font"></text>
       <text>拨打电话</text>
     </button>
   </view>

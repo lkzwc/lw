@@ -61,10 +61,8 @@ Page({
         category: this.data.currentCategory,
         keyword: this.data.keyword
       }
-      console.log('[loadSkills] 查询参数:', params)
 
       const { list, hasMore, total } = await api.skill.getList(params)
-      console.log('[loadSkills] 返回数量:', list.length, '总数:', total, 'hasMore:', hasMore)
 
       const formattedList = list.map(item => ({
         ...item,
@@ -302,10 +300,8 @@ Page({
         phone: this.data.phone,
         images: this.data.images || []
       }
-      console.log('[发布技能] 提交数据:', skillData)
 
       const id = await api.skill.create(skillData)
-      console.log('[发布技能] 成功，id:', id)
 
       util.hideLoading()
       util.showToast('发布成功')

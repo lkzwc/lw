@@ -87,9 +87,9 @@ Page({
         .where({ _openid: openid, status: _.neq('deleted') })
         .count()
       
-      // 获取我的点赞数
-      const likesRes = await db.collection('likes')
-        .where({ _openid: openid })
+      // 获取我的点赞数（从 posts 的 likedBy 数组统计）
+      const likesRes = await db.collection('posts')
+        .where({ likedBy: openid, status: _.neq('deleted') })
         .count()
       
       this.setData({
@@ -129,28 +129,35 @@ Page({
             .get()
           
           if (userRes.data.length > 0) {
+            // 将头像上传到云存储（永久存储）
+            const avatarUrl = await app.uploadAvatar(userInfo.avatarUrl, app.globalData.openid)
+
             // 更新已有用户
             await db.collection('users').doc(userRes.data[0]._id).update({
               data: {
                 nickName: userInfo.nickName,
-                avatarUrl: userInfo.avatarUrl,
+                avatarUrl,
                 updateTime: db.serverDate()
               }
             })
             
             app.globalData.userInfo = {
               ...userRes.data[0],
-              ...userInfo
+              nickName: userInfo.nickName,
+              avatarUrl
             }
             // 保存到本地存储
             wx.setStorageSync('userInfo', app.globalData.userInfo)
 
             app.globalData.isAdmin = !!userRes.data[0].isAdmin
           } else {
+            // 将头像上传到云存储（永久存储）
+            const avatarUrl = await app.uploadAvatar(userInfo.avatarUrl, app.globalData.openid)
+
             // 创建新用户
             const newUser = {
               nickName: userInfo.nickName,
-              avatarUrl: userInfo.avatarUrl,
+              avatarUrl,
               phase: '',
               building: '',
               createTime: db.serverDate(),
@@ -179,7 +186,6 @@ Page({
       },
       fail: (err) => {
         wx.hideLoading()
-        console.log('用户拒绝授权:', err)
         app.logout()
         this.checkLoginStatus()
         util.showToast('登录已取消')
@@ -287,6 +293,12 @@ Page({
       const app = getApp()
       const db = wx.cloud.database()
       
+      // 如果是新选择的头像（临时文件路径），上传到云存储获取永久链接
+      let avatarUrl = editForm.avatarUrl
+      if (avatarUrl && (avatarUrl.startsWith('http://tmp/') || avatarUrl.startsWith('wxfile://'))) {
+        avatarUrl = await app.uploadAvatar(avatarUrl, app.globalData.openid)
+      }
+      
       // 获取当前用户
       const userRes = await db.collection('users')
         .where({ _openid: app.globalData.openid })
@@ -297,7 +309,7 @@ Page({
         await db.collection('users').doc(userRes.data[0]._id).update({
           data: {
             nickName: editForm.nickName,
-            avatarUrl: editForm.avatarUrl,
+            avatarUrl,
             phase: editForm.phase,
             building: editForm.building,
             updateTime: db.serverDate()
@@ -307,7 +319,8 @@ Page({
         // 更新 globalData
         app.globalData.userInfo = {
           ...userRes.data[0],
-          ...editForm
+          ...editForm,
+          avatarUrl
         }
         // 更新本地存储
         wx.setStorageSync('userInfo', app.globalData.userInfo)
@@ -316,7 +329,7 @@ Page({
         await db.collection('users').add({
           data: {
             nickName: editForm.nickName,
-            avatarUrl: editForm.avatarUrl || '/assets/images/default-avatar.png',
+            avatarUrl: avatarUrl || '/assets/icons/avatar.png',
             phase: editForm.phase,
             building: editForm.building,
             createTime: db.serverDate(),
@@ -364,7 +377,9 @@ Page({
 
   // 我的拼车
   onMyCarpoolsTap: function () {
-    util.showToast('我的拼车功能开发中')
+    wx.navigateTo({
+      url: '/pages/carpool/carpool'
+    })
   },
 
   // 联系开发者

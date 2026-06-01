@@ -19,6 +19,7 @@
     "pages/timeline/timeline",
     "pages/timeline-detail/timeline-detail",
     "pages/discuss/discuss",
+    "pages/discuss-detail/discuss-detail",
     "pages/webview/webview",
     "pages/notice-detail/notice-detail"
   ],

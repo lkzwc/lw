@@ -1,1 +1,55 @@
 /* pages/my-likes/my-likes.wxss */
+
+.my-likes-page {
+  min-height: 100vh;
+  background: #F5F7FA;
+}
+
+.page-header {
+  padding: var(--spacing-md);
+  background: #FFFFFF;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.page-title {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.posts-list {
+  padding: var(--spacing-md);
+}
+
+.load-more,
+.no-more {
+  text-align: center;
+  padding: var(--spacing-md);
+  font-size: var(--font-sm);
+  color: var(--text-placeholder);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 160rpx var(--spacing-lg);
+}
+
+.empty-icon-font {
+  font-size: 80rpx;
+  color: var(--text-placeholder);
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: var(--font-md);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-hint {
+  font-size: var(--font-sm);
+  color: var(--text-placeholder);
+}

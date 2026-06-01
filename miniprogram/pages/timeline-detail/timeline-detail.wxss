@@ -236,16 +236,21 @@
 }
 
 .send-btn {
-  width: 120rpx;
+  width: 72rpx;
   height: 72rpx;
   background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
   border-radius: 36rpx;
-  font-size: var(--font-base);
-  color: #FFFFFF;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
 }
 
 .send-btn::after {
   border: none;
+}
+
+.send-icon-font {
+  font-size: 32rpx;
+  color: #FFFFFF;
 }

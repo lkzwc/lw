@@ -1,4 +1,31 @@
 <!--pages/my-likes/my-likes.wxml-->
 <view class="my-likes-page">
-  <text>我的点赞 - 开发中</text>
+  <!-- 标题 -->
+  <view class="page-header">
+    <text class="page-title">我的点赞</text>
+  </view>
+
+  <!-- 帖子列表 -->
+  <view class="posts-list">
+    <post-card wx:for="{{posts}}" wx:key="_id" post="{{item}}"></post-card>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{posts.length === 0 && !loading}}">
+    <text class="iconfont icon-aixin empty-icon-font"></text>
+    <text class="empty-text">暂无点赞</text>
+    <text class="empty-hint">去社区发现感兴趣的内容吧</text>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{posts.length > 0 && hasMore}}">
+    <text>{{loadingMore ? '加载中...' : '上拉加载更多'}}</text>
+  </view>
+
+  <!-- 没有更多 -->
+  <view class="no-more" wx:if="{{posts.length > 0 && !hasMore}}">
+    <text>没有更多了</text>
+  </view>
 </view>
+
+<loading wx:if="{{loading}}"></loading>

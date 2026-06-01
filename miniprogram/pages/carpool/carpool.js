@@ -73,13 +73,26 @@ Page({
       
       const res = await query.orderBy('createTime', 'desc').get()
       
-      this.setData({ routes: res.data })
+      this.setData({ routes: this.formatRoutes(res.data) })
     } catch (err) {
       console.error('加载路线失败', err)
       util.showToast('加载失败，请重试')
     } finally {
       this.setData({ loading: false })
     }
+  },
+
+  // 格式化路线展示字段
+  formatRoutes: function (routes) {
+    return routes.map(item => ({
+      ...item,
+      start: item.start || '',
+      end: item.end || '',
+      timeStr: item.timeStr || '',
+      seats: item.seats || 0,
+      phone: item.phone || '',
+      userName: item.userName || '邻居'
+    }))
   },
 
   // 切换筛选

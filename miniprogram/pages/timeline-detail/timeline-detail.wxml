@@ -34,11 +34,11 @@
     </view>
     
     <!-- 状态卡片 -->
-    <view class="status-card" wx:if="{{detail.status}}">
+    <view class="status-card" wx:if="{{detail.status && detail.status !== 'deleted'}}">
       <view class="status-row">
         <text class="status-label">处理状态</text>
         <view class="status-badge {{detail.status}}">
-          {{detail.statusText}}
+          {{detail.statusText || detail.status}}
         </view>
       </view>
     </view>
@@ -66,7 +66,9 @@
   <!-- 底部操作栏 -->
   <view class="action-bar">
     <input class="comment-input" placeholder="发表评论..." value="{{commentInput}}" bindinput="onCommentInput" bindconfirm="onSendComment" />
-    <button class="send-btn" bindtap="onSendComment">发送</button>
+    <view class="send-btn" bindtap="onSendComment">
+      <text class="iconfont icon-send send-icon-font"></text>
+    </view>
   </view>
   
 </view>

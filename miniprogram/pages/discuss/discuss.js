@@ -1,292 +1,167 @@
-// pages/discuss/discuss.js - 业主议事厅
+// pages/discuss/discuss.js - 业主议事厅列表版
 const app = getApp()
 const util = require('../../utils/util')
 
 Page({
   data: {
-    // 状态栏高度
     statusBarHeight: 20,
-    
-    // 议题信息
-    topic: {
-      id: '',
-      title: '关于小区停车位分配方案的讨论',
-      description: '近期小区停车位紧张，物业提出了新的分配方案，请大家讨论并提出意见。方案要点：1. 按住户比例分配；2. 引入临时停车收费机制；3. 设置访客停车专区。',
-      author: '张大爷',
-      createTime: '2024-05-12 10:30',
-      status: 'voting', // discussing | voting | resolved
-      statusText: '投票中',
-      isAuthor: true, // 当前用户是否是发起人
-      isParticipant: true // 当前用户是否是参与者
-    },
-    
-    // 投票信息
-    vote: {
-      active: true,
-      title: '是否同意新停车位分配方案？',
-      deadline: '2024-05-15 18:00',
-      approveCount: 45,
-      rejectCount: 12,
-      neutralCount: 23,
-      approvePercent: 55,
-      rejectPercent: 15,
-      myVote: null // null | 'approve' | 'reject'
-    },
-    
-    // 消息列表
-    messages: [],
-    
-    scrollToView: '',
-    hasMore: true,
-    
-    // 输入
-    inputContent: '',
-    myAvatar: '',
-    
-    // 发起投票弹窗
-    showVotePopup: false,
-    voteForm: {
+    topics: [],
+    loading: true,
+
+    // 发布弹窗
+    showPublishDialog: false,
+    submitting: false,
+    canSubmit: false,
+    publishForm: {
       title: '',
-      deadline: '',
-      description: '',
-      timeIndex: [0, 0]
-    },
-    timeRange: [['今天', '明天', '后天'], ['12:00', '18:00', '20:00', '22:00']]
+      desc: ''
+    }
   },
 
-  onLoad: function (options) {
-    // 获取系统状态栏高度
+  onLoad: function () {
     const sysInfo = wx.getSystemInfoSync()
-    this.setData({
-      statusBarHeight: sysInfo.statusBarHeight
-    })
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
+    this.loadTopics()
+  },
 
-    const topicId = options.id
-    if (topicId) {
-      // TODO: 加载议题详情
+  onPullDownRefresh: function () {
+    this.loadTopics().then(() => {
+      wx.stopPullDownRefresh()
+    })
+  },
+
+  // 加载议题列表
+  loadTopics: async function () {
+    this.setData({ loading: true })
+
+    try {
+      const db = wx.cloud.database()
+      const _ = db.command
+
+      const res = await db.collection('discussions')
+        .where({
+          status: _.neq('deleted')
+        })
+        .orderBy('createTime', 'desc')
+        .get()
+
+      this.setData({ topics: this.formatTopics(res.data) })
+    } catch (err) {
+      console.error('加载议题失败', err)
+    } finally {
+      this.setData({ loading: false })
     }
-    
-    // 设置用户头像
-    if (app.globalData.userInfo) {
-      this.setData({
-        myAvatar: app.globalData.userInfo.avatarUrl
+  },
+
+  // 格式化议题展示字段
+  formatTopics: function (topics) {
+    const statusMap = {
+      discussing: '讨论中',
+      voting: '投票中',
+      resolved: '已解决'
+    }
+
+    return topics.map(item => ({
+      ...item,
+      title: item.title || '',
+      description: item.description || item.desc || '',
+      statusText: item.statusText || statusMap[item.status] || '讨论中',
+      author: item.author || item.userName || '邻居',
+      avatar: item.avatar || item.avatarUrl || '',
+      createTime: item.createTime ? util.formatDate(item.createTime, 'MM-DD HH:mm') : '',
+      commentCount: item.commentCount || 0
+    }))
+  },
+
+  // 点击议题 → 跳转详情
+  onTopicTap: function (e) {
+    const id = e.currentTarget.dataset.id
+    wx.navigateTo({
+      url: `/pages/discuss-detail/discuss-detail?id=${id}`
+    })
+  },
+
+  // 打开发布弹窗
+  onPublishTap: function () {
+    if (!app.globalData.isLoggedIn || !app.globalData.openid) {
+      wx.showModal({
+        title: '提示',
+        content: '发起议题需要先登录',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.switchTab({ url: '/pages/mine/mine' })
+          }
+        }
       })
-    }
-    
-    // 滚动到最后一条消息
-    this.scrollToBottom()
-  },
-
-  onShow: function () {
-    // 实时更新投票进度
-    this.refreshVoteProgress()
-    
-    // 定时刷新投票进度（每5秒）
-    if (this.data.vote.active) {
-      this.voteTimer = setInterval(() => {
-        this.refreshVoteProgress()
-      }, 5000)
-    }
-  },
-
-  onHide: function () {
-    // 清除定时器
-    if (this.voteTimer) {
-      clearInterval(this.voteTimer)
-      this.voteTimer = null
-    }
-  },
-
-  onUnload: function () {
-    // 清除定时器
-    if (this.voteTimer) {
-      clearInterval(this.voteTimer)
-      this.voteTimer = null
-    }
-  },
-
-  // 刷新投票进度
-  refreshVoteProgress: function () {
-    // TODO: 从服务器获取最新投票数据
-    // 模拟实时更新
-    const vote = this.data.vote
-    const total = vote.approveCount + vote.rejectCount + vote.neutralCount
-    this.setData({
-      vote: {
-        ...vote,
-        approvePercent: Math.round(vote.approveCount / total * 100),
-        rejectPercent: Math.round(vote.rejectCount / total * 100)
-      }
-    })
-  },
-
-  // 投票赞成
-  onVoteApprove: async function () {
-    const vote = this.data.vote
-    this.setData({
-      vote: {
-        ...vote,
-        myVote: 'approve',
-        approveCount: vote.approveCount + 1,
-        neutralCount: vote.neutralCount - 1
-      }
-    })
-    this.refreshVoteProgress()
-    util.showToast('已投票赞成')
-    
-    // TODO: 提交投票到服务器
-  },
-
-  // 投票反对
-  onVoteReject: async function () {
-    const vote = this.data.vote
-    this.setData({
-      vote: {
-        ...vote,
-        myVote: 'reject',
-        rejectCount: vote.rejectCount + 1,
-        neutralCount: vote.neutralCount - 1
-      }
-    })
-    this.refreshVoteProgress()
-    util.showToast('已投票反对')
-    
-    // TODO: 提交投票到服务器
-  },
-
-  // 发起投票
-  onStartVote: function () {
-    this.setData({
-      showVotePopup: true,
-      voteForm: {
-        title: '',
-        deadline: '',
-        description: '',
-        timeIndex: [0, 0]
-      }
-    })
-  },
-
-  // 关闭投票弹窗
-  onCloseVotePopup: function () {
-    this.setData({ showVotePopup: false })
-  },
-
-  // 输入投票标题
-  onVoteTitleInput: function (e) {
-    this.setData({
-      voteForm: {
-        ...this.data.voteForm,
-        title: e.detail.value
-      }
-    })
-  },
-
-  // 选择截止时间
-  onTimePick: function (e) {
-    const index = e.detail.value
-    const deadline = this.data.timeRange[0][index[0]] + ' ' + this.data.timeRange[1][index[1]]
-    this.setData({
-      voteForm: {
-        ...this.data.voteForm,
-        timeIndex: index,
-        deadline: deadline
-      }
-    })
-  },
-
-  // 输入投票说明
-  onVoteDescInput: function (e) {
-    this.setData({
-      voteForm: {
-        ...this.data.voteForm,
-        description: e.detail.value
-      }
-    })
-  },
-
-  // 提交投票
-  onSubmitVote: function () {
-    const { title, deadline } = this.data.voteForm
-    if (!title.trim()) {
-      util.showToast('请输入投票议题')
       return
     }
-    if (!deadline) {
-      util.showToast('请选择截止时间')
-      return
-    }
-    
-    // TODO: 提交到服务器
-    util.showToast('投票已发起')
+
     this.setData({
-      showVotePopup: false,
-      vote: {
-        active: true,
-        title: title,
-        deadline: deadline,
-        approveCount: 0,
-        rejectCount: 0,
-        neutralCount: 80, // 参与者总数
-        approvePercent: 0,
-        rejectPercent: 0,
-        myVote: null
-      },
-      topic: {
-        ...this.data.topic,
-        status: 'voting',
-        statusText: '投票中'
-      }
+      showPublishDialog: true,
+      publishForm: { title: '', desc: '' },
+      canSubmit: false
     })
   },
 
-  // 输入消息
-  onInput: function (e) {
-    this.setData({ inputContent: e.detail.value })
+  // 关闭发布弹窗
+  onClosePublishDialog: function () {
+    this.setData({ showPublishDialog: false })
   },
 
-  // 发送消息
-  onSend: function () {
-    const content = this.data.inputContent.trim()
-    if (!content) return
-    
-    const newMsg = {
-      _id: Date.now().toString(),
-      nickName: '我',
-      avatar: this.data.myAvatar,
-      content: content,
-      timeStr: new Date().toISOString(),
-      displayTime: util.formatTime(new Date(), 'HH:mm'),
-      showTime: true,
-      isMine: true
-    }
-    
-    this.setData({
-      messages: [...this.data.messages, newMsg],
-      inputContent: ''
-    })
-    
-    // 滚动到底部
-    this.scrollToBottom()
-    
-    // TODO: 发送消息到服务器
+  // 检查是否可以提交
+  checkCanSubmit: function () {
+    this.setData({ canSubmit: this.data.publishForm.title.trim() })
   },
 
-  // 滚动到底部
-  scrollToBottom: function () {
-    const messages = this.data.messages
-    if (messages.length > 0) {
-      const lastId = messages[messages.length - 1]._id
-      this.setData({
-        scrollToView: `msg-${lastId}`
+  // 输入标题
+  onTitleInput: function (e) {
+    this.setData({ 'publishForm.title': e.detail.value }, this.checkCanSubmit)
+  },
+
+  // 输入描述
+  onDescInput: function (e) {
+    this.setData({ 'publishForm.desc': e.detail.value })
+  },
+
+  // 提交发布
+  onSubmit: async function () {
+    if (!this.data.canSubmit || this.data.submitting) return
+    this.setData({ submitting: true })
+
+    try {
+      const db = wx.cloud.database()
+      const { publishForm } = this.data
+      const userInfo = app.globalData.userInfo || {}
+
+      await db.collection('discussions').add({
+        data: {
+          title: publishForm.title.trim(),
+          description: publishForm.desc.trim(),
+          status: 'discussing',
+          statusText: '讨论中',
+          author: userInfo.nickName || '邻居',
+          avatarUrl: userInfo.avatarUrl || '',
+          commentCount: 0,
+          joinAvatars: [],
+          createTime: db.serverDate(),
+          updateTime: db.serverDate()
+        }
       })
-    }
-  },
 
-  // 加载更多消息
-  onScrollToUpper: function () {
-    if (!this.data.hasMore) return
-    // TODO: 加载历史消息
+      util.showToast('发起成功')
+      this.setData({
+        showPublishDialog: false,
+        publishForm: { title: '', desc: '' },
+        canSubmit: false
+      })
+      this.loadTopics()
+    } catch (err) {
+      console.error('发布失败', err)
+      util.showToast(err.errMsg || err.message || '发起失败')
+    } finally {
+      this.setData({ submitting: false })
+    }
   },
 
   // 返回上一页
@@ -301,8 +176,8 @@ Page({
 
   onShareAppMessage: function () {
     return {
-      title: this.data.topic.title,
-      path: `/pages/discuss/discuss?id=${this.data.topic.id}`
+      title: '业主议事厅 - 共商共议，共建美好家园',
+      path: '/pages/discuss/discuss'
     }
   }
 })

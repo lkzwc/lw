@@ -17,27 +17,15 @@ Component({
 
   lifetimes: {
     attached: function () {
-      // 检查是否已点赞
+      // 检查是否已点赞（直接从 likedBy 数组判断）
       if (app.globalData.isLoggedIn && this.properties.post._id) {
-        this.checkLiked()
+        const isLiked = api.post.checkLiked(this.properties.post, app.globalData.openid)
+        this.setData({ isLiked })
       }
     }
   },
 
   methods: {
-    // 检查是否已点赞
-    checkLiked: async function () {
-      try {
-        const isLiked = await api.post.checkLiked(
-          this.properties.post._id,
-          app.globalData.openid
-        )
-        this.setData({ isLiked })
-      } catch (err) {
-        console.error('检查点赞状态失败', err)
-      }
-    },
-
     // 阻止事件冒泡
     stopPropagation: function () {},
 

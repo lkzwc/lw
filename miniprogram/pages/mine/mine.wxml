@@ -14,7 +14,7 @@
     <view class="user-row" wx:if="{{!isLoggedIn}}">
       <view class="avatar-wrap">
         <view class="avatar-guest">
-          <text class="avatar-icon">👤</text>
+          <text class="iconfont icon-wode avatar-icon-font"></text>
         </view>
       </view>
       <view class="user-detail">
@@ -114,7 +114,7 @@
       </button>
     </view>
     <view class="form-row">
-      <input class="form-input" placeholder="昵称" value="{{editForm.nickName}}" bindinput="onNickNameInput" maxlength="20" />
+      <input class="form-input" type="nickname" placeholder="昵称" value="{{editForm.nickName}}" bindinput="onNickNameInput" maxlength="20" />
     </view>
     <view class="form-row">
       <picker mode="multiSelector" range="{{phaseBuildingRange}}" value="{{phaseBuildingValue}}" bindchange="onPhaseBuildingChange">

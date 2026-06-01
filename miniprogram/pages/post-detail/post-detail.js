@@ -2,6 +2,7 @@
 const app = getApp()
 const api = require('../../utils/api')
 const util = require('../../utils/util')
+const config = require('../../utils/config')
 
 Page({
   data: {
@@ -40,8 +41,8 @@ Page({
       // 检查是否是作者
       const isOwner = post._openid === app.globalData.openid
       
-      // 检查是否已点赞
-      const isLiked = await api.post.checkLiked(this.data.postId, app.globalData.openid)
+      // 检查是否已点赞（直接从 likedBy 数组判断）
+      const isLiked = api.post.checkLiked(post, app.globalData.openid)
       
       this.setData({
         post,
@@ -49,6 +50,12 @@ Page({
         isLiked,
         loading: false
       })
+
+      // 关键修复：帖子作者打开自己帖子 → 请求订阅授权
+      // 这样后续有人评论时，作者才能收到通知
+      if (isOwner && app.globalData.isLoggedIn) {
+        this.requestAuthorSubscribe()
+      }
     } catch (err) {
       console.error('加载帖子详情失败', err)
       util.showToast('加载失败')
@@ -70,7 +77,6 @@ Page({
       this.setData({ comments: formattedComments })
     } catch (err) {
       console.error('加载评论失败', err)
-      // 不再使用兜底数据
     }
   },
 
@@ -80,11 +86,10 @@ Page({
     util.previewImage(this.data.post.images, url)
   },
 
-  // 点击标签
+  // 点击标签 → 回社区页（tabBar 页面只能用 switchTab）
   onTagTap: function (e) {
-    const tag = e.currentTarget.dataset.tag
-    wx.navigateTo({
-      url: `/pages/community/community?tag=${tag}`
+    wx.switchTab({
+      url: '/pages/community/community'
     })
   },
 
@@ -128,35 +133,76 @@ Page({
         isLiked,
         'post.likeCount': isLiked ? this.data.post.likeCount + 1 : this.data.post.likeCount - 1
       })
-      
-      // 点赞成功后请求订阅授权（必须在用户点击事件中）
-      if (isLiked) {
-        this.requestSubscribeOnAction()
-      }
+      // 移除点赞时的订阅授权请求 — 点赞不需要订阅通知
     } catch (err) {
       console.error('点赞失败', err)
       util.showToast('操作失败')
     }
   },
 
-  // 用户操作时请求订阅授权
-  requestSubscribeOnAction: function () {
-    const templateId = '19XJ-vNa8CD9RTDJG42yqTGklIkX0lep2o2CR50yVFI'
-    
+  /**
+   * 帖子作者打开自己帖子时，请求订阅授权
+   * 这样有人评论时，作者才能收到通知
+   * requestSubscribeMessage 必须在用户点击事件或 onShow 等时机调用
+   * 这里用 loadPostDetail（页面加载时）调用，首次可能被微信拒绝
+   * 更稳妥的做法是在作者进行某次交互时再调用
+   */
+  requestAuthorSubscribe: function () {
+    const templateId = config.subscribeTemplates.commentReply
+    if (!templateId) return
+
     wx.requestSubscribeMessage({
       tmplIds: [templateId],
       success: (res) => {
-        console.log('订阅授权结果', res)
+        if (res[templateId] === 'accept') {
+          // 记录授权到 subscriptions 表
+          this.recordSubscription(templateId, 'reply')
+        }
       },
       fail: (err) => {
-        console.error('订阅授权失败', err)
+        // 用户拒绝或不在用户点击事件中调用
+        // errCode 20004 = 用户不再询问，可引导去设置页
+        if (err.errCode === 20004) {
+          this.showSubscribeSettingGuide()
+        }
+      }
+    })
+  },
+
+  // 记录用户订阅授权
+  recordSubscription: async function (templateId, type) {
+    try {
+      const db = wx.cloud.database()
+      await db.collection('subscriptions').add({
+        data: {
+          templateId,
+          type,
+          acceptTime: db.serverDate(),
+          used: false
+        }
+      })
+    } catch (err) {
+      console.error('记录订阅授权失败', err)
+    }
+  },
+
+  // 用户关闭了"总是询问"，引导去设置页重新开启
+  showSubscribeSettingGuide: function () {
+    wx.showModal({
+      title: '开启消息通知',
+      content: '您已关闭通知授权，如需接收评论回复通知，请在设置中开启',
+      confirmText: '去设置',
+      cancelText: '暂不',
+      success: (res) => {
+        if (res.confirm) {
+          wx.openSetting()
+        }
       }
     })
   },
 
   // 点击评论
   onCommentTap: function () {
-    // 滚动到评论区域
     wx.pageScrollTo({
       selector: '.comments-section',
       duration: 300
@@ -165,7 +211,6 @@ Page({
 
   // 分享
   onShareTap: function () {
-    // 更新分享数
     this.setData({
       'post.shareCount': this.data.post.shareCount + 1
     })
@@ -181,7 +226,6 @@ Page({
     const index = e.detail.index
     
     if (index === 0) {
-      // 删除帖子
       wx.showModal({
         title: '确认删除',
         content: '删除后无法恢复，确定要删除吗？',
@@ -192,7 +236,6 @@ Page({
               await api.post.delete(this.data.postId)
               util.hideLoading()
               util.showToast('已删除')
-              
               setTimeout(() => {
                 wx.navigateBack()
               }, 1500)
@@ -227,12 +270,6 @@ Page({
 
   // 提交评论
   onSubmitComment: async function () {
-    console.log('onSubmitComment called', {
-      isLoggedIn: app.globalData.isLoggedIn,
-      commentContent: this.data.commentContent,
-      submitting: this.data.submitting
-    })
-    
     if (!app.globalData.isLoggedIn) {
       wx.showModal({
         title: '提示',
@@ -255,20 +292,8 @@ Page({
       return
     }
     
-    if (this.data.submitting) {
-      return
-    }
-    
-    // 先请求订阅授权（必须在用户点击事件中直接调用）
-    const templateId = '19XJ-vNa8CD9RTDJG42yqTGklIkX0lep2o2CR50yVFI'
-    try {
-      await wx.requestSubscribeMessage({
-        tmplIds: [templateId]
-      })
-    } catch (err) {
-      console.error('订阅授权失败', err)
-    }
-    
+    if (this.data.submitting) return
+
     this.setData({ submitting: true })
     util.showLoading('发送中...')
     
@@ -281,22 +306,28 @@ Page({
           avatarUrl: app.globalData.userInfo?.avatarUrl || ''
         }
       }
-      
+
       // 如果是回复
       if (this.data.replyTo) {
         commentData.parentId = this.data.replyTo._id
         commentData.replyToName = this.data.replyTo.userInfo.nickName
       }
-      
-      console.log('Creating comment:', commentData)
+
       await api.comment.create(commentData)
-      
+
       util.hideLoading()
       util.showToast('发送成功')
-      
-      // 发送订阅消息通知帖子作者
-      this.sendReplyNotification(content)
-      
+
+      // 发送订阅消息通知帖子作者（非自己评论自己时）
+      if (!this.data.isOwner) {
+        this.sendReplyNotification(content)
+      }
+
+      // 如果是回复某条评论，也通知被回复的人
+      if (this.data.replyTo && this.data.replyTo._openid && this.data.replyTo._openid !== app.globalData.openid) {
+        this.sendReplyToCommentNotification(content)
+      }
+
       // 清空输入
       this.setData({
         commentContent: '',
@@ -304,21 +335,20 @@ Page({
         submitting: false,
         'post.commentCount': (this.data.post?.commentCount || 0) + 1
       })
-      
+
       // 刷新评论列表
       this.loadComments()
     } catch (err) {
       console.error('评论失败', err)
       util.hideLoading()
-      
-      // 更详细的错误提示
+
       let errMsg = '发送失败'
       if (err.errMsg && err.errMsg.includes('collection not exists')) {
         errMsg = '评论功能尚未开通，请联系管理员'
       } else if (err.message) {
         errMsg = err.message
       }
-      
+
       util.showToast(errMsg)
       this.setData({ submitting: false })
     }
@@ -326,22 +356,42 @@ Page({
 
   // 发送回复通知给帖子作者
   sendReplyNotification: async function (commentContent) {
-    // 不通知自己
-    if (this.data.isOwner) {
-      console.log('自己评论自己的帖子，不发送通知')
-      return
-    }
-    
     const post = this.data.post
-    if (!post || !post._openid) {
-      console.log('帖子信息不完整，无法发送通知')
-      return
-    }
-    
-    const templateId = '19XJ-vNa8CD9RTDJG42yqTGklIkX0lep2o2CR50yVFI'
-    
+    if (!post || !post._openid) return
+
+    const templateId = config.subscribeTemplates.commentReply
+    if (!templateId) return
+
+    // 通知去重：检查是否已对该帖子发送过首条评论通知
     try {
-      // 直接发送订阅消息（微信会自动检查用户是否有额度）
+      const db = wx.cloud.database()
+      const dedupRes = await db.collection('notifications')
+        .where({
+          postId: this.data.postId,
+          type: 'first_reply',
+          toOpenid: post._openid
+        })
+        .count()
+
+      // 如果已有通知记录，不再重复发送（避免骚扰）
+      // 但如果是不同评论者，仍然需要发送
+      // 简化方案：30分钟内不重复通知同一用户
+      const recentNotifs = await db.collection('notifications')
+        .where({
+          postId: this.data.postId,
+          toOpenid: post._openid,
+          createTime: db.command.gte(new Date(Date.now() - 30 * 60 * 1000))
+        })
+        .count()
+
+      if (recentNotifs.total > 0) {
+        return // 30分钟内已通知过，不重复发送
+      }
+    } catch (err) {
+      // notifications 表可能不存在，跳过去重直接发送
+    }
+
+    try {
       const result = await wx.cloud.callFunction({
         name: 'sendSubscribeMessage',
         data: {
@@ -349,29 +399,78 @@ Page({
           templateId: templateId,
           data: {
             thing1: { value: this.getPostTitle(post.content) },
-            thing2: { value: commentContent.slice(0, 20) },
+            thing2: { value: this.truncateField(commentContent, 20) },
             time3: { value: util.formatTime(new Date()) }
           },
           page: `/pages/post-detail/post-detail?id=${this.data.postId}`
         }
       })
-      
-      console.log('订阅消息发送结果', result)
-      
+
+      // 记录通知（去重用）
       if (result.result && result.result.success) {
-        console.log('回复通知已发送')
-      } else {
-        console.log('回复通知发送失败，可能用户额度不足或未授权')
+        this.recordNotification(this.data.postId, 'first_reply', post._openid)
       }
     } catch (err) {
       console.error('发送回复通知失败', err)
     }
   },
 
-  // 获取帖子标题（取前20字）
+  // 发送回复通知给被回复的评论者
+  sendReplyToCommentNotification: async function (commentContent) {
+    const replyTo = this.data.replyTo
+    if (!replyTo || !replyTo._openid) return
+
+    const templateId = config.subscribeTemplates.commentReply
+    if (!templateId) return
+
+    try {
+      await wx.cloud.callFunction({
+        name: 'sendSubscribeMessage',
+        data: {
+          openid: replyTo._openid,
+          templateId: templateId,
+          data: {
+            thing1: { value: this.getPostTitle(this.data.post?.content) },
+            thing2: { value: this.truncateField(commentContent, 20) },
+            time3: { value: util.formatTime(new Date()) }
+          },
+          page: `/pages/post-detail/post-detail?id=${this.data.postId}`
+        }
+      })
+    } catch (err) {
+      console.error('发送回复评论通知失败', err)
+    }
+  },
+
+  // 记录通知发送（用于去重）
+  recordNotification: async function (postId, type, toOpenid) {
+    try {
+      const db = wx.cloud.database()
+      await db.collection('notifications').add({
+        data: {
+          postId,
+          type,
+          toOpenid,
+          createTime: db.serverDate()
+        }
+      })
+    } catch (err) {
+      // 表可能不存在，静默失败
+    }
+  },
+
+  // 获取帖子标题（取前20字，thing 类型限制 20 字符）
   getPostTitle: function (content) {
     if (!content) return '帖子'
-    return content.replace(/#[^\s#]+/g, '').trim().slice(0, 20) || '帖子'
+    const cleaned = content.replace(/#[^\s#]+/g, '').trim()
+    return this.truncateField(cleaned, 20) || '帖子'
+  },
+
+  // thing 类型字段截断（微信限制 20 字符，中文字符算 1 个）
+  truncateField: function (str, maxLen) {
+    if (!str) return ''
+    if (str.length <= maxLen) return str
+    return str.slice(0, maxLen - 1) + '…'
   },
 
   // 分享

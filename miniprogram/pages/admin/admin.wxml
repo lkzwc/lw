@@ -30,19 +30,19 @@
   <!-- 功能入口 -->
   <view class="action-grid">
     <view class="action-btn" bindtap="onNoticeManage">
-      <text class="action-icon">📢</text>
+      <text class="iconfont icon-gonggao action-icon-font"></text>
       <text class="action-text">公告</text>
     </view>
     <view class="action-btn" bindtap="onPostManage">
-      <text class="action-icon">📝</text>
+      <text class="iconfont icon-tiezhi action-icon-font"></text>
       <text class="action-text">帖子</text>
     </view>
     <view class="action-btn" bindtap="onSkillManage">
-      <text class="action-icon">🛠️</text>
+      <text class="iconfont icon-gongju action-icon-font"></text>
       <text class="action-text">技能</text>
     </view>
     <view class="action-btn" bindtap="onUserManage">
-      <text class="action-icon">👥</text>
+      <text class="iconfont icon-yonghu action-icon-font"></text>
       <text class="action-text">用户</text>
     </view>
   </view>

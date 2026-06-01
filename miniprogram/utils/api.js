@@ -115,6 +115,7 @@ const postApi = {
         },
         status: 'active',
         likeCount: 0,
+        likedBy: [],
         commentCount: 0,
         shareCount: 0,
         createTime: db.serverDate(),
@@ -134,33 +135,25 @@ const postApi = {
     })
   },
 
-  // 点赞帖子
+  // 点赞帖子（likedBy 数组方式，一次 update 搞定）
   like: async (postId, openid) => {
-    // 检查是否已点赞
-    const likeRes = await db.collection('likes').where({
-      postId,
-      _openid: openid
-    }).get()
+    const doc = await db.collection('posts').doc(postId).get()
+    const likedBy = doc.data.likedBy || []
 
-    if (likeRes.data.length > 0) {
+    if (likedBy.includes(openid)) {
       // 取消点赞
-      await db.collection('likes').doc(likeRes.data[0]._id).remove()
       await db.collection('posts').doc(postId).update({
         data: {
+          likedBy: _.pull(openid),
           likeCount: _.inc(-1)
         }
       })
       return false
     } else {
-      // 添加点赞
-      await db.collection('likes').add({
-        data: {
-          postId,
-          createTime: db.serverDate()
-        }
-      })
+      // 点赞
       await db.collection('posts').doc(postId).update({
         data: {
+          likedBy: _.addToSet(openid),
           likeCount: _.inc(1)
         }
       })
@@ -168,13 +161,10 @@ const postApi = {
     }
   },
 
-  // 检查是否已点赞
-  checkLiked: async (postId, openid) => {
-    const res = await db.collection('likes').where({
-      postId,
-      _openid: openid
-    }).get()
-    return res.data.length > 0
+  // 检查是否已点赞（直接从文档 likedBy 数组判断，无需额外查询）
+  checkLiked: (post, openid) => {
+    const likedBy = post.likedBy || []
+    return likedBy.includes(openid)
   },
 
   // 搜索帖子
@@ -368,7 +358,6 @@ const skillApi = {
     const query = db.collection('skills').where(condition)
 
     const countRes = await query.count()
-    console.log('[skillApi.getList] condition:', JSON.stringify(condition), '总数:', countRes.total)
 
     const listRes = await query
       .orderBy('createTime', 'desc')
@@ -442,39 +431,36 @@ const skillApi = {
     return skill
   },
 
-  // 点赞 / 取消点赞
+  // 点赞 / 取消点赞（likedBy 数组方式）
   like: async (skillId, openid) => {
-    const likeRes = await db.collection('skill_likes').where({
-      skillId,
-      _openid: openid
-    }).get()
+    const doc = await db.collection('skills').doc(skillId).get()
+    const likedBy = doc.data.likedBy || []
 
-    if (likeRes.data.length > 0) {
+    if (likedBy.includes(openid)) {
       // 取消点赞
-      await db.collection('skill_likes').doc(likeRes.data[0]._id).remove()
       await db.collection('skills').doc(skillId).update({
-        data: { likeCount: _.inc(-1) }
+        data: {
+          likedBy: _.pull(openid),
+          likeCount: _.inc(-1)
+        }
       })
       return false
     } else {
       // 点赞
-      await db.collection('skill_likes').add({
-        data: { skillId, createTime: db.serverDate() }
-      })
       await db.collection('skills').doc(skillId).update({
-        data: { likeCount: _.inc(1) }
+        data: {
+          likedBy: _.addToSet(openid),
+          likeCount: _.inc(1)
+        }
       })
       return true
     }
   },
 
-  // 检查是否已点赞
-  checkLiked: async (skillId, openid) => {
-    const res = await db.collection('skill_likes').where({
-      skillId,
-      _openid: openid
-    }).get()
-    return res.data.length > 0
+  // 检查是否已点赞（直接从文档 likedBy 数组判断）
+  checkLiked: (skill, openid) => {
+    const likedBy = skill.likedBy || []
+    return likedBy.includes(openid)
   },
 
   // 发布技能
@@ -483,8 +469,6 @@ const skillApi = {
     const app = getApp()
     const userInfo = app.globalData.userInfo || {}
 
-    console.log('[skillApi.create] userInfo:', userInfo)
-    console.log('[skillApi.create] data:', data)
 
     const res = await db.collection('skills').add({
       data: {
@@ -496,11 +480,11 @@ const skillApi = {
         status: 'active',
         viewCount: 0,
         likeCount: 0,
+        likedBy: [],
         createTime: db.serverDate(),
         updateTime: db.serverDate()
       }
     })
-    console.log('[skillApi.create] 写入成功，_id:', res._id)
     return res._id
   },
 
@@ -597,32 +581,21 @@ const userApi = {
     return res.data
   },
 
-  // 获取我的点赞
+  // 获取我的点赞（从 posts 的 likedBy 数组查找）
   getMyLikes: async (openid, page = 1, pageSize = 10) => {
     const skip = (page - 1) * pageSize
 
-    // 先获取点赞记录
-    const likesRes = await db.collection('likes')
-      .where({ _openid: openid })
+    const res = await db.collection('posts')
+      .where({
+        likedBy: openid,
+        status: _.neq('deleted')
+      })
       .orderBy('createTime', 'desc')
       .skip(skip)
       .limit(pageSize)
       .get()
 
-    if (likesRes.data.length === 0) {
-      return []
-    }
-
-    // 再获取帖子详情
-    const postIds = likesRes.data.map(like => like.postId)
-    const postsRes = await db.collection('posts')
-      .where({
-        _id: _.in(postIds),
-        status: _.neq('deleted')
-      })
-      .get()
-
-    return postsRes.data
+    return res.data
   }
 }
 

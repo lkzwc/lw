@@ -87,8 +87,9 @@
   background: #f8f9fa;
 }
 
-.action-icon {
+.action-icon-font {
   font-size: 44rpx;
+  color: #4A90D9;
   margin-bottom: 12rpx;
 }
 

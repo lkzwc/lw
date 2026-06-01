@@ -1,14 +1,13 @@
-<!--pages/discuss/discuss.wxml - 业主议事厅（头像两侧，概述投票吸顶）-->
+<!--pages/discuss/discuss.wxml - 业主议事厅列表版-->
 <view class="discuss-page">
 
   <!-- 自定义导航栏 -->
   <view class="custom-nav">
     <view class="nav-placeholder" style="height: {{statusBarHeight}}px;"></view>
-    <view class="nav-bar">
+    <view class="nav-bar nav-bar-simple">
       <view class="nav-back" bindtap="onBackTap">
         <text class="nav-back-icon">‹</text>
       </view>
-      <text class="nav-title">业主议事厅</text>
       <view class="nav-right"></view>
     </view>
   </view>
@@ -16,130 +15,75 @@
   <!-- 自定义导航栏占位 -->
   <view style="height: {{statusBarHeight + 44}}px;"></view>
 
-  <!-- 吸顶区域：议题概要 + 投票 -->
-  <view class="sticky-header">
-    <!-- 议题概要区域 -->
-    <view class="topic-header">
-      <view class="topic-info">
-        <view class="topic-title-row">
-          <text class="topic-title">{{topic.title}}</text>
-          <text class="topic-status {{topic.status}}">{{topic.statusText}}</text>
-        </view>
-        <text class="topic-desc">{{topic.description}}</text>
-        <view class="topic-meta">
-          <text class="topic-author">发起人：{{topic.author}}</text>
-          <text class="topic-time">{{topic.createTime}}</text>
-        </view>
-      </view>
-    </view>
+  <!-- 页面标题区 -->
+  <view class="page-header">
+    <text class="page-subtitle">共商共议，共建美好家园</text>
+  </view>
 
-    <!-- 投票进度条（精简版） -->
-    <view class="vote-progress" wx:if="{{vote.active}}">
-      <view class="vote-header">
-        <text class="vote-title">{{vote.title}} <text class="vote-deadline">（截止：{{vote.deadline}}）</text></text>
-      </view>
-      <view class="vote-bar">
-        <view class="vote-approve" style="width: {{vote.approvePercent}}%">
-          <text class="vote-percent">{{vote.approvePercent}}%</text>
+  <!-- 议题列表 -->
+  <view class="topic-list">
+    <view class="topic-card" wx:for="{{topics}}" wx:key="_id" bindtap="onTopicTap" data-id="{{item._id}}">
+      <view class="topic-top">
+        <view class="topic-title-wrap">
+          <text class="topic-title">{{item.title}}</text>
+          <text class="topic-status status-{{item.status}}">{{item.statusText}}</text>
         </view>
-        <view class="vote-reject" style="width: {{vote.rejectPercent}}%">
-          <text class="vote-percent">{{vote.rejectPercent}}%</text>
+        <text class="topic-desc">{{item.description}}</text>
+      </view>
+      <view class="topic-bottom">
+        <view class="topic-author">
+          <image class="author-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
+          <view class="author-info">
+            <text class="author-name">{{item.author}}</text>
+            <text class="topic-time">{{item.createTime}}</text>
+          </view>
+        </view>
+        <view class="topic-stats">
+          <text class="iconfont icon-pinglun stat-icon"></text>
+          <text class="stat-num">{{item.commentCount || 0}}</text>
         </view>
       </view>
-      <view class="vote-actions" wx:if="{{!vote.myVote && topic.isParticipant}}">
-        <button class="vote-btn approve" bindtap="onVoteApprove">赞成 {{vote.approveCount}}</button>
-        <button class="vote-btn reject" bindtap="onVoteReject">反对 {{vote.rejectCount}}</button>
-      </view>
-      <view class="vote-result" wx:if="{{vote.myVote}}">
-        <text class="result-icon">{{vote.myVote === 'approve' ? '✅' : '❌'}}</text>
-        <text class="result-text">您已投票：{{vote.myVote === 'approve' ? '赞成' : '反对'}}</text>
-      </view>
-    </view>
-
-    <!-- 发起投票按钮 -->
-    <view class="start-vote-btn" wx:if="{{topic.isAuthor && !vote.active}}" bindtap="onStartVote">
-      <text class="btn-icon">📊</text>
-      <text class="btn-text">发起投票</text>
     </view>
   </view>
 
-  <!-- 群聊消息区域（头像在两侧） -->
-  <scroll-view
-    class="chat-area"
-    scroll-y
-    scroll-into-view="{{scrollToView}}"
-    bindscrolltoupper="onScrollToUpper"
-  >
-    <view class="chat-messages">
-      <view
-        class="message-item {{item.isMine ? 'mine' : 'other'}}"
-        wx:for="{{messages}}"
-        wx:key="_id"
-        id="msg-{{item._id}}"
-      >
-        <view class="time-divider" wx:if="{{item.showTime}}">
-          <text>{{item.timeStr}}</text>
-        </view>
-        <view class="message-content">
-          <image class="message-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
-          <view class="message-body">
-            <text class="message-name" wx:if="{{!item.isMine}}">{{item.nickName}}</text>
-            <view class="message-bubble">
-              <text class="message-text">{{item.content}}</text>
-            </view>
-            <text class="message-time">{{item.displayTime}}</text>
-          </view>
-        </view>
-      </view>
-      <view class="load-more-tip" wx:if="{{hasMore}}">
-        <text>上拉加载更多消息</text>
-      </view>
-      <view class="no-more-tip" wx:if="{{!hasMore && messages.length > 0}}">
-        <text>没有更多消息了</text>
-      </view>
-    </view>
-  </scroll-view>
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{topics.length === 0}}">
+    <text class="iconfont icon-pinglun empty-icon-font"></text>
+    <text class="empty-text">暂无议事议题</text>
+    <text class="empty-hint">点击右下角发起第一个议题吧</text>
+  </view>
 
-  <!-- 消息输入区域 -->
-  <view class="input-area">
-    <view class="input-bar">
-      <input class="message-input" placeholder="发表您的看法..." value="{{inputContent}}" bindinput="onInput" bindconfirm="onSend" />
-      <button class="send-btn {{inputContent ? 'active' : ''}}" bindtap="onSend">
-        <text>发送</text>
-      </button>
-    </view>
+  <!-- 发布按钮 -->
+  <view class="publish-btn" bindtap="onPublishTap">
+    <text class="iconfont icon-tianjia publish-icon-font"></text>
   </view>
 
 </view>
 
-<!-- 发起投票半屏弹窗 -->
+<!-- 发起议题半屏弹窗 -->
 <mp-half-screen-dialog
-  ext-class="vote-dialog"
-  show="{{showVotePopup}}"
+  ext-class="publish-dialog"
+  show="{{showPublishDialog}}"
   maskClosable="{{true}}"
   closable="{{true}}"
-  bindclose="onCloseVotePopup"
+  bindclose="onClosePublishDialog"
 >
   <view slot="title" class="dialog-title-row">
-    <text class="dialog-title">发起投票</text>
-    <view class="dialog-submit-btn {{voteForm.title ? '' : 'disabled'}}" bindtap="onSubmitVote">
-      <text>发起</text>
+    <text class="dialog-title">发起议题</text>
+    <view class="dialog-submit-btn {{canSubmit ? '' : 'disabled'}}" bindtap="onSubmit">
+      <text>{{submitting ? '发布中' : '发起'}}</text>
     </view>
   </view>
   <view slot="desc" class="dialog-body">
+    <!-- 议题标题 -->
     <view class="form-section">
-      <input class="form-input" placeholder="投票议题（必填）" value="{{voteForm.title}}" bindinput="onVoteTitleInput" />
+      <input class="form-input" placeholder="请输入议题标题（必填）" value="{{publishForm.title}}" bindinput="onTitleInput" maxlength="50" />
     </view>
+
+    <!-- 议题描述 -->
     <view class="form-section">
-      <picker mode="multiSelector" range="{{timeRange}}" value="{{voteForm.timeIndex}}" bindchange="onTimePick">
-        <view class="form-picker">
-          <text class="picker-text {{voteForm.deadline ? '' : 'placeholder'}}">{{voteForm.deadline || '截止时间'}}</text>
-          <text class="picker-arrow">›</text>
-        </view>
-      </picker>
-    </view>
-    <view class="form-section">
-      <textarea class="form-textarea" placeholder="投票说明（可选）" value="{{voteForm.description}}" bindinput="onVoteDescInput" />
+      <textarea class="form-textarea" placeholder="请描述议题内容..." value="{{publishForm.desc}}" bindinput="onDescInput" maxlength="500" auto-height></textarea>
+      <text class="form-count">{{publishForm.desc.length || 0}}/500</text>
     </view>
   </view>
 </mp-half-screen-dialog>

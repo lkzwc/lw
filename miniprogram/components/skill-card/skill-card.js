@@ -10,14 +10,14 @@ Component({
   },
 
   data: {
-    categoryIcon: '📋'
+    categoryIcon: 'icon-pingjia'
   },
 
   observers: {
     'skill.category': function (category) {
       const cat = config.skillCategories.find(c => c.id === category)
       this.setData({
-        categoryIcon: cat ? cat.icon : '📋'
+        categoryIcon: cat ? cat.iconClass : 'icon-pingjia'
       })
     }
   },

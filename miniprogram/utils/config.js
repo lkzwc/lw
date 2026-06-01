@@ -3,12 +3,12 @@
 module.exports = {
   // 技能墙类目
   skillCategories: [
-    { id: 'housekeeping', name: '家政保洁', icon: '🏠' },
-    { id: 'repair', name: '维修服务', icon: '🔧' },
-    { id: 'tutor', name: '家教辅导', icon: '📚' },
-    { id: 'moving', name: '搬家服务', icon: '🚚' },
-    { id: 'pet', name: '宠物照料', icon: '🐾' },
-    { id: 'other', name: '其他', icon: '📋' }
+    { id: 'housekeeping', name: '家政保洁', iconClass: 'icon-wuyebaoxiu' },
+    { id: 'repair', name: '维修服务', iconClass: 'icon-gongju' },
+    { id: 'tutor', name: '家教辅导', iconClass: 'icon-bangzhuzhongxin' },
+    { id: 'moving', name: '搬家服务', iconClass: 'icon-qiche' },
+    { id: 'pet', name: '宠物照料', iconClass: 'icon-aixin' },
+    { id: 'other', name: '其他', iconClass: 'icon-pingjia' }
   ],
   
   // 期号选项
@@ -21,15 +21,7 @@ module.exports = {
   weather: {
     city: '西安',
     district: '灞桥区',
-    // 可替换为实际天气API
     apiKey: ''
-  },
-  
-  // 新闻API配置
-  news: {
-    // 可使用天行数据、聚合数据等免费API
-    apiKey: '',
-    pageSize: 10
   },
   
   // 图片上传配置
@@ -51,5 +43,13 @@ module.exports = {
   cache: {
     userInfoExpire: 7 * 24 * 60 * 60 * 1000, // 用户信息缓存7天
     noticeExpire: 30 * 60 * 1000 // 公告缓存30分钟
+  },
+
+  // 订阅消息模板 ID（需在微信公众平台后台 → 订阅消息 中配置）
+  subscribeTemplates: {
+    // 评论回复通知 - 通知帖子作者有人评论
+    commentReply: '19XJ-vNa8CD9RTDJG42yqTGklIkX0lep2o2CR50yVFI',
+    // 活动提醒 - 活动开始前通知报名用户
+    activityReminder: '' // TODO: 在微信公众平台后台申请活动提醒模板后填入
   }
 }

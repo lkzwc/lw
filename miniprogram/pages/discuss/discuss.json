@@ -1,6 +1,7 @@
 {
-  "navigationStyle": "custom",
   "usingComponents": {
     "mp-half-screen-dialog": "weui-miniprogram/half-screen-dialog/half-screen-dialog"
-  }
+  },
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#F5F7FA"
 }

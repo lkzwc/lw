@@ -61,7 +61,7 @@
 /* 页面标题区 */
 .page-header {
   background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-  padding: 0 var(--spacing-lg) var(--spacing-lg);
+  padding: 0 var(--spacing-lg) var(--spacing-md);
   border-radius: 0 0 40rpx 40rpx;
 }
 
@@ -73,14 +73,14 @@
 /* 筛选标签 */
 .filter-tabs {
   display: flex;
-  padding: var(--spacing-md);
-  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  gap: var(--spacing-xs);
 }
 
 .filter-tab {
   flex: 1;
   text-align: center;
-  padding: 16rpx 0;
+  padding: 12rpx 0;
   background: #FFFFFF;
   border-radius: 24rpx;
   font-size: var(--font-sm);
@@ -96,16 +96,16 @@
 
 /* 路线列表 */
 .route-list {
-  padding: 0 var(--spacing-md);
+  padding: 0 var(--spacing-sm);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .route-card {
   background: #FFFFFF;
-  border-radius: 16rpx;
-  padding: var(--spacing-md);
+  border-radius: 20rpx;
+  padding: var(--spacing-sm);
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
 }
 
@@ -113,7 +113,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
 }
 
 .route-type {
@@ -140,40 +140,28 @@
 
 /* 路线路径 */
 .route-path {
-  padding: var(--spacing-sm) 0;
-}
-
-.path-point {
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 8rpx 0;
+  gap: 12rpx;
 }
 
-.point-dot {
-  width: 16rpx;
-  height: 16rpx;
-  border-radius: 50%;
-  margin-right: var(--spacing-sm);
-}
-
-.point-dot.start {
-  background: #52C41A;
-}
-
-.point-dot.end {
-  background: #4A90D9;
-}
-
-.point-text {
+.path-text {
+  flex: 1;
   font-size: var(--font-base);
   color: var(--text-primary);
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
-.path-line {
-  width: 2rpx;
-  height: 32rpx;
-  background: #E8E8E8;
-  margin: 8rpx 0 8rpx 7rpx;
+.path-arrow {
+  flex-shrink: 0;
+  font-size: 28rpx;
+  color: var(--text-placeholder);
 }
 
 /* 路线底部 */
@@ -181,7 +169,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: var(--spacing-sm);
+  padding-top: 8rpx;
   border-top: 1rpx solid #F0F0F0;
 }
 
@@ -190,26 +178,36 @@
   align-items: center;
 }
 
-.time-icon {
-  font-size: 24rpx;
+.time-icon-font {
+  font-size: 28rpx;
+  color: var(--text-placeholder);
   margin-right: 8rpx;
 }
 
-.time-text {
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
+.contact-icon-font {
+  font-size: 28rpx;
+  color: #4A90D9;
+  margin-right: 8rpx;
+}
+
+.empty-icon-font {
+  font-size: 80rpx;
+  color: var(--text-placeholder);
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
 }
 
 .route-contact {
   display: flex;
   align-items: center;
   background: rgba(74, 144, 217, 0.1);
-  padding: 12rpx 24rpx;
+  padding: 8rpx 20rpx;
   border-radius: 24rpx;
 }
 
-.contact-icon {
-  font-size: 24rpx;
+.contact-icon-font {
+  font-size: 28rpx;
+  color: #4A90D9;
   margin-right: 8rpx;
 }
 
@@ -224,7 +222,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 100rpx var(--spacing-lg);
+  padding: 80rpx var(--spacing-lg);
 }
 
 .empty-icon {
@@ -249,52 +247,26 @@
   position: fixed;
   right: var(--spacing-md);
   bottom: calc(120rpx + env(safe-area-inset-bottom));
+  width: 100rpx;
+  height: 100rpx;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-  padding: 20rpx 32rpx;
-  border-radius: 40rpx;
+  justify-content: center;
   box-shadow: 0 8rpx 24rpx rgba(74, 144, 217, 0.4);
 }
 
-.publish-icon {
-  font-size: var(--font-lg);
+.publish-btn:active {
+  transform: scale(0.94);
+}
+
+.publish-icon-font {
+  font-size: 44rpx;
   color: #FFFFFF;
-  margin-right: 8rpx;
 }
 
-.publish-text {
-  font-size: var(--font-base);
-  color: #FFFFFF;
-  font-weight: 500;
-}
-
-/* ========== 发布弹窗 ========== */
-.dialog-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.dialog-title {
-  font-size: 34rpx;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.dialog-submit-btn {
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-  color: #FFFFFF;
-  font-size: 28rpx;
-  padding: 12rpx 32rpx;
-  border-radius: 32rpx;
-  font-weight: 500;
-}
-
-.dialog-submit-btn.disabled {
-  opacity: 0.5;
-}
+/* ========== 发布弹窗 - 按钮样式继承全局 app.wxss ========== */
 
 .dialog-body {
   overflow-x: hidden;
@@ -373,9 +345,14 @@
   border-color: var(--primary-color);
 }
 
-.type-icon {
+.type-icon-font {
   font-size: 40rpx;
+  color: var(--text-secondary);
   margin-bottom: 8rpx;
+}
+
+.type-option.active .type-icon-font {
+  color: #4A90D9;
 }
 
 .type-text {

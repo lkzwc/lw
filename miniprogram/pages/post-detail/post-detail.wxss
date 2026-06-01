@@ -349,9 +349,9 @@
   flex-shrink: 0;
 }
 
-.send-icon {
-  width: 32rpx;
-  height: 32rpx;
+.send-icon-font {
+  font-size: 32rpx;
+  color: #FFFFFF;
   flex-shrink: 0;
 }
 

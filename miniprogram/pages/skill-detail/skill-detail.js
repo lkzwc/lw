@@ -8,7 +8,7 @@ Page({
   data: {
     skillId: '',
     skill: null,
-    categoryIcon: '📋',
+    categoryIcon: 'icon-pingjia',
     loading: true,
     isLiked: false,
     liking: false
@@ -31,18 +31,12 @@ Page({
       
       // 获取分类图标
       const cat = config.skillCategories.find(c => c.id === skill.category)
-      const categoryIcon = cat ? cat.icon : '📋'
+      const categoryIcon = cat ? cat.iconClass : 'icon-pingjia'
 
-      // 检查是否已点赞
-      let isLiked = false
-      if (app.globalData.isLoggedIn && app.globalData.openid) {
-        try {
-          isLiked = await api.skill.checkLiked(id, app.globalData.openid)
-        } catch (e) {
-          // skill_likes 集合不存在或权限问题，忽略，不影响详情加载
-          console.warn('checkLiked 失败（集合可能未创建）:', e)
-        }
-      }
+      // 检查是否已点赞（直接从 likedBy 数组判断）
+      const isLiked = app.globalData.isLoggedIn && app.globalData.openid
+        ? api.skill.checkLiked(skill, app.globalData.openid)
+        : false
       
       this.setData({ skill, categoryIcon, isLiked, loading: false })
       
@@ -96,10 +90,7 @@ Page({
     } catch (err) {
       // 失败回滚
       console.error('点赞失败', err)
-      this.setData({
-        isLiked,
-        'skill.likeCount': skill.likeCount
-      })
+      this.setData({ isLiked, 'skill.likeCount': skill.likeCount })
       util.showToast('操作失败')
     } finally {
       this.setData({ liking: false })

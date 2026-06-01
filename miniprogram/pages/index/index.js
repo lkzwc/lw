@@ -26,7 +26,7 @@ Page({
       { id: 'discuss', name: '业主议事厅', icon: 'icon-pinglun' },
       { id: 'carpool', name: '捎一段', icon: 'icon-yewujieshao-chengjipinche' },
       { id: 'news', name: '60秒知天下', icon: 'icon-xinwen' },
-      { id: 'timeline', name: '小区时间线', icon: 'icon-richangjilu' }
+      { id: 'timeline', name: '小区时间线', icon: 'icon-jilu' }
     ],
     
     // 公告
@@ -101,7 +101,7 @@ Page({
       const skills = res.data.map(item => ({
         ...item,
         // 取第一张图片，没有则用兜底图
-        cover: (item.images && item.images.length > 0) ? item.images[0] : '/assets/icons/skill.png',
+        cover: (item.images && item.images.length > 0) ? item.images[0] : '',
         avatar: (item.userInfo && item.userInfo.avatarUrl) ? item.userInfo.avatarUrl : '/assets/icons/avatar.png',
         author: (item.userInfo && item.userInfo.nickName) ? item.userInfo.nickName : '邻居',
         likes: item.likeCount || 0
@@ -126,7 +126,14 @@ Page({
         .orderBy('createTime', 'desc')
         .limit(3)
         .get()
-      this.setData({ activities: res.data })
+
+      const activities = res.data.map(item => ({
+        ...item,
+        timeStr: item.time || item.date || this.formatDate(item.createTime),
+        cover: item.cover || item.images && item.images.length > 0 ? item.images[0] : ''
+      }))
+
+      this.setData({ activities })
     } catch (err) {
       console.error('加载活动失败', err)
     }
@@ -164,37 +171,89 @@ Page({
   onScanTap: function () {
     wx.scanCode({
       success: (res) => {
-        console.log('扫码结果', res)
       }
     })
   },
 
   // 通知
   onNotifyTap: function () {
-    util.showToast('通知功能开发中')
+    wx.showModal({
+      title: '消息通知',
+      content: '通知功能即将上线，敬请期待',
+      confirmText: '知道了',
+      showCancel: false
+    })
   },
 
   // 菜单点击
   onMenuTap: function (e) {
     const id = e.currentTarget.dataset.id
+
+    // 一键报警：确认后直接拨打物业安保电话
+    if (id === 'alarm') {
+      wx.showModal({
+        title: '一键报警',
+        content: '确认拨打物业安保电话 029-83584509？\n\n如遇紧急情况请直接拨打 110',
+        confirmText: '立即拨打',
+        confirmColor: '#E74C3C',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            wx.makePhoneCall({
+              phoneNumber: '02983584509',
+              fail: (err) => {
+                if (err.errMsg !== 'makePhoneCall:fail cancel' && err.errMsg !== 'makePhoneCall:fail user cancel') {
+                  util.showToast('拨打失败，请手动拨打')
+                }
+              }
+            })
+          }
+        }
+      })
+      return
+    }
+
+    // 一键物业：拨打物业服务电话
+    if (id === 'property') {
+      wx.makePhoneCall({
+        phoneNumber: '02983584509',
+        fail: (err) => {
+          if (err.errMsg !== 'makePhoneCall:fail cancel' && err.errMsg !== 'makePhoneCall:fail user cancel') {
+            util.showToast('拨打失败，请手动拨打 029-83584509')
+          }
+        }
+      })
+      return
+    }
+
+    // 一键楼管：拨打楼管服务电话
+    if (id === 'manager') {
+      wx.makePhoneCall({
+        phoneNumber: '02983584509',
+        fail: (err) => {
+          if (err.errMsg !== 'makePhoneCall:fail cancel' && err.errMsg !== 'makePhoneCall:fail user cancel') {
+            util.showToast('拨打失败，请手动拨打 029-83584509')
+          }
+        }
+      })
+      return
+    }
+
     const routes = {
-      'property': '/pages/carpool/carpool',
-      'manager': '/pages/carpool/carpool',
-      'alarm': '/pages/carpool/carpool',
       'discuss': '/pages/discuss/discuss',
       'carpool': '/pages/carpool/carpool',
       'timeline': '/pages/timeline/timeline',
       'skill': '/pages/skill-wall/skill-wall'
     }
     
-    // 60s知天下跳转外部链接
+    // 60秒知天下 → 新闻页（内嵌 webview）
     if (id === 'news') {
       wx.navigateTo({
-        url: '/pages/webview/webview?url=https://newsnow.busiyi.world/'
+        url: '/pages/news/news'
       })
       return
     }
-    
+
     const url = routes[id]
     if (url) {
       wx.navigateTo({ url })

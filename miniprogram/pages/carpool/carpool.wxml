@@ -23,9 +23,9 @@
 
   <!-- 筛选标签 -->
   <view class="filter-tabs">
-    <view class="filter-tab {{filterType === 'all' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="all">全部</view>
-    <view class="filter-tab {{filterType === 'long' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="long">长期路线</view>
-    <view class="filter-tab {{filterType === 'once' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="once">临时路线</view>
+    <view class="filter-tab {{filterType === 'all' ? 'active' : ''}}" bindtap="onFilterChange" data-type="all">全部</view>
+    <view class="filter-tab {{filterType === 'long' ? 'active' : ''}}" bindtap="onFilterChange" data-type="long">长期路线</view>
+    <view class="filter-tab {{filterType === 'once' ? 'active' : ''}}" bindtap="onFilterChange" data-type="once">临时路线</view>
   </view>
 
   <!-- 路线列表 -->
@@ -44,11 +44,11 @@
       
       <view class="route-footer">
         <view class="route-time">
-          <text class="time-icon">⏰</text>
+          <text class="iconfont icon-naozhong_huaban1 time-icon-font"></text>
           <text class="time-text">{{item.timeStr}}</text>
         </view>
         <view class="route-contact" catchtap="onCallTap" data-phone="{{item.phone}}">
-          <text class="contact-icon">📞</text>
+          <text class="iconfont icon-dianhua contact-icon-font"></text>
           <text class="contact-text">联系车主</text>
         </view>
       </view>
@@ -57,15 +57,14 @@
 
   <!-- 空状态 -->
   <view class="empty-state" wx:if="{{routes.length === 0}}">
-    <text class="empty-icon">🚗</text>
+    <text class="iconfont icon-qiche empty-icon-font"></text>
     <text class="empty-text">暂无拼车路线</text>
     <text class="empty-hint">点击右下角发布第一条路线吧</text>
   </view>
 
   <!-- 发布按钮 -->
   <view class="publish-btn" bindtap="onPublishTap">
-    <text class="publish-icon">+</text>
-    <text class="publish-text">发布路线</text>
+    <text class="iconfont icon-tianjia publish-icon-font"></text>
   </view>
 
 </view>
@@ -89,11 +88,11 @@
     <view class="form-section">
       <view class="type-selector">
         <view class="type-option {{publishForm.type === 'long' ? 'active' : ''}}" bindtap="onTypeChange" data-type="long">
-          <text class="type-icon">🔄</text>
+          <text class="iconfont icon-naozhong_huaban1 type-icon-font"></text>
           <text class="type-text">长期</text>
         </view>
         <view class="type-option {{publishForm.type === 'once' ? 'active' : ''}}" bindtap="onTypeChange" data-type="once">
-          <text class="type-icon">📍</text>
+          <text class="iconfont icon-location type-icon-font"></text>
           <text class="type-text">单次</text>
         </view>
       </view>

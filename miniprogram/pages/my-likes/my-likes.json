@@ -1,3 +1,9 @@
 {
-  "navigationBarTitleText": "我的点赞"
+  "navigationBarTitleText": "我的点赞",
+  "usingComponents": {
+    "post-card": "/components/post-card/post-card",
+    "loading": "/components/loading/loading"
+  },
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#F5F7FA"
 }

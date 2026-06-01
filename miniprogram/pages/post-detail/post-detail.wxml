@@ -115,7 +115,7 @@
       adjust-position="{{true}}"
     />
     <button class="send-btn" bindtap="onSubmitComment">
-      <image class="send-icon" src="/assets/icons/send.png" mode="aspectFit"></image>
+      <text class="iconfont icon-send send-icon-font"></text>
       <text class="send-text">发送</text>
     </button>
   </view>

@@ -15,7 +15,7 @@ page {
   --color-secondary: #FF6B35;
   --color-secondary-light: #FF8B5A;
   --color-secondary-dark: #E55A25;
-  --color-secondary-bg: rgba(74, 144, 217, 0.1);
+  --color-secondary-bg: rgba(255, 107, 53, 0.1);
   
   /* 功能色 */
   --color-success: #52C41A;
@@ -41,9 +41,9 @@ page {
   --glass-border: rgba(255, 255, 255, 0.5);
   
   /* 边框色 */
-  --border-color: #F0E6D8;
-  --border-light: #F5EBE0;
-  --border-dark: #E5D5C5;
+  --border-color: #E8F0F8;
+  --border-light: #F0F5FA;
+  --border-dark: #D8E8F5;
   
   /* 字号 */
   --font-xs: 20rpx;

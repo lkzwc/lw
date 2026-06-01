@@ -76,6 +76,11 @@ Page({
 
   // 用户管理
   onUserManage: function () {
-    wx.showToast({ title: '开发中', icon: 'none' })
+    wx.showModal({
+      title: '用户管理',
+      content: '功能即将上线，届时可查看和管理社区用户',
+      confirmText: '知道了',
+      showCancel: false
+    })
   }
 })
