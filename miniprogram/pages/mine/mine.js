@@ -2,6 +2,7 @@
 const app = getApp()
 const util = require('../../utils/util')
 const config = require('../../utils/config')
+const api = require('../../utils/api')
 
 const PHASE_LIST = config.phases
 const BUILDING_MAP = config.phaseBuildings
@@ -72,40 +73,11 @@ Page({
     if (!app.globalData.isLoggedIn) return
     
     try {
-      const db = wx.cloud.database()
-      const _ = db.command
       const openid = app.globalData.openid
-      
       if (!openid) return
-      
-      // 获取我的帖子数
-      const postsRes = await db.collection('posts')
-        .where({ _openid: openid, status: _.neq('deleted') })
-        .count()
-      
-      // 获取我的技能数
-      const skillsRes = await db.collection('skills')
-        .where({ _openid: openid, status: _.neq('deleted') })
-        .count()
-      
-      // 获取我的拼车数
-      const carpoolsRes = await db.collection('carpools')
-        .where({ _openid: openid, status: _.neq('deleted') })
-        .count()
-      
-      // 获取我的点赞数（从 posts 的 likedBy 数组统计）
-      const likesRes = await db.collection('posts')
-        .where({ likedBy: openid, status: _.neq('deleted') })
-        .count()
-      
-      this.setData({
-        stats: {
-          postCount: postsRes.total,
-          likeCount: likesRes.total,
-          skillCount: skillsRes.total,
-          carpoolCount: carpoolsRes.total
-        }
-      })
+
+      const stats = await api.user.getMyStats(openid)
+      this.setData({ stats })
     } catch (err) {
       console.error('加载统计失败', err)
     }

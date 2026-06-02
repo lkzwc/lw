@@ -1,6 +1,7 @@
 // pages/activity/activity.js - 活动日历
 const app = getApp()
 const util = require('../../utils/util')
+const api = require('../../utils/api')
 
 Page({
   data: {
@@ -155,21 +156,16 @@ Page({
   // 加载当前周活动标记
   loadActivityMarkers: async function () {
     try {
-      const db = wx.cloud.database()
-      const _ = db.command
       const dates = this.data.weekDays.map(item => item.date)
 
-      const res = await db.collection('activities')
-        .where({
-          status: _.neq('deleted'),
-          date: _.in(dates)
-        })
-        .field({ date: true })
-        .get()
+      const res = await api.activity.getList({ page: 1, pageSize: 100 })
+      const activityList = res.list || []
 
       const activityDateSet = {}
-      res.data.forEach(item => {
-        activityDateSet[item.date] = true
+      activityList.forEach(item => {
+        if (dates.includes(item.date)) {
+          activityDateSet[item.date] = true
+        }
       })
 
       this.setData({
@@ -188,18 +184,12 @@ Page({
     this.setData({ loading: true })
 
     try {
-      const db = wx.cloud.database()
-      const _ = db.command
+      const res = await api.activity.getList({ page: 1, pageSize: 100 })
+      const list = res.list || []
+      
+      const activities = list.filter(item => item.date === this.data.selectedDate)
 
-      const res = await db.collection('activities')
-        .where({
-          status: _.neq('deleted'),
-          date: this.data.selectedDate
-        })
-        .orderBy('createTime', 'desc')
-        .get()
-
-      this.setData({ activities: this.formatActivities(res.data) })
+      this.setData({ activities: this.formatActivities(activities) })
     } catch (err) {
       console.error('加载活动失败', err)
     } finally {
@@ -367,25 +357,20 @@ Page({
     this.setData({ submitting: true })
 
     try {
-      const db = wx.cloud.database()
       const { publishForm } = this.data
 
-      await db.collection('activities').add({
-        data: {
-          title: publishForm.title.trim(),
-          date: publishForm.date,
-          time: publishForm.date,
-          location: publishForm.location.trim(),
-          desc: publishForm.desc.trim(),
-          maxCount: publishForm.maxCount,
-          joinCount: 0,
-          joinAvatars: [],
-          joinedBy: [],
-          status: 'upcoming',
-          statusLabel: '未开始',
-          createTime: db.serverDate(),
-          updateTime: db.serverDate()
-        }
+      await api.activity.create({
+        title: publishForm.title.trim(),
+        date: publishForm.date,
+        time: publishForm.date,
+        location: publishForm.location.trim(),
+        desc: publishForm.desc.trim(),
+        maxCount: publishForm.maxCount,
+        joinCount: 0,
+        joinAvatars: [],
+        joinedBy: [],
+        status: 'upcoming',
+        statusLabel: '未开始'
       })
 
       util.showToast('发布成功')

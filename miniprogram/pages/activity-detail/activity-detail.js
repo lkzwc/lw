@@ -3,6 +3,7 @@ const app = getApp()
 const util = require('../../utils/util')
 const config = require('../../utils/config')
 const subscribe = require('../../utils/subscribe') // 订阅消息囤票模块
+const api = require('../../utils/api')
 
 Page({
   data: {
@@ -31,10 +32,7 @@ Page({
     this.setData({ loading: true })
     
     try {
-      const db = wx.cloud.database()
-      const res = await db.collection('activities').doc(id).get()
-      
-      const data = res.data
+      const data = await api.activity.getDetail(id)
       const openid = app.globalData.openid || ''
       
       const activity = {
@@ -72,20 +70,11 @@ Page({
     
     const activity = this.data.activity
     const isJoined = activity.isJoined
-    const db = wx.cloud.database()
-    const _ = db.command
     const openid = app.globalData.openid
-    const avatarUrl = app.globalData.userInfo?.avatarUrl || ''
     
     try {
       if (isJoined) {
-        // 取消报名 - 云数据库原子操作
-        await db.collection('activities').doc(activity._id).update({
-          data: {
-            joinedBy: _.pull(openid),
-            joinCount: _.inc(-1)
-          }
-        })
+        await api.activity.cancelJoin(activity._id, openid)
         
         this.setData({
           'activity.isJoined': false,
@@ -93,13 +82,7 @@ Page({
         })
         util.showToast('已取消报名')
       } else {
-        // 报名 - 云数据库原子操作
-        await db.collection('activities').doc(activity._id).update({
-          data: {
-            joinedBy: _.addToSet(openid),
-            joinCount: _.inc(1)
-          }
-        })
+        await api.activity.join(activity._id, openid)
         
         this.setData({
           'activity.isJoined': true,

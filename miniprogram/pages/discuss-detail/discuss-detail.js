@@ -1,33 +1,24 @@
-// pages/discuss-detail/discuss-detail.js - 议题详情（聊天面板）
+// pages/discuss-detail/discuss-detail.js - 业主议事厅详情（消息+投票内嵌 discussions 文档）
 const app = getApp()
 const util = require('../../utils/util')
-
-const PAGE_SIZE = 20
+const api = require('../../utils/api')
 
 Page({
   data: {
     statusBarHeight: 20,
     id: '',
     topic: null,
-    vote: null,
     messages: [],
     scrollToView: '',
-    hasMore: true,
     inputContent: '',
     myAvatar: '',
     myNickName: '',
     loading: true,
-    // 回复目标
     replyTo: null,
 
-    // 发起投票弹窗
+    // 投票弹窗
     showVotePopup: false,
-    voteForm: {
-      title: '',
-      deadline: '',
-      description: '',
-      timeIndex: [0, 0]
-    },
+    voteForm: { title: '', deadline: '', timeIndex: [0, 0] },
     timeRange: [['今天', '明天', '后天'], ['12:00', '18:00', '20:00', '22:00']]
   },
 
@@ -46,74 +37,49 @@ Page({
 
     if (app.globalData.userInfo) {
       this.setData({
-        myAvatar: app.globalData.userInfo.avatarUrl,
+        myAvatar: app.globalData.userInfo.avatarUrl || '',
         myNickName: app.globalData.userInfo.nickName || '邻居'
       })
     }
   },
 
-  onShow: function () {
-    if (this.data.vote && this.data.vote.active) {
-      this.refreshVoteProgress()
-      this.voteTimer = setInterval(() => {
-        this.refreshVoteProgress()
-      }, 5000)
-    }
-  },
-
-  onHide: function () {
-    this.clearVoteTimer()
-  },
-
-  onUnload: function () {
-    this.clearVoteTimer()
-  },
-
-  clearVoteTimer: function () {
-    if (this.voteTimer) {
-      clearInterval(this.voteTimer)
-      this.voteTimer = null
-    }
-  },
-
-  // ===== 加载议题 + 消息 =====
+  // ===== 加载议题（含消息+投票） =====
   loadDetail: async function (id) {
     this.setData({ loading: true })
-    const db = wx.cloud.database()
 
     try {
-      // 并行加载议题和消息
-      const [topicRes, msgRes] = await Promise.all([
-        db.collection('discussions').doc(id).get(),
-        db.collection('discuss_messages')
-          .where({ discussId: id })
-          .orderBy('createTime', 'desc')
-          .limit(PAGE_SIZE)
-          .get()
-      ])
+      const data = await api.discuss.getDetail(id)
+      const openid = app.globalData.openid || ''
 
-      const data = topicRes.data
-      const messages = this.formatMessages((msgRes.data || []).reverse())
-      const hasMore = msgRes.data.length >= PAGE_SIZE
+      // 格式化消息
+      const rawMessages = data.messages || []
+      const messages = this.formatMessages(rawMessages, openid)
+
+      // 投票状态
+      const votedUsers = data.votedUsers || []
+      const myVote = votedUsers.indexOf(openid) >= 0
 
       this.setData({
         topic: {
           id: data._id,
           title: data.title || '',
           description: data.description || '',
-          author: data.author || data.userName || '邻居',
+          author: data.author || '邻居',
           avatar: data.avatarUrl || '',
           createTime: data.createTime ? util.formatDate(data.createTime, 'MM-DD HH:mm') : '',
           status: data.status || 'discussing',
           statusText: data.statusText || '讨论中',
-          isAuthor: data._openid === app.globalData.openid
+          isAuthor: data._openid === openid,
+          vote: (data.vote) || null,
+          voteApprove: data.voteApprove || 0,
+          voteReject: data.voteReject || 0,
+          votedUsers: votedUsers,
+          myVote: myVote
         },
         messages,
-        hasMore,
         loading: false
       })
 
-      // 滚动到最新消息
       setTimeout(() => this.scrollToBottom(), 300)
     } catch (err) {
       console.error('加载失败', err)
@@ -123,77 +89,32 @@ Page({
   },
 
   // ===== 格式化消息 =====
-  formatMessages: function (rawList) {
+  formatMessages: function (rawList, openid) {
     if (!rawList || rawList.length === 0) return []
 
-    const openid = app.globalData.openid
-    const messages = rawList.map((item, idx) => {
+    return rawList.map((item, idx) => {
       const prev = idx > 0 ? rawList[idx - 1] : null
-      const prevTime = prev ? prev.createTime : null
-      const curTime = item.createTime
-
-      // 时间线：与上一条间隔超过5分钟显示时间分隔
       let showTime = false
-      if (!prevTime) {
+      if (!prev) {
         showTime = true
       } else {
-        const prevDate = new Date(prevTime)
-        const curDate = new Date(curTime)
-        showTime = (curDate - prevDate) > 5 * 60 * 1000
+        showTime = (item.time - prev.time) > 5 * 60 * 1000 || (item.time - prev.time) < 0
       }
 
+      const msgDate = new Date(item.time)
       return {
-        _id: item._id,
+        _id: item.time ? item.time.toString() : String(idx),
+        userId: item.userId || '',
         nickName: item.nickName || '邻居',
         avatar: item.avatar || '',
         content: item.content || '',
-        createTime: item.createTime,
-        displayTime: item.createTime ? util.formatTime(new Date(item.createTime), 'HH:mm') : '',
-        dateStr: item.createTime ? util.formatDate(item.createTime, 'MM月DD日 HH:mm') : '',
+        displayTime: util.formatTime(msgDate, 'HH:mm'),
+        dateStr: util.formatDate(msgDate, 'MM月DD日 HH:mm'),
         showTime: showTime,
-        isMine: item._openid === openid,
+        isMine: item.userId === openid,
         replyToName: item.replyToName || ''
       }
     })
-
-    return messages
-  },
-
-  // ===== 加载更多历史消息 =====
-  loadMoreMessages: async function () {
-    if (!this.data.hasMore || this.data._loadingMore) return
-    this.data._loadingMore = true
-
-    const db = wx.cloud.database()
-    const minTime = this.data.messages.length > 0
-      ? this.data.messages[0].createTime
-      : null
-
-    try {
-      let query = db.collection('discuss_messages')
-        .where({ discussId: this.data.id })
-        .orderBy('createTime', 'desc')
-        .limit(PAGE_SIZE)
-
-      if (minTime) {
-        query = query.where(db.command.and([
-          { discussId: this.data.id },
-          { createTime: db.command.lt(minTime) }
-        ]))
-      }
-
-      const res = await query.get()
-      const olderMsgs = this.formatMessages((res.data || []).reverse())
-
-      this.setData({
-        messages: [...olderMsgs, ...this.data.messages],
-        hasMore: res.data.length >= PAGE_SIZE
-      })
-    } catch (err) {
-      console.error('加载更多消息失败', err)
-    } finally {
-      this.data._loadingMore = false
-    }
   },
 
   // ===== 发送消息 =====
@@ -202,30 +123,30 @@ Page({
     if (!content) return
 
     const userInfo = app.globalData.userInfo || {}
+    const openid = app.globalData.openid || ''
+    const now = Date.now()
+
     const newMsg = {
-      discussId: this.data.id,
+      time: now,
+      userId: openid,
       nickName: userInfo.nickName || '邻居',
       avatar: userInfo.avatarUrl || '',
       content: content,
-      replyToName: this.data.replyTo ? this.data.replyTo.nickName : '',
-      createTime: new Date(),
-      _openid: app.globalData.openid || ''
+      replyToName: this.data.replyTo ? this.data.replyTo.nickName : ''
     }
 
-    // 乐观更新：先添加到本地列表
-    const tempId = Date.now().toString()
+    // 乐观更新
     const localMsg = {
-      _id: tempId,
+      _id: now.toString(),
+      userId: openid,
       nickName: newMsg.nickName,
       avatar: newMsg.avatar,
       content: newMsg.content,
-      createTime: newMsg.createTime,
-      displayTime: util.formatTime(newMsg.createTime, 'HH:mm'),
-      dateStr: util.formatDate(newMsg.createTime, 'MM月DD日 HH:mm'),
+      displayTime: util.formatTime(new Date(now), 'HH:mm'),
+      dateStr: util.formatDate(new Date(now), 'MM月DD日 HH:mm'),
       showTime: true,
       isMine: true,
-      replyToName: newMsg.replyToName,
-      _pending: true
+      replyToName: newMsg.replyToName
     }
 
     this.setData({
@@ -237,30 +158,16 @@ Page({
 
     // 写入数据库
     try {
-      const db = wx.cloud.database()
-      const res = await db.collection('discuss_messages').add({ data: newMsg })
-
-      // 更新本地消息的 _id 为真实 ID
-      const messages = this.data.messages.map(m => {
-        if (m._id === tempId) return { ...m, _id: res._id, _pending: false }
-        return m
-      })
-      this.setData({ messages })
-
-      // 更新议题的回复数
-      await db.collection('discussions').doc(this.data.id).update({
-        data: { commentCount: db.command.inc(1) }
-      }).catch(() => {})
+      await api.discuss.sendMessage(this.data.id, newMsg)
     } catch (err) {
-      console.error('发送消息失败', err)
+      console.error('发送失败', err)
       util.showToast('发送失败')
-      // 移除临时消息
-      const messages = this.data.messages.filter(m => m._id !== tempId)
-      this.setData({ messages, inputContent: content, replyTo: localMsg.replyToName ? { nickName: localMsg.replyToName } : null })
+      const messages = this.data.messages.filter(m => m._id !== now.toString())
+      this.setData({ messages, inputContent: content })
     }
   },
 
-  // ===== 回复某人 =====
+  // ===== 回复 =====
   onReplyTap: function (e) {
     const item = e.currentTarget.dataset.item
     this.setData({ replyTo: item })
@@ -285,51 +192,11 @@ Page({
     }
   },
 
-  onScrollToUpper: function () {
-    if (!this.data.hasMore) return
-    this.loadMoreMessages()
-  },
-
-  // ===== 投票（本地暂存） =====
-  refreshVoteProgress: function () {
-    if (!this.data.vote) return
-    const vote = this.data.vote
-    const total = vote.approveCount + vote.rejectCount + vote.neutralCount
-    if (total > 0) {
-      this.setData({
-        vote: {
-          ...vote,
-          approvePercent: Math.round(vote.approveCount / total * 100),
-          rejectPercent: Math.round(vote.rejectCount / total * 100)
-        }
-      })
-    }
-  },
-
-  onVoteApprove: function () {
-    const vote = this.data.vote
-    if (!vote || vote.myVote) return
-    this.setData({
-      vote: { ...vote, myVote: 'approve', approveCount: vote.approveCount + 1 }
-    })
-    this.refreshVoteProgress()
-    util.showToast('已投票赞成')
-  },
-
-  onVoteReject: function () {
-    const vote = this.data.vote
-    if (!vote || vote.myVote) return
-    this.setData({
-      vote: { ...vote, myVote: 'reject', rejectCount: vote.rejectCount + 1 }
-    })
-    this.refreshVoteProgress()
-    util.showToast('已投票反对')
-  },
-
+  // ===== 投票：发起 =====
   onStartVote: function () {
     this.setData({
       showVotePopup: true,
-      voteForm: { title: '', deadline: '', description: '', timeIndex: [0, 0] }
+      voteForm: { title: '', deadline: '', timeIndex: [0, 0] }
     })
   },
 
@@ -347,30 +214,65 @@ Page({
     this.setData({ 'voteForm.timeIndex': index, 'voteForm.deadline': deadline })
   },
 
-  onVoteDescInput: function (e) {
-    this.setData({ 'voteForm.description': e.detail.value })
-  },
-
-  onSubmitVote: function () {
+  onSubmitVote: async function () {
     const { title, deadline } = this.data.voteForm
     if (!title.trim()) { util.showToast('请输入投票议题'); return }
     if (!deadline) { util.showToast('请选择截止时间'); return }
 
-    util.showToast('投票已发起')
+    try {
+      await api.discuss.createVote(this.data.id, { title: title.trim(), deadline: deadline })
+
+      util.showToast('投票已发起')
+      this.setData({
+        showVotePopup: false,
+        'topic.vote': { title: title.trim(), deadline: deadline },
+        'topic.voteApprove': 0,
+        'topic.voteReject': 0,
+        'topic.votedUsers': [],
+        'topic.myVote': false
+      })
+    } catch (err) {
+      console.error('发起投票失败', err)
+      util.showToast('发起失败')
+    }
+  },
+
+  // ===== 投票：赞成/反对 =====
+  onVoteApprove: async function () {
+    await this.doVote('approve')
+  },
+
+  onVoteReject: async function () {
+    await this.doVote('reject')
+  },
+
+  doVote: async function (type) {
+    const openid = app.globalData.openid
+    if (!openid || !this.data.topic) return
+    if (this.data.topic.myVote) {
+      util.showToast('您已投过票')
+      return
+    }
+
+    // 乐观更新
+    const incField = type === 'approve' ? 'voteApprove' : 'voteReject'
     this.setData({
-      showVotePopup: false,
-      vote: {
-        active: true,
-        title: title,
-        deadline: deadline,
-        approveCount: 0,
-        rejectCount: 0,
-        neutralCount: 80,
-        approvePercent: 0,
-        rejectPercent: 0,
-        myVote: null
-      }
+      'topic.myVote': true,
+      [`topic.${incField}`]: (this.data.topic[incField] || 0) + 1,
+      'topic.votedUsers': [...(this.data.topic.votedUsers || []), openid]
     })
+
+    try {
+      await api.discuss.doVote(this.data.id, openid, type)
+      util.showToast(type === 'approve' ? '已投票赞成' : '已投票反对')
+    } catch (err) {
+      console.error('投票失败', err)
+      // 回滚
+      this.setData({
+        'topic.myVote': false,
+        [`topic.${incField}`]: (this.data.topic[incField] || 1) - 1
+      })
+    }
   },
 
   onBackTap: function () {

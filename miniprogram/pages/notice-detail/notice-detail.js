@@ -1,6 +1,7 @@
 // pages/notice-detail/notice-detail.js - 公告详情（Markdown渲染）
 const app = getApp()
-const db = wx.cloud.database()
+const api = require('../../utils/api')
+const util = require('../../utils/util')
 
 Page({
   data: {
@@ -23,8 +24,7 @@ Page({
   loadNotice: async function (id) {
     this.setData({ loading: true })
     try {
-      const res = await db.collection('notices').doc(id).get()
-      const notice = res.data
+      const notice = await api.notice.getDetail(id)
       notice.dateStr = this.formatDate(notice.createTime)
 
       // 渲染Markdown内容

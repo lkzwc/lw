@@ -31,31 +31,26 @@
   </view>
 
   <!-- 投票区域 -->
-  <view class="vote-section" wx:if="{{vote && vote.active}}">
+  <view class="vote-section" wx:if="{{topic.vote}}">
     <view class="vote-header">
-      <text class="vote-title">{{vote.title}}</text>
-      <text class="vote-deadline">截止：{{vote.deadline}}</text>
+      <text class="vote-title">🗳 {{topic.vote.title}}</text>
+      <text class="vote-deadline">截止：{{topic.vote.deadline}}</text>
     </view>
-    <view class="vote-bar">
-      <view class="vote-approve" style="width: {{vote.approvePercent}}%">
-        <text class="vote-percent">{{vote.approvePercent}}%</text>
-      </view>
-      <view class="vote-reject" style="width: {{vote.rejectPercent}}%">
-        <text class="vote-percent">{{vote.rejectPercent}}%</text>
-      </view>
+    <view class="vote-stats">
+      <text class="vote-count approve">👍 {{topic.voteApprove || 0}}</text>
+      <text class="vote-count reject">👎 {{topic.voteReject || 0}}</text>
     </view>
-    <view class="vote-actions" wx:if="{{!vote.myVote}}">
-      <button class="vote-btn approve" bindtap="onVoteApprove">赞成 {{vote.approveCount}}</button>
-      <button class="vote-btn reject" bindtap="onVoteReject">反对 {{vote.rejectCount}}</button>
+    <view class="vote-actions" wx:if="{{!topic.myVote}}">
+      <button class="vote-btn approve" bindtap="onVoteApprove">赞成</button>
+      <button class="vote-btn reject" bindtap="onVoteReject">反对</button>
     </view>
-    <view class="vote-result" wx:if="{{vote.myVote}}">
-      <text class="result-icon">{{vote.myVote === 'approve' ? '✅' : '❌'}}</text>
-      <text class="result-text">您已投票：{{vote.myVote === 'approve' ? '赞成' : '反对'}}</text>
+    <view class="vote-result" wx:if="{{topic.myVote}}">
+      <text class="result-text">✓ 您已投票</text>
     </view>
   </view>
 
   <!-- 发起投票按钮 -->
-  <view class="start-vote-btn" wx:if="{{topic && topic.isAuthor && !vote}}" bindtap="onStartVote">
+  <view class="start-vote-btn" wx:if="{{topic && topic.isAuthor && !topic.vote}}" bindtap="onStartVote">
     <text class="iconfont icon-pinglun icon-md"></text>
     <text class="btn-text">发起投票</text>
   </view>
@@ -78,9 +73,6 @@
             <text class="message-time">{{item.displayTime}}</text>
           </view>
         </view>
-      </view>
-      <view class="load-more-tip" wx:if="{{hasMore}}">
-        <text>上拉加载更多消息</text>
       </view>
     </view>
   </scroll-view>
@@ -122,9 +114,6 @@
           <text class="picker-arrow">›</text>
         </view>
       </picker>
-    </view>
-    <view class="form-section">
-      <textarea class="form-textarea" placeholder="投票说明（可选）" value="{{voteForm.description}}" bindinput="onVoteDescInput" />
     </view>
   </view>
 </mp-half-screen-dialog>

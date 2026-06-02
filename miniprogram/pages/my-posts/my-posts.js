@@ -179,11 +179,7 @@ Page({
             if (type === 'skill') {
               await api.skill.delete(id)
             } else if (type === 'carpool') {
-              // 拼车直接软删除
-              const db = wx.cloud.database()
-              await db.collection('carpools').doc(id).update({
-                data: { status: 'deleted', updateTime: db.serverDate() }
-              })
+              await api.carpool.delete(id)
             } else {
               await api.post.delete(id)
             }

@@ -651,6 +651,17 @@ const userApi = {
       .get()
 
     return res.data
+  },
+
+  // 获取我的统计数据
+  getMyStats: async (openid) => {
+    const [postsRes, skillsRes, likesRes, carpoolsRes] = await Promise.all([
+      db.collection('posts').where({ _openid: openid, status: _.neq('deleted') }).count(),
+      db.collection('skills').where({ _openid: openid, status: _.neq('deleted') }).count(),
+      db.collection('posts').where({ likedBy: openid, status: _.neq('deleted') }).count(),
+      db.collection('carpools').where({ _openid: openid, status: _.neq('deleted') }).count()
+    ])
+    return { postCount: postsRes.total, skillCount: skillsRes.total, likeCount: likesRes.total, carpoolCount: carpoolsRes.total }
   }
 }
 
@@ -663,28 +674,130 @@ const noticeApi = {
     let query = db.collection('notices')
 
     if (!includeAll) {
-      query = query.where({
-        status: 'active'
-      })
+      query = query.where({ status: 'active' })
     } else {
-      query = query.where({
-        status: _.neq('deleted')
-      })
+      query = query.where({ status: _.neq('deleted') })
     }
 
-    const res = await query
-      .orderBy('createTime', 'desc')
-      .limit(limit)
-      .get()
-
+    const res = await query.orderBy('createTime', 'desc').limit(limit).get()
     return res.data
   },
 
   // 创建公告（管理员）
   create: async (data) => {
     const res = await db.collection('notices').add({
+      data: { ...data, status: 'active', createTime: db.serverDate(), updateTime: db.serverDate() }
+    })
+    return res._id
+  },
+
+  // 更新公告
+  update: async (noticeId, data) => {
+    await db.collection('notices').doc(noticeId).update({ data: { ...data, updateTime: db.serverDate() } })
+  },
+
+  // 删除公告
+  delete: async (noticeId) => {
+    await db.collection('notices').doc(noticeId).update({ data: { status: 'deleted' } })
+  },
+
+  // 获取公告详情
+  getDetail: async (noticeId) => {
+    const res = await db.collection('notices').doc(noticeId).get()
+    return res.data
+  }
+}
+
+/**
+ * 议事厅（discussions）
+ */
+const discussApi = {
+  getList: async (page = 1, pageSize = 10) => {
+    const skip = (page - 1) * pageSize
+    const query = db.collection('discussions').where({ status: _.neq('deleted') })
+    const countRes = await query.count()
+    const res = await query.orderBy('createTime', 'desc').skip(skip).limit(pageSize).get()
+    return { list: res.data, total: countRes.total, hasMore: skip + res.data.length < countRes.total }
+  },
+
+  getDetail: async (id) => {
+    const res = await db.collection('discussions').doc(id).get()
+    return res.data
+  },
+
+  create: async (data) => {
+    const app = getApp()
+    const userInfo = app.globalData.userInfo || {}
+    const res = await db.collection('discussions').add({
       data: {
         ...data,
+        author: userInfo.nickName || '邻居',
+        avatarUrl: userInfo.avatarUrl || '',
+        status: 'discussing',
+        statusText: '讨论中',
+        commentCount: 0,
+        messages: [],
+        vote: null,
+        voteApprove: 0,
+        voteReject: 0,
+        votedUsers: [],
+        createTime: db.serverDate(),
+        updateTime: db.serverDate()
+      }
+    })
+    return res._id
+  },
+
+  delete: async (id) => {
+    await db.collection('discussions').doc(id).update({ data: { status: 'deleted', updateTime: db.serverDate() } })
+  },
+
+  // 发送消息（push 到 messages 数组）
+  sendMessage: async (discussId, msg) => {
+    await db.collection('discussions').doc(discussId).update({
+      data: {
+        messages: _.push([msg]),
+        commentCount: _.inc(1),
+        updateTime: db.serverDate()
+      }
+    })
+  },
+
+  // 投票
+  createVote: async (discussId, vote) => {
+    await db.collection('discussions').doc(discussId).update({
+      data: { vote, voteApprove: 0, voteReject: 0, votedUsers: [], updateTime: db.serverDate() }
+    })
+  },
+
+  doVote: async (discussId, openid, type) => {
+    const incField = type === 'approve' ? 'voteApprove' : 'voteReject'
+    await db.collection('discussions').doc(discussId).update({
+      data: { [incField]: _.inc(1), votedUsers: _.push([openid]), updateTime: db.serverDate() }
+    })
+  }
+}
+
+/**
+ * 拼车（carpools）
+ */
+const carpoolApi = {
+  getList: async (params = {}) => {
+    const { page = 1, pageSize = 10 } = params
+    const skip = (page - 1) * pageSize
+    const query = db.collection('carpools').where({ status: _.neq('deleted') })
+    const countRes = await query.count()
+    const res = await query.orderBy('createTime', 'desc').skip(skip).limit(pageSize).get()
+    return { list: res.data, total: countRes.total, hasMore: skip + res.data.length < countRes.total }
+  },
+
+  create: async (data) => {
+    const app = getApp()
+    const userInfo = app.globalData.userInfo || {}
+    const res = await db.collection('carpools').add({
+      data: {
+        ...data,
+        userInfo: { nickName: userInfo.nickName || '邻居', avatarUrl: userInfo.avatarUrl || '' },
         status: 'active',
         createTime: db.serverDate(),
         updateTime: db.serverDate()
@@ -693,23 +806,97 @@ const noticeApi = {
     return res._id
   },
 
-  // 更新公告
-  update: async (noticeId, data) => {
-    await db.collection('notices').doc(noticeId).update({
-      data: {
-        ...data,
-        updateTime: db.serverDate()
-      }
+  delete: async (id) => {
+    await db.collection('carpools').doc(id).update({ data: { status: 'deleted', updateTime: db.serverDate() } })
+  }
+}
+
+/**
+ * 活动（activities）
+ */
+const activityApi = {
+  getList: async (params = {}) => {
+    const { page = 1, pageSize = 10 } = params
+    const skip = (page - 1) * pageSize
+    const query = db.collection('activities').where({ status: _.neq('deleted') })
+    const countRes = await query.count()
+    const res = await query.orderBy('createTime', 'desc').skip(skip).limit(pageSize).get()
+    return { list: res.data, total: countRes.total, hasMore: skip + res.data.length < countRes.total }
+  },
+
+  getDetail: async (id) => {
+    const res = await db.collection('activities').doc(id).get()
+    return res.data
+  },
+
+  create: async (data) => {
+    const res = await db.collection('activities').add({
+      data: { ...data, status: 'active', joinCount: 0, joinedUsers: [], createTime: db.serverDate(), updateTime: db.serverDate() }
+    })
+    return res._id
+  },
+
+  join: async (activityId, openid) => {
+    await db.collection('activities').doc(activityId).update({
+      data: { joinedUsers: _.push([openid]), joinCount: _.inc(1), updateTime: db.serverDate() }
     })
   },
 
-  // 删除公告
-  delete: async (noticeId) => {
-    await db.collection('notices').doc(noticeId).update({
+  cancelJoin: async (activityId, openid) => {
+    await db.collection('activities').doc(activityId).update({
+      data: { joinedUsers: _.pull(openid), joinCount: _.inc(-1), updateTime: db.serverDate() }
+    })
+  }
+}
+
+/**
+ * 时间线（timeline）
+ */
+const timelineApi = {
+  getList: async (page = 1, pageSize = 10) => {
+    const skip = (page - 1) * pageSize
+    const query = db.collection('timeline').where({ status: _.neq('deleted') })
+    const countRes = await query.count()
+    const res = await query.orderBy('createTime', 'desc').skip(skip).limit(pageSize).get()
+    return { list: res.data, total: countRes.total, hasMore: skip + res.data.length < countRes.total }
+  },
+
+  getDetail: async (id) => {
+    const res = await db.collection('timeline').doc(id).get()
+    return res.data
+  },
+
+  create: async (data) => {
+    const app = getApp()
+    const userInfo = app.globalData.userInfo || {}
+    const res = await db.collection('timeline').add({
       data: {
-        status: 'deleted'
+        ...data,
+        userInfo: { nickName: userInfo.nickName || '邻居', avatarUrl: userInfo.avatarUrl || '' },
+        status: 'active',
+        createTime: db.serverDate(),
+        updateTime: db.serverDate()
       }
     })
+    return res._id
+  },
+
+  getComments: async (timelineId) => {
+    const res = await db.collection('timeline_comments').where({ timelineId }).orderBy('createTime', 'asc').get()
+    return res.data
+  },
+
+  addComment: async (data) => {
+    const app = getApp()
+    const userInfo = app.globalData.userInfo || {}
+    const res = await db.collection('timeline_comments').add({
+      data: {
+        ...data,
+        userInfo: { nickName: userInfo.nickName || '邻居', avatarUrl: userInfo.avatarUrl || '' },
+        createTime: db.serverDate()
+      }
+    })
+    return res._id
   }
 }
 
@@ -718,5 +905,9 @@ module.exports = {
   comment: commentApi,
   skill: skillApi,
   user: userApi,
-  notice: noticeApi
+  notice: noticeApi,
+  discuss: discussApi,
+  carpool: carpoolApi,
+  activity: activityApi,
+  timeline: timelineApi
 }

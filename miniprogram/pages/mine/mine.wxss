@@ -127,7 +127,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 48rpx 0 130rpx;
+  padding: 48rpx 0 100rpx;
 }
 
 .avatar-wrap {

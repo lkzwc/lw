@@ -1,6 +1,7 @@
 // pages/carpool/carpool.js - 捎一段
 const app = getApp()
 const util = require('../../utils/util')
+const api = require('../../utils/api')
 
 Page({
   data: {
@@ -60,20 +61,14 @@ Page({
     this.setData({ loading: true })
     
     try {
-      const db = wx.cloud.database()
-      const _ = db.command
+      const res = await api.carpool.getList({ page: 1, pageSize: 100 })
       
-      let query = db.collection('carpools').where({
-        status: _.neq('deleted')
-      })
-      
+      let routes = res.list || []
       if (this.data.filterType !== 'all') {
-        query = query.where({ type: this.data.filterType })
+        routes = routes.filter(item => item.type === this.data.filterType)
       }
       
-      const res = await query.orderBy('createTime', 'desc').get()
-      
-      this.setData({ routes: this.formatRoutes(res.data) })
+      this.setData({ routes: this.formatRoutes(routes) })
     } catch (err) {
       console.error('加载路线失败', err)
       util.showToast('加载失败，请重试')
@@ -241,25 +236,20 @@ Page({
     wx.showLoading({ title: '发布中...' })
 
     try {
-      const db = wx.cloud.database()
       const { publishForm } = this.data
       const userInfo = app.globalData.userInfo || {}
 
-      await db.collection('carpools').add({
-        data: {
-          type: publishForm.type,
-          start: publishForm.start.trim(),
-          end: publishForm.end.trim(),
-          timeStr: publishForm.type === 'once' ? publishForm.timeStr : publishForm.schedule.trim(),
-          schedule: publishForm.schedule.trim(),
-          seats: publishForm.seats,
-          phone: publishForm.phone.trim(),
-          userName: userInfo.nickName || '邻居',
-          avatarUrl: userInfo.avatarUrl || '',
-          status: 'active',
-          createTime: db.serverDate(),
-          updateTime: db.serverDate()
-        }
+      await api.carpool.create({
+        type: publishForm.type,
+        start: publishForm.start.trim(),
+        end: publishForm.end.trim(),
+        timeStr: publishForm.type === 'once' ? publishForm.timeStr : publishForm.schedule.trim(),
+        schedule: publishForm.schedule.trim(),
+        seats: publishForm.seats,
+        phone: publishForm.phone.trim(),
+        userName: userInfo.nickName || '邻居',
+        avatarUrl: userInfo.avatarUrl || '',
+        status: 'active'
       })
 
       wx.hideLoading()

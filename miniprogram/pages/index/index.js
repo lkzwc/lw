@@ -1,6 +1,7 @@
 // pages/index/index.js - 高科麓湾未来感首页
 const app = getApp()
 const util = require('../../utils/util')
+const api = require('../../utils/api')
 
 Page({
   data: {
@@ -62,23 +63,12 @@ Page({
   // 加载公告
   loadNotices: async function () {
     try {
-      const db = wx.cloud.database()
-      const _ = db.command
-      
-      const res = await db.collection('notices')
-        .where({
-          status: _.in(['active', 'published'])
-        })
-        .orderBy('createTime', 'desc')
-        .limit(3)
-        .get()
-
-      const notices = res.data.map(item => ({
+      const notices = await api.notice.getList(5)
+      const processedNotices = notices.map(item => ({
         ...item,
         dateStr: this.formatDate(item.createTime)
       }))
-
-      this.setData({ notices })
+      this.setData({ notices: processedNotices })
     } catch (err) {
       console.error('加载公告失败', err)
     }
@@ -87,18 +77,8 @@ Page({
   // 加载技能
   loadSkills: async function () {
     try {
-      const db = wx.cloud.database()
-      const _ = db.command
-      
-      const res = await db.collection('skills')
-        .where({
-          status: _.in(['active', 'published'])
-        })
-        .orderBy('createTime', 'desc')
-        .limit(6)
-        .get()
-
-      const skills = res.data.map(item => ({
+      const res = await api.skill.getList({ showHome: true, pageSize: 6 })
+      const skills = res.list.map(item => ({
         ...item,
         // 取第一张图片，没有则用兜底图
         cover: (item.images && item.images.length > 0) ? item.images[0] : '',
@@ -106,7 +86,6 @@ Page({
         author: (item.userInfo && item.userInfo.nickName) ? item.userInfo.nickName : '邻居',
         likes: item.likeCount || 0
       }))
-
       this.setData({ skills })
     } catch (err) {
       console.error('加载技能失败', err)
@@ -116,23 +95,12 @@ Page({
   // 加载活动
   loadActivities: async function () {
     try {
-      const db = wx.cloud.database()
-      const _ = db.command
-      
-      const res = await db.collection('activities')
-        .where({
-          status: _.in(['active', 'published', 'upcoming', 'ongoing'])
-        })
-        .orderBy('createTime', 'desc')
-        .limit(3)
-        .get()
-
-      const activities = res.data.map(item => ({
+      const res = await api.activity.getList({ pageSize: 3 })
+      const activities = res.list.map(item => ({
         ...item,
         timeStr: item.time || item.date || this.formatDate(item.createTime),
         cover: item.cover || item.images && item.images.length > 0 ? item.images[0] : ''
       }))
-
       this.setData({ activities })
     } catch (err) {
       console.error('加载活动失败', err)

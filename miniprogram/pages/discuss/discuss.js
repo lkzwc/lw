@@ -1,6 +1,7 @@
 // pages/discuss/discuss.js - 业主议事厅列表版
 const app = getApp()
 const util = require('../../utils/util')
+const api = require('../../utils/api')
 
 Page({
   data: {
@@ -34,17 +35,8 @@ Page({
     this.setData({ loading: true })
 
     try {
-      const db = wx.cloud.database()
-      const _ = db.command
-
-      const res = await db.collection('discussions')
-        .where({
-          status: _.neq('deleted')
-        })
-        .orderBy('createTime', 'desc')
-        .get()
-
-      this.setData({ topics: this.formatTopics(res.data) })
+      const res = await api.discuss.getList()
+      this.setData({ topics: this.formatTopics(res.list) })
     } catch (err) {
       console.error('加载议题失败', err)
     } finally {
@@ -124,23 +116,11 @@ Page({
     this.setData({ submitting: true })
 
     try {
-      const db = wx.cloud.database()
       const { publishForm } = this.data
-      const userInfo = app.globalData.userInfo || {}
 
-      await db.collection('discussions').add({
-        data: {
-          title: publishForm.content.trim().substring(0, 50), // 取内容前50字作为标题
-          description: publishForm.content.trim(),
-          status: 'discussing',
-          statusText: '讨论中',
-          author: userInfo.nickName || '邻居',
-          avatarUrl: userInfo.avatarUrl || '',
-          commentCount: 0,
-          joinAvatars: [],
-          createTime: db.serverDate(),
-          updateTime: db.serverDate()
-        }
+      await api.discuss.create({
+        title: publishForm.content.trim().substring(0, 50),
+        description: publishForm.content.trim()
       })
 
       util.showToast('发起成功')

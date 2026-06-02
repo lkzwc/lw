@@ -1,6 +1,7 @@
 // pages/timeline/timeline.js - 小区时间线
 const app = getApp()
 const util = require('../../utils/util')
+const api = require('../../utils/api')
 
 Page({
   data: {
@@ -50,17 +51,12 @@ Page({
     this.setData({ loading: true })
 
     try {
-      const db = wx.cloud.database()
-      const _ = db.command
+      const res = await api.timeline.getList(1, 100)
+      const list = res.list || []
 
-      const query = db.collection('timeline').where({
-        status: _.neq('deleted'),
-        phase: this.data.currentPhase
-      })
+      const timelines = list.filter(item => item.phase === this.data.currentPhase)
 
-      const res = await query.orderBy('createTime', 'desc').get()
-
-      this.setData({ timelines: this.formatTimelines(res.data) })
+      this.setData({ timelines: this.formatTimelines(timelines) })
     } catch (err) {
       console.error('加载时间线失败', err)
     } finally {
@@ -183,7 +179,6 @@ Page({
     this.setData({ submitting: true })
 
     try {
-      const db = wx.cloud.database()
       const { publishForm, currentPhase } = this.data
 
       // 上传图片
@@ -199,16 +194,12 @@ Page({
         }
       }
 
-      await db.collection('timeline').add({
-        data: {
-          type: publishForm.type,
-          phase: currentPhase,
-          desc: publishForm.desc.trim(),
-          images: uploadedImages,
-          status: 'pending',
-          createTime: db.serverDate(),
-          updateTime: db.serverDate()
-        }
+      await api.timeline.create({
+        type: publishForm.type,
+        phase: currentPhase,
+        desc: publishForm.desc.trim(),
+        images: uploadedImages,
+        status: 'pending'
       })
 
       util.showToast('发布成功')

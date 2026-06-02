@@ -25,9 +25,6 @@ Page({
   // 加载统计数据
   loadStats: async function () {
     try {
-      const db = wx.cloud.database()
-      const _ = db.command
-      
       // 今日零点时间
       const today = new Date()
       today.setHours(0, 0, 0, 0)

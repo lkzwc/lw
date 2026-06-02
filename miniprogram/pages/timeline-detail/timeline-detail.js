@@ -1,6 +1,7 @@
 // pages/timeline-detail/timeline-detail.js
 const app = getApp()
 const util = require('../../utils/util')
+const api = require('../../utils/api')
 
 Page({
   data: {
@@ -30,11 +31,7 @@ Page({
     this.setData({ loading: true })
     
     try {
-      const db = wx.cloud.database()
-      const _ = db.command
-
-      // 加载详情
-      const detailRes = await db.collection('timeline').doc(id).get()
+      const raw = await api.timeline.getDetail(id)
 
       const typeMap = {
         issue: '问题反馈',
@@ -46,7 +43,6 @@ Page({
         processing: '处理中',
         resolved: '已解决'
       }
-      const raw = detailRes.data || {}
       const detail = {
         ...raw,
         userName: raw.userName || '邻居',
@@ -59,14 +55,9 @@ Page({
         images: raw.images || []
       }
       
-      // 加载评论列表
-      const commentRes = await db.collection('timeline_comments')
-        .where({ timelineId: id, status: _.neq('deleted') })
-        .orderBy('createTime', 'desc')
-        .limit(50)
-        .get()
+      const commentList = await api.timeline.getComments(id)
 
-      const comments = (commentRes.data || []).map(item => ({
+      const comments = (commentList || []).map(item => ({
         _id: item._id,
         userName: item.userName || '邻居',
         avatar: item.avatar || '',
@@ -133,18 +124,12 @@ Page({
     }
 
     try {
-      const db = wx.cloud.database()
-      
-      // 保存评论到云数据库
-      await db.collection('timeline_comments').add({
-        data: {
-          timelineId: this.data.id,
-          userName: app.globalData.userInfo?.nickName || '邻居',
-          avatar: app.globalData.userInfo?.avatarUrl || '',
-          content,
-          status: 'active',
-          createTime: db.serverDate()
-        }
+      await api.timeline.addComment({
+        timelineId: this.data.id,
+        userName: app.globalData.userInfo?.nickName || '邻居',
+        avatar: app.globalData.userInfo?.avatarUrl || '',
+        content,
+        status: 'active'
       })
 
       // 添加到本地列表（不用重新加载）
