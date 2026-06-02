@@ -1,9 +1,61 @@
 /* pages/post-detail/post-detail.wxss */
 
 .post-detail-page {
-  
+
   background-color: var(--bg-secondary);
   padding-bottom: 120rpx;
+}
+
+/* ========== 自定义导航栏 ========== */
+.custom-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  overflow: hidden;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  box-shadow: none;
+  border-bottom: none;
+}
+
+.nav-placeholder {
+  width: 100%;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 var(--spacing-md);
+}
+
+.nav-back {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-back-icon {
+  font-size: 52rpx;
+  color: #FFFFFF;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.nav-right {
+  width: 72rpx;
 }
 
 /* 帖子卡片 */
@@ -158,15 +210,6 @@
   color: #FF6B6B;
 }
 
-.action-item.liked .action-icon-font {
-  color: #FF6B6B;
-}
-
-.action-icon-font {
-  font-size: 40rpx;
-  color: #999999;
-  flex-shrink: 0;
-}
 
 .action-count {
   font-size: 26rpx;
@@ -349,11 +392,6 @@
   flex-shrink: 0;
 }
 
-.send-icon-font {
-  font-size: 32rpx;
-  color: #FFFFFF;
-  flex-shrink: 0;
-}
 
 .send-text {
   font-size: 28rpx;

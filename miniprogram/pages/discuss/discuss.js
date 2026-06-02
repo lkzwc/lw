@@ -4,17 +4,16 @@ const util = require('../../utils/util')
 
 Page({
   data: {
-    statusBarHeight: 20,
     topics: [],
     loading: true,
+    statusBarHeight: 20,
 
     // 发布弹窗
     showPublishDialog: false,
     submitting: false,
     canSubmit: false,
     publishForm: {
-      title: '',
-      desc: ''
+      content: ''
     }
   },
 
@@ -99,7 +98,7 @@ Page({
 
     this.setData({
       showPublishDialog: true,
-      publishForm: { title: '', desc: '' },
+      publishForm: { content: '' },
       canSubmit: false
     })
   },
@@ -111,17 +110,12 @@ Page({
 
   // 检查是否可以提交
   checkCanSubmit: function () {
-    this.setData({ canSubmit: this.data.publishForm.title.trim() })
+    this.setData({ canSubmit: !!this.data.publishForm.content.trim() })
   },
 
-  // 输入标题
-  onTitleInput: function (e) {
-    this.setData({ 'publishForm.title': e.detail.value }, this.checkCanSubmit)
-  },
-
-  // 输入描述
-  onDescInput: function (e) {
-    this.setData({ 'publishForm.desc': e.detail.value })
+  // 输入内容
+  onContentInput: function (e) {
+    this.setData({ 'publishForm.content': e.detail.value }, this.checkCanSubmit)
   },
 
   // 提交发布
@@ -136,8 +130,8 @@ Page({
 
       await db.collection('discussions').add({
         data: {
-          title: publishForm.title.trim(),
-          description: publishForm.desc.trim(),
+          title: publishForm.content.trim().substring(0, 50), // 取内容前50字作为标题
+          description: publishForm.content.trim(),
           status: 'discussing',
           statusText: '讨论中',
           author: userInfo.nickName || '邻居',
@@ -152,7 +146,7 @@ Page({
       util.showToast('发起成功')
       this.setData({
         showPublishDialog: false,
-        publishForm: { title: '', desc: '' },
+        publishForm: { content: '' },
         canSubmit: false
       })
       this.loadTopics()
@@ -164,6 +158,13 @@ Page({
     }
   },
 
+  onShareAppMessage: function () {
+    return {
+      title: '业主议事厅 - 共商共议，共建美好家园',
+      path: '/pages/discuss/discuss'
+    }
+  },
+
   // 返回上一页
   onBackTap: function () {
     wx.navigateBack({
@@ -172,12 +173,5 @@ Page({
         wx.switchTab({ url: '/pages/index/index' })
       }
     })
-  },
-
-  onShareAppMessage: function () {
-    return {
-      title: '业主议事厅 - 共商共议，共建美好家园',
-      path: '/pages/discuss/discuss'
-    }
   }
 })

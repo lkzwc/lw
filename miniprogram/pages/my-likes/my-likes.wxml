@@ -1,20 +1,58 @@
 <!--pages/my-likes/my-likes.wxml-->
 <view class="my-likes-page">
-  <!-- 标题 -->
-  <view class="page-header">
-    <text class="page-title">我的点赞</text>
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">{{navTitle}}</text>
+      <view class="nav-right"></view>
+    </view>
   </view>
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
 
   <!-- 帖子列表 -->
-  <view class="posts-list">
-    <post-card wx:for="{{posts}}" wx:key="_id" post="{{item}}"></post-card>
-  </view>
+  <view class="items-list">
+    <mp-slideview wx:for="{{posts}}" wx:key="_id" show="{{false}}" buttons="{{slideButtons}}" bindbuttontap="onSlideButtonTap" data-index="{{index}}" data-id="{{item._id}}">
+      <view class="like-card" bindtap="onItemTap" data-id="{{item._id}}">
+        <!-- 用户信息 -->
+        <view class="post-header">
+          <image class="avatar" src="{{item.userInfo.avatarUrl || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
+          <view class="user-info">
+            <view class="nick-name">{{item.userInfo.nickName || '匿名用户'}}</view>
+            <view class="post-time">{{item.createTimeStr}}</view>
+          </view>
+        </view>
+        <!-- 内容 -->
+        <view class="post-content">
+          <text class="content-text">{{item.content}}</text>
+        </view>
+        <!-- 图片 -->
+        <view class="post-images image-grid" wx:if="{{item.images && item.images.length > 0}}">
+          <image wx:for="{{item.images}}" wx:for-item="img" wx:key="*this" src="{{img}}" mode="aspectFill"></image>
+        </view>
+        <!-- 操作栏 - 红色爱心表示已点赞，可点击取消 -->
+        <view class="post-actions">
+          <view class="action-item liked" catchtap="onUnlike" data-index="{{index}}" data-id="{{item._id}}">
+            <text class="iconfont icon-aixin icon-lg"></text>
+            <text class="action-text unlike-text">{{item.likeCount || 0}}</text>
+          </view>
+          <view class="action-item">
+            <text class="iconfont icon-pinglun icon-lg"></text>
+            <text class="action-text">{{item.commentCount || 0}}</text>
+          </view>
+        </view>
+      </view>
+    </mp-slideview>
 
-  <!-- 空状态 -->
-  <view class="empty-state" wx:if="{{posts.length === 0 && !loading}}">
-    <text class="iconfont icon-aixin empty-icon-font"></text>
-    <text class="empty-text">暂无点赞</text>
-    <text class="empty-hint">去社区发现感兴趣的内容吧</text>
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{posts.length === 0 && !loading}}">
+      <text class="iconfont icon-aixin icon-huge"></text>
+      <text class="empty-text">暂无点赞</text>
+      <text class="empty-hint">去社区发现感兴趣的内容吧</text>
+    </view>
   </view>
 
   <!-- 加载更多 -->

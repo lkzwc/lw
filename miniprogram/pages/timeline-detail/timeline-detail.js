@@ -4,6 +4,7 @@ const util = require('../../utils/util')
 
 Page({
   data: {
+    statusBarHeight: 20,
     id: '',
     detail: null,
     comments: [],
@@ -12,6 +13,9 @@ Page({
   },
 
   onLoad: function (options) {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
+
     const id = options.id
     if (id) {
       this.setData({ id })
@@ -179,5 +183,15 @@ Page({
       title: detail ? detail.title : '小区动态',
       path: `/pages/timeline-detail/timeline-detail?id=${this.data.id}`
     }
+  },
+
+  // 返回上一页
+  onBackTap: function () {
+    wx.navigateBack({
+      delta: 1,
+      fail: () => {
+        wx.switchTab({ url: '/pages/index/index' })
+      }
+    })
   }
 })

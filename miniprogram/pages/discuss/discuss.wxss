@@ -13,7 +13,10 @@
   left: 0;
   right: 0;
   z-index: 200;
+  overflow: hidden;
   background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  box-shadow: none;
+  border-bottom: none;
 }
 
 .nav-placeholder {
@@ -58,8 +61,8 @@
 /* ========== 页面标题区 ========== */
 .page-header {
   background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-  padding: 0 var(--spacing-lg) var(--spacing-lg);
-  border-radius: 0 0 32rpx 32rpx;
+  padding: 0 var(--spacing-lg) var(--spacing-md);
+  border-radius: 0 0 40rpx 40rpx;
 }
 
 .page-subtitle {
@@ -196,13 +199,6 @@
   padding: 120rpx var(--spacing-lg);
 }
 
-.empty-icon-font {
-  font-size: 80rpx;
-  color: var(--text-placeholder);
-  margin-bottom: var(--spacing-md);
-  opacity: 0.5;
-}
-
 .empty-text {
   font-size: var(--font-md);
   color: var(--text-secondary);
@@ -233,10 +229,6 @@
   transform: scale(0.94);
 }
 
-.publish-icon-font {
-  font-size: 44rpx;
-  color: #FFFFFF;
-}
 
 /* ========== 发布弹窗 ========== */
 .dialog-body {

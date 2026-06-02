@@ -163,11 +163,6 @@ page {
     inset 0 2rpx 4rpx rgba(255, 255, 255, 0.8);
 }
 
-.menu-icon-wrap .iconfont {
-  font-size: 44rpx;
-  color: #4A90D9;
-}
-
 .menu-name {
   font-size: 24rpx;
   color: #333;
@@ -191,8 +186,6 @@ page {
 }
 
 .notice-icon-font {
-  font-size: 40rpx;
-  color: #4A90D9;
   margin-right: 8rpx;
 }
 
@@ -260,11 +253,6 @@ page {
   gap: 10rpx;
 }
 
-.section-title-icon {
-  font-size: 32rpx;
-  color: #4A90D9;
-}
-
 .section-title {
   font-size: 32rpx;
   font-weight: 600;
@@ -320,7 +308,6 @@ page {
 
 .skill-placeholder-icon {
   font-size: 60rpx;
-  color: #B0C4DE;
 }
 
 .skill-info {
@@ -400,7 +387,6 @@ page {
 
 .home-placeholder-icon {
   font-size: 50rpx;
-  color: #B0C4DE;
 }
 
 .activity-content {
@@ -424,8 +410,6 @@ page {
 }
 
 .activity-icon {
-  font-size: 28rpx;
-  color: #4A90D9;
   margin-right: 8rpx;
   flex-shrink: 0;
 }
@@ -445,16 +429,6 @@ page {
   font-size: 22rpx;
   color: #999;
   margin-bottom: 4rpx;
-}
-
-.activity-loc-icon {
-  font-size: 24rpx;
-  color: #999;
-}
-
-.activity-time-icon {
-  font-size: 24rpx;
-  color: #999;
 }
 
 .activity-action {

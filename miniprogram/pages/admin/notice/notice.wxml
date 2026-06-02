@@ -1,5 +1,18 @@
 <!--pages/admin/notice/notice.wxml-->
 <view class="page">
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">公告管理</text>
+      <view class="nav-right"></view>
+    </view>
+  </view>
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
+
   <!-- 操作栏 -->
   <view class="action-bar">
     <text class="count">共 {{totalCount}} 条</text>
@@ -8,19 +21,15 @@
 
   <!-- 列表 -->
   <view class="list">
-    <view class="list-item" wx:for="{{notices}}" wx:key="_id">
-      <view class="item-main" bindtap="onEditNotice" data-id="{{item._id}}">
+    <mp-slideview wx:for="{{notices}}" wx:key="_id" show="{{false}}" buttons="{{slideButtons}}" bindbuttontap="onSlideButtonTap" data-index="{{index}}" data-id="{{item._id}}" ext-class="slideview-item">
+      <view class="list-item" bindtap="onEditNotice" data-id="{{item._id}}">
         <view class="item-title">{{item.title}}</view>
         <view class="item-row">
           <text class="item-time">{{item.createTimeStr}}</text>
           <text class="item-status {{item.status === 'active' ? 'active' : ''}}">{{item.status === 'active' ? '已发布' : '草稿'}}</text>
         </view>
       </view>
-      <view class="item-actions">
-        <text class="btn-link" catchtap="onEditNotice" data-id="{{item._id}}">编辑</text>
-        <text class="btn-danger" catchtap="onDeleteNotice" data-id="{{item._id}}">删除</text>
-      </view>
-    </view>
+    </mp-slideview>
   </view>
 
   <view class="empty" wx:if="{{!loading && notices.length === 0}}">

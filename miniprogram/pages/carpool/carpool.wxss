@@ -160,8 +160,6 @@
 
 .path-arrow {
   flex-shrink: 0;
-  font-size: 28rpx;
-  color: var(--text-placeholder);
 }
 
 /* 路线底部 */
@@ -178,37 +176,12 @@
   align-items: center;
 }
 
-.time-icon-font {
-  font-size: 28rpx;
-  color: var(--text-placeholder);
-  margin-right: 8rpx;
-}
-
-.contact-icon-font {
-  font-size: 28rpx;
-  color: #4A90D9;
-  margin-right: 8rpx;
-}
-
-.empty-icon-font {
-  font-size: 80rpx;
-  color: var(--text-placeholder);
-  margin-bottom: var(--spacing-md);
-  opacity: 0.5;
-}
-
 .route-contact {
   display: flex;
   align-items: center;
   background: rgba(74, 144, 217, 0.1);
   padding: 8rpx 20rpx;
   border-radius: 24rpx;
-}
-
-.contact-icon-font {
-  font-size: 28rpx;
-  color: #4A90D9;
-  margin-right: 8rpx;
 }
 
 .contact-text {
@@ -261,10 +234,6 @@
   transform: scale(0.94);
 }
 
-.publish-icon-font {
-  font-size: 44rpx;
-  color: #FFFFFF;
-}
 
 /* ========== 发布弹窗 - 按钮样式继承全局 app.wxss ========== */
 
@@ -345,13 +314,7 @@
   border-color: var(--primary-color);
 }
 
-.type-icon-font {
-  font-size: 40rpx;
-  color: var(--text-secondary);
-  margin-bottom: 8rpx;
-}
-
-.type-option.active .type-icon-font {
+.type-option.active .iconfont {
   color: #4A90D9;
 }
 

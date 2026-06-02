@@ -7,7 +7,7 @@ Page({
     filterType: 'all',
     routes: [],
     loading: true,
-    
+
     // 发布弹窗
     showPublishDialog: false,
     submitting: false,
@@ -22,7 +22,7 @@ Page({
       phone: ''
     },
     timeRange: [[], [], []],
-    timeIndex: [0, 0, 0]
+    timeIndex: [0, 0]
   },
 
   onLoad: function (options) {
@@ -143,7 +143,7 @@ Page({
     })
   },
 
-  // 打开发布弹窗
+  // ========== 发布弹窗 ==========
   onPublishTap: function () {
     if (!app.globalData.userInfo) {
       wx.showModal({

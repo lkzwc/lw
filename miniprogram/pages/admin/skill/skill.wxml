@@ -1,5 +1,18 @@
 <!--pages/admin/skill/skill.wxml-->
 <view class="page">
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">技能管理</text>
+      <view class="nav-right"></view>
+    </view>
+  </view>
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
+
   <!-- 统计条 -->
   <view class="stat-bar">
     <text>共 {{totalCount}} 条</text>
@@ -8,8 +21,8 @@
 
   <!-- 列表 -->
   <view class="list">
-    <view class="list-item" wx:for="{{skills}}" wx:key="_id">
-      <view class="item-main" bindtap="onEditSkill" data-id="{{item._id}}">
+    <mp-slideview wx:for="{{skills}}" wx:key="_id" show="{{false}}" buttons="{{slideButtons}}" bindbuttontap="onSlideButtonTap" data-index="{{index}}" data-id="{{item._id}}" ext-class="slideview-item">
+      <view class="list-item" bindtap="onEditSkill" data-id="{{item._id}}">
         <view class="item-row">
           <text class="item-title">{{item.title}}</text>
           <text class="item-price">¥{{item.price}}/{{item.unit || '次'}}</text>
@@ -19,11 +32,7 @@
           <text class="item-category">{{item.category}}</text>
         </view>
       </view>
-      <view class="item-actions">
-        <switch checked="{{item.showHome}}" catchtap="onToggleHome" data-id="{{item._id}}" color="#4A90D9" />
-        <text class="btn-danger" catchtap="onDeleteSkill" data-id="{{item._id}}">删除</text>
-      </view>
-    </view>
+    </mp-slideview>
   </view>
 
   <view class="empty" wx:if="{{!loading && skills.length === 0}}">

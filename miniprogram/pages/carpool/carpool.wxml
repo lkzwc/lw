@@ -31,40 +31,40 @@
   <!-- 路线列表 -->
   <view class="route-list">
     <view class="route-card" wx:for="{{routes}}" wx:key="_id" bindtap="onRouteTap" data-id="{{item._id}}">
-      <view class="route-header">
-        <view class="route-type type-{{item.type}}">{{item.type === 'long' ? '长期' : '临时'}}</view>
-        <text class="route-seats">余{{item.seats}}座</text>
-      </view>
-      
-      <view class="route-path">
-        <text class="path-text">{{item.start}}</text>
-        <text class="iconfont icon-arrow-right path-arrow"></text>
-        <text class="path-text">{{item.end}}</text>
-      </view>
-      
-      <view class="route-footer">
-        <view class="route-time">
-          <text class="iconfont icon-naozhong_huaban1 time-icon-font"></text>
-          <text class="time-text">{{item.timeStr}}</text>
+        <view class="route-header">
+          <view class="route-type type-{{item.type}}">{{item.type === 'long' ? '长期' : '临时'}}</view>
+          <text class="route-seats">余{{item.seats}}座</text>
         </view>
-        <view class="route-contact" catchtap="onCallTap" data-phone="{{item.phone}}">
-          <text class="iconfont icon-dianhua contact-icon-font"></text>
-          <text class="contact-text">联系车主</text>
+
+        <view class="route-path">
+          <text class="path-text">{{item.start}}</text>
+          <text class="iconfont icon-arrow-right icon-sm"></text>
+          <text class="path-text">{{item.end}}</text>
+        </view>
+
+        <view class="route-footer">
+          <view class="route-time">
+            <text class="iconfont icon-naozhong_huaban1 icon-sm"></text>
+            <text class="time-text">{{item.timeStr}}</text>
+          </view>
+          <view class="route-contact" catchtap="onCallTap" data-phone="{{item.phone}}">
+            <text class="iconfont icon-dianhua icon-sm"></text>
+            <text class="contact-text">联系车主</text>
+          </view>
         </view>
       </view>
-    </view>
   </view>
 
   <!-- 空状态 -->
   <view class="empty-state" wx:if="{{routes.length === 0}}">
-    <text class="iconfont icon-qiche empty-icon-font"></text>
+    <text class="iconfont icon-qiche icon-xxxl"></text>
     <text class="empty-text">暂无拼车路线</text>
     <text class="empty-hint">点击右下角发布第一条路线吧</text>
   </view>
 
   <!-- 发布按钮 -->
   <view class="publish-btn" bindtap="onPublishTap">
-    <text class="iconfont icon-tianjia publish-icon-font"></text>
+    <text class="iconfont icon-tianjia icon-xl"></text>
   </view>
 
 </view>
@@ -88,11 +88,11 @@
     <view class="form-section">
       <view class="type-selector">
         <view class="type-option {{publishForm.type === 'long' ? 'active' : ''}}" bindtap="onTypeChange" data-type="long">
-          <text class="iconfont icon-naozhong_huaban1 type-icon-font"></text>
+          <text class="iconfont icon-naozhong_huaban1 icon-lg"></text>
           <text class="type-text">长期</text>
         </view>
         <view class="type-option {{publishForm.type === 'once' ? 'active' : ''}}" bindtap="onTypeChange" data-type="once">
-          <text class="iconfont icon-location type-icon-font"></text>
+          <text class="iconfont icon-location icon-lg"></text>
           <text class="type-text">单次</text>
         </view>
       </view>

@@ -2,15 +2,20 @@
 const app = getApp()
 const util = require('../../utils/util')
 const config = require('../../utils/config')
+const subscribe = require('../../utils/subscribe') // 订阅消息囤票模块
 
 Page({
   data: {
+    statusBarHeight: 20,
     id: '',
     activity: null,
     loading: true
   },
 
   onLoad: function (options) {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
+
     const id = options.id
     if (id) {
       this.setData({ id })
@@ -102,69 +107,14 @@ Page({
         })
         util.showToast('报名成功')
 
-        // 报名成功后请求订阅授权，活动开始前可收到提醒
-        this.requestActivityReminder()
+        // Tier 1 囤票（必囤）：报名成功后请求订阅授权
+        // 一次弹窗囤活动提醒+评论回复两张票
+        // force=true 表示每次报名都弹授权窗（报名是用户明确意图，不受频率控制）
+        subscribe.requestActivityReminderSubscribe(true)
       }
     } catch (err) {
       console.error('操作失败', err)
       util.showToast('操作失败，请重试')
-    }
-  },
-
-  /**
-   * 报名成功后请求订阅授权
-   * 用户点击"立即报名"是合法的交互时机
-   * 授权后，活动开始前可通过云函数发送提醒
-   */
-  requestActivityReminder: function () {
-    const templateId = config.subscribeTemplates.activityReminder
-    if (!templateId) {
-      // 模板 ID 未配置，跳过订阅
-      return
-    }
-
-    wx.requestSubscribeMessage({
-      tmplIds: [templateId],
-      success: (res) => {
-        if (res[templateId] === 'accept') {
-          // 记录授权，后续云函数定时任务可据此发送提醒
-          this.recordSubscription(templateId, 'activity_reminder')
-        }
-      },
-      fail: (err) => {
-        // errCode 20004 = 用户不再询问
-        if (err.errCode === 20004) {
-          wx.showModal({
-            title: '开启活动提醒',
-            content: '您已关闭通知授权，如需接收活动开始提醒，请在设置中开启',
-            confirmText: '去设置',
-            cancelText: '暂不',
-            success: (res) => {
-              if (res.confirm) {
-                wx.openSetting()
-              }
-            }
-          })
-        }
-      }
-    })
-  },
-
-  // 记录用户订阅授权
-  recordSubscription: async function (templateId, type) {
-    try {
-      const db = wx.cloud.database()
-      await db.collection('subscriptions').add({
-        data: {
-          templateId,
-          type,
-          activityId: this.data.id,
-          acceptTime: db.serverDate(),
-          used: false
-        }
-      })
-    } catch (err) {
-      console.error('记录订阅授权失败', err)
     }
   },
 
@@ -175,5 +125,15 @@ Page({
       path: `/pages/activity-detail/activity-detail?id=${this.data.id}`,
       imageUrl: activity ? activity.cover : ''
     }
+  },
+
+  // 返回上一页
+  onBackTap: function () {
+    wx.navigateBack({
+      delta: 1,
+      fail: () => {
+        wx.switchTab({ url: '/pages/index/index' })
+      }
+    })
   }
 })

@@ -233,10 +233,6 @@
   border: 2rpx dashed #D9D9D9;
 }
 
-.btn-icon {
-  font-size: 32rpx;
-  color: #4A90D9;
-}
 
 .btn-text {
   font-size: var(--font-base);
@@ -323,12 +319,17 @@
 .message-time {
   font-size: 20rpx;
   color: var(--text-placeholder);
-  margin-top: 4rpx;
-  display: block;
 }
 
 .message-item.mine .message-time {
   text-align: right;
+}
+
+.reply-to-name {
+  font-size: 22rpx;
+  color: #4A90D9;
+  display: block;
+  margin-bottom: 4rpx;
 }
 
 .load-more-tip {
@@ -380,10 +381,6 @@
   opacity: 1;
 }
 
-.send-icon-font {
-  font-size: 32rpx;
-  color: #FFFFFF;
-}
 
 /* ========== 弹窗 ========== */
 .dialog-body {

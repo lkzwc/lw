@@ -11,11 +11,16 @@ module.exports = {
     { id: 'other', name: '其他', iconClass: 'icon-pingjia' }
   ],
   
-  // 期号选项
+  // 期号选项（高科麓湾 4 期）
   phases: ['一期', '二期', '三期', '四期'],
-  
-  // 楼号选项
-  buildings: Array.from({ length: 20 }, (_, i) => `${i + 1}栋`),
+
+  // 各期楼号
+  phaseBuildings: {
+    '一期': Array.from({ length: 17 }, (_, i) => `${i + 1}栋`),
+    '二期': Array.from({ length: 27 }, (_, i) => `${i + 1}栋`),
+    '三期': Array.from({ length: 20 }, (_, i) => `${i + 1}栋`),
+    '四期': ['1栋', '2栋', '3栋', '4栋', '5栋', '6栋', '7栋', 'L1', 'L2']
+  },
   
   // 天气API配置（西安灞桥区）
   weather: {

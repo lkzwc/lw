@@ -5,11 +5,13 @@ const util = require('../../../utils/util')
 
 Page({
   data: {
+    statusBarHeight: 20,
     notices: [],
     totalCount: 0,
     loading: true,
     showModal: false,
     editId: '',
+    slideButtons: [{ text: '删除', type: 'warn' }],
     formData: {
       title: '',
       content: '',
@@ -18,6 +20,8 @@ Page({
   },
 
   onLoad: function () {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
     this.loadNotices()
   },
 
@@ -81,21 +85,25 @@ Page({
     }
   },
 
-  // 删除公告
-  onDeleteNotice: function (e) {
-    const id = e.currentTarget.dataset.id
-    
+  // 左滑删除
+  onSlideButtonTap: function (e) {
+    const { index, id } = e.currentTarget.dataset
+
     wx.showModal({
       title: '确认删除',
-      content: '删除后无法恢复，确定要删除吗？',
+      content: '删除后无法恢复，确定要删除这条公告吗？',
       confirmColor: '#FF4D4F',
       success: async (res) => {
         if (res.confirm) {
+          wx.showLoading({ title: '删除中...' })
           try {
             await api.notice.delete(id)
+            wx.hideLoading()
             util.showToast('删除成功')
-            this.loadNotices()
+            const notices = this.data.notices.filter((_, i) => i !== index)
+            this.setData({ notices, totalCount: notices.length })
           } catch (err) {
+            wx.hideLoading()
             console.error('删除失败', err)
             util.showToast('删除失败')
           }
@@ -170,5 +178,15 @@ Page({
       }
       util.showToast(msg)
     }
+  },
+
+  // 返回上一页
+  onBackTap: function () {
+    wx.navigateBack({
+      delta: 1,
+      fail: () => {
+        wx.switchTab({ url: '/pages/index/index' })
+      }
+    })
   }
 })

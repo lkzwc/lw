@@ -5,12 +5,14 @@ const util = require('../../../utils/util')
 
 Page({
   data: {
+    statusBarHeight: 20,
     skills: [],
     totalCount: 0,
     homeCount: 0,
     loading: true,
     showModal: false,
     editId: '',
+    slideButtons: [{ text: '删除', type: 'warn' }],
     categories: ['家政服务', '维修服务', '教育培训', '美容美发', '其他'],
     categoryIndex: 0,
     formData: {
@@ -25,6 +27,8 @@ Page({
   },
 
   onLoad: function () {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
     this.loadSkills()
   },
 
@@ -116,21 +120,26 @@ Page({
     }
   },
 
-  // 删除技能
-  onDeleteSkill: function (e) {
-    const id = e.currentTarget.dataset.id
-    
+  // 左滑删除
+  onSlideButtonTap: function (e) {
+    const { index, id } = e.currentTarget.dataset
+
     wx.showModal({
       title: '确认删除',
-      content: '删除后无法恢复，确定要删除吗？',
+      content: '删除后无法恢复，确定要删除这条技能吗？',
       confirmColor: '#FF4D4F',
       success: async (res) => {
         if (res.confirm) {
+          wx.showLoading({ title: '删除中...' })
           try {
             await api.skill.delete(id)
+            wx.hideLoading()
             util.showToast('删除成功')
-            this.loadSkills()
+            const skills = this.data.skills.filter((_, i) => i !== index)
+            const homeCount = skills.filter(item => item.showHome).length
+            this.setData({ skills, totalCount: skills.length, homeCount })
           } catch (err) {
+            wx.hideLoading()
             console.error('删除失败', err)
             util.showToast('删除失败')
           }
@@ -226,5 +235,15 @@ Page({
       util.hideLoading()
       util.showToast('保存失败')
     }
+  },
+
+  // 返回上一页
+  onBackTap: function () {
+    wx.navigateBack({
+      delta: 1,
+      fail: () => {
+        wx.switchTab({ url: '/pages/index/index' })
+      }
+    })
   }
 })

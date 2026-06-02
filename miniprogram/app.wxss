@@ -1,8 +1,8 @@
 /* app.wxss - 全局样式 */
 /* 引入主题样式 */
-@import '/theme/theme.wxss';
+@import './theme/theme.wxss';
 /* 引入 iconfont 字体图标 */
-@import '/styles/iconfont.wxss';
+@import './styles/iconfont.wxss';
 
 /* ========== 页面基础 ========== */
 page {

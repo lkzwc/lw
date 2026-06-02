@@ -1,5 +1,18 @@
 <!--pages/admin/post/post.wxml-->
 <view class="page">
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">帖子管理</text>
+      <view class="nav-right"></view>
+    </view>
+  </view>
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
+
   <!-- 统计条 -->
   <view class="stat-bar">
     <text>共 {{totalCount}} 条</text>
@@ -8,23 +21,21 @@
 
   <!-- 列表 -->
   <view class="list">
-    <view class="list-item" wx:for="{{posts}}" wx:key="_id">
-      <view class="item-main" bindtap="onViewPost" data-id="{{item._id}}">
+    <mp-slideview wx:for="{{posts}}" wx:key="_id" show="{{false}}" buttons="{{slideButtons}}" bindbuttontap="onSlideButtonTap" data-index="{{index}}" data-id="{{item._id}}" ext-class="slideview-item">
+      <view class="list-item" bindtap="onViewPost" data-id="{{item._id}}">
         <view class="item-row">
           <text class="item-user">{{item.userInfo.nickName || '邻居'}}</text>
           <text class="item-time">{{item.createTimeStr}}</text>
         </view>
         <view class="item-content">{{item.content}}</view>
         <view class="item-meta">
-          <text>👍{{item.likeCount || 0}}</text>
-          <text>💬{{item.commentCount || 0}}</text>
+          <text class="iconfont icon-aixin icon-sm"></text>
+          <text class="meta-num">{{item.likeCount || 0}}</text>
+          <text class="iconfont icon-pinglun icon-sm"></text>
+          <text class="meta-num">{{item.commentCount || 0}}</text>
         </view>
       </view>
-      <view class="item-actions">
-        <text class="btn-link" catchtap="onViewPost" data-id="{{item._id}}">详情</text>
-        <text class="btn-danger" catchtap="onDeletePost" data-id="{{item._id}}">删除</text>
-      </view>
-    </view>
+    </mp-slideview>
   </view>
 
   <view class="empty" wx:if="{{!loading && posts.length === 0}}">

@@ -1,7 +1,5 @@
 {
-  "navigationBarTitleText": "活动详情",
-  "navigationBarBackgroundColor": "#52C41A",
-  "navigationBarTextStyle": "white",
+  "navigationStyle": "custom",
   "usingComponents": {
     "loading": "/components/loading/loading"
   }

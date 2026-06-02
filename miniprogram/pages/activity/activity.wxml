@@ -60,7 +60,7 @@
       <view class="activity-card" wx:for="{{activities}}" wx:key="_id" bindtap="onActivityTap" data-id="{{item._id}}">
         <image class="activity-cover" src="{{item.cover}}" mode="aspectFill" wx:if="{{item.cover}}"></image>
         <view class="activity-cover-placeholder" wx:else>
-          <text class="iconfont icon-rili placeholder-icon"></text>
+          <text class="iconfont icon-rili icon-xxxl"></text>
         </view>
         <view class="activity-content">
           <view class="activity-status status-{{item.status}}">{{item.statusLabel}}</view>
@@ -87,7 +87,7 @@
 
     <!-- 空状态 -->
     <view class="empty-state" wx:if="{{activities.length === 0}}">
-    <text class="iconfont icon-rili empty-icon-font"></text>
+    <text class="iconfont icon-rili icon-huge"></text>
       <text class="empty-text">当天暂无活动</text>
       <text class="empty-hint">点击右上角发起第一个活动吧</text>
     </view>

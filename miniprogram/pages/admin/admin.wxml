@@ -1,5 +1,18 @@
 <!--pages/admin/admin.wxml-->
 <view class="admin-page">
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">管理后台</text>
+      <view class="nav-right"></view>
+    </view>
+  </view>
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
+
   <!-- 数据看板 -->
   <view class="dashboard">
     <view class="dashboard-title">数据概览</view>
@@ -30,19 +43,19 @@
   <!-- 功能入口 -->
   <view class="action-grid">
     <view class="action-btn" bindtap="onNoticeManage">
-      <text class="iconfont icon-gonggao action-icon-font"></text>
+      <text class="iconfont icon-gonggao icon-lg"></text>
       <text class="action-text">公告</text>
     </view>
     <view class="action-btn" bindtap="onPostManage">
-      <text class="iconfont icon-tiezhi action-icon-font"></text>
+      <text class="iconfont icon-tieziguanli icon-lg"></text>
       <text class="action-text">帖子</text>
     </view>
     <view class="action-btn" bindtap="onSkillManage">
-      <text class="iconfont icon-gongju action-icon-font"></text>
+      <text class="iconfont icon-jinengliang-xian icon-lg"></text>
       <text class="action-text">技能</text>
     </view>
     <view class="action-btn" bindtap="onUserManage">
-      <text class="iconfont icon-yonghu action-icon-font"></text>
+      <text class="iconfont icon-yonghu icon-lg"></text>
       <text class="action-text">用户</text>
     </view>
   </view>

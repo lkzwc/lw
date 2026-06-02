@@ -5,22 +5,146 @@
   background: #F5F7FA;
 }
 
-.page-header {
-  padding: var(--spacing-md);
-  background: #FFFFFF;
-  border-bottom: 1rpx solid #F0F0F0;
+/* ========== 自定义导航栏 ========== */
+.custom-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  overflow: hidden;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  box-shadow: none;
+  border-bottom: none;
 }
 
-.page-title {
+.nav-placeholder {
+  width: 100%;
+  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 var(--spacing-md);
+}
+
+.nav-back {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-back-icon {
+  font-size: 52rpx;
+  color: #FFFFFF;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
   font-size: var(--font-lg);
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.nav-right {
+  width: 72rpx;
+}
+
+.items-list {
+  padding: var(--spacing-md);
+}
+
+/* ========== mp-slideview 卡片间距 ========== */
+mp-slideview {
+  margin-bottom: 24rpx;
+}
+
+/* ========== slideview 删除按钮高度跟随卡片 ========== */
+.slideview-item .weui-slideview__btn__wrp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slideview-item .weui-slideview__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100% !important;
+}
+
+/* ========== 帖子卡片（内联，不使用组件） ========== */
+.post-card {
+  padding: 28rpx;
+  border-radius: 20rpx;
+  background-color: var(--bg-card);
+  border: 1rpx solid var(--border-color);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  border: 2rpx solid var(--border-color);
+}
+
+.user-info {
+  flex: 1;
+}
+
+.nick-name {
+  font-size: 30rpx;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.posts-list {
-  padding: var(--spacing-md);
+.post-time {
+  font-size: 24rpx;
+  color: var(--text-placeholder);
+  margin-top: 4rpx;
 }
 
+.post-content {
+  margin-bottom: 20rpx;
+}
+
+.content-text {
+  font-size: 30rpx;
+  line-height: 1.7;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.post-images {
+  margin-bottom: 20rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.post-images image {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 16rpx;
+  object-fit: cover;
+}
+
+/* ========== 公共样式 ========== */
 .load-more,
 .no-more {
   text-align: center;
@@ -36,13 +160,6 @@
   padding: 160rpx var(--spacing-lg);
 }
 
-.empty-icon-font {
-  font-size: 80rpx;
-  color: var(--text-placeholder);
-  margin-bottom: var(--spacing-md);
-  opacity: 0.5;
-}
-
 .empty-text {
   font-size: var(--font-md);
   color: var(--text-secondary);
@@ -51,5 +168,96 @@
 
 .empty-hint {
   font-size: var(--font-sm);
+  color: var(--text-placeholder);
+}
+
+/* ========== 拼车卡片 ========== */
+.carpool-card {
+  padding: 28rpx;
+  border-radius: 20rpx;
+  background-color: var(--bg-card);
+  border: 1rpx solid var(--border-color);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.carpool-route {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.route-point {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.route-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+}
+
+.route-dot.start {
+  background: #4A90D9;
+}
+
+.route-dot.end {
+  background: #FF6B35;
+}
+
+.route-text {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.route-arrow {
+  width: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-placeholder);
+  font-size: 28rpx;
+}
+
+.carpool-info {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.carpool-tag {
+  font-size: 24rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+  background: rgba(74, 144, 217, 0.1);
+  color: #4A90D9;
+}
+
+.carpool-tag.once {
+  background: rgba(255, 107, 53, 0.1);
+  color: #FF6B35;
+}
+
+.carpool-time {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+}
+
+.carpool-seats {
+  font-size: 26rpx;
+  color: var(--text-placeholder);
+}
+
+.carpool-footer {
+  display: flex;
+  align-items: center;
+}
+
+.carpool-time-ago {
+  font-size: 24rpx;
   color: var(--text-placeholder);
 }

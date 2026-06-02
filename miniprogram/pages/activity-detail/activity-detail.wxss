@@ -1,9 +1,59 @@
 /* pages/activity-detail/activity-detail.wxss - 统一暖橙色主题 */
 
 .detail-page {
-  
-  
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
+}
+
+/* ========== 自定义导航栏 ========== */
+.custom-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  overflow: hidden;
+  background: linear-gradient(135deg, #3DB94F 0%, #52C41A 100%);
+  box-shadow: none;
+  border-bottom: none;
+}
+
+.nav-placeholder {
+  width: 100%;
+  background: linear-gradient(135deg, #3DB94F 0%, #52C41A 100%);
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 var(--spacing-md);
+}
+
+.nav-back {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-back-icon {
+  font-size: 52rpx;
+  color: #FFFFFF;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.nav-right {
+  width: 72rpx;
 }
 
 /* 活动封面 */
@@ -19,11 +69,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.detail-placeholder-icon {
-  font-size: 120rpx;
-  color: #B0C4DE;
 }
 
 /* 活动内容 */
@@ -99,16 +144,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.info-location-icon {
-  color: #4A90D9;
-  font-size: 32rpx;
-}
-
-.info-time-icon {
-  color: #FAAD14;
-  font-size: 32rpx;
 }
 
 .info-people-icon {
@@ -199,11 +234,6 @@
 
 .share-btn::after {
   border: none;
-}
-
-.share-icon {
-  font-size: 28rpx;
-  color: var(--text-secondary);
 }
 
 .join-btn {

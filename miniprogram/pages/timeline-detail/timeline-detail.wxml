@@ -1,6 +1,18 @@
 <!--pages/timeline-detail/timeline-detail.wxml-->
 <view class="detail-page">
-  
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">详情</text>
+      <view class="nav-right"></view>
+    </view>
+  </view>
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
+
   <view class="detail-content">
     
     <!-- 顶部卡片 -->
@@ -67,7 +79,7 @@
   <view class="action-bar">
     <input class="comment-input" placeholder="发表评论..." value="{{commentInput}}" bindinput="onCommentInput" bindconfirm="onSendComment" />
     <view class="send-btn" bindtap="onSendComment">
-      <text class="iconfont icon-send send-icon-font"></text>
+      <text class="iconfont icon-send icon-md"></text>
     </view>
   </view>
   

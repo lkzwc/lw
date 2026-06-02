@@ -87,9 +87,7 @@
   padding: 20rpx 28rpx;
 }
 
-.search-icon-font {
-  font-size: 32rpx;
-  color: rgba(255, 255, 255, 0.7);
+.search-bar .iconfont {
   margin-right: var(--spacing-sm);
 }
 
@@ -194,16 +192,6 @@
   gap: 8rpx;
 }
 
-.post-stat.liked .stat-icon-font {
-  color: #FF6B6B;
-  transform: scale(1.2);
-}
-
-.stat-icon-font {
-  font-size: 40rpx;
-  color: #999999;
-  transition: transform 0.2s;
-}
 
 .stat-num {
   font-size: var(--font-sm);
@@ -229,12 +217,6 @@
   padding: 100rpx var(--spacing-lg);
 }
 
-.empty-icon-font {
-  font-size: 80rpx;
-  color: var(--text-placeholder);
-  margin-bottom: var(--spacing-md);
-  opacity: 0.5;
-}
 
 .empty-text {
   font-size: var(--font-md);
@@ -275,10 +257,6 @@
   transform: scale(0.94);
 }
 
-.publish-icon-font {
-  font-size: 44rpx;
-  color: #FFFFFF;
-}
 
 /* ===== 评论半屏弹窗 — 参考 awesome-skyline half-screen 样式 ===== */
 
@@ -376,6 +354,12 @@
   border-bottom: 1rpx solid #F5F5F5;
 }
 
+/* 二级评论（回复）— 明显缩进 + 浅色背景 */
+.comment-item.reply {
+  padding: 20rpx 32rpx 20rpx 72rpx;
+  background: #F8FAFB;
+}
+
 .comment-item:last-child {
   border-bottom: none;
 }
@@ -388,6 +372,12 @@
   margin-top: 4rpx;
 }
 
+/* 二级评论头像更小 */
+.comment-user-avatar.reply-avatar {
+  width: 48rpx;
+  height: 48rpx;
+}
+
 .comment-user-info {
   flex: 1;
   margin-left: 20rpx;
@@ -395,13 +385,18 @@
 }
 
 .comment-user-name {
-  display: block;
+  flex: 1;
   font-size: 26rpx;
   font-weight: 500;
   color: #1A191E;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.comment-user-row {
+  display: flex;
+  align-items: center;
   margin-bottom: 4rpx;
 }
 
@@ -411,6 +406,13 @@
   color: #333;
   line-height: 1.5;
   word-break: break-all;
+}
+
+/* 回复 @用户名 标签 */
+.reply-to {
+  color: #4A90D9;
+  font-size: 26rpx;
+  margin-right: 4rpx;
 }
 
 .comment-user-time {
@@ -433,20 +435,24 @@
   color: #999;
 }
 
-/* 评论滚动区 — 占据 body 剩余空间 */
+/* 评论滚动区 — 占据弹窗剩余空间，设定具体高度确保滚动 */
+/* 半屏弹窗默认占 70vh，摘要区约 120rpx，留出足够空间 */
 .comment-scroll-area {
-  flex: 1;
-  overflow: hidden;
+  height: calc(70vh - 200rpx);
 }
 
 /* 底部输入区 — footer slot，组件已处理 safe-area */
 .comment-input-area {
+  padding: 0;
+  background: #FFFFFF;
+}
+
+.comment-input-row {
   display: flex;
   align-items: center;
   gap: 16rpx;
   padding: 16rpx 32rpx;
   border-top: 1rpx solid #F0F0F0;
-  background: #FFFFFF;
 }
 
 .comment-input-avatar {
@@ -500,66 +506,6 @@
   font-size: var(--font-sm);
   color: var(--text-placeholder);
   margin-top: 8rpx;
-}
-
-/* 自动识别标签 */
-.auto-tags {
-  margin-bottom: var(--spacing-md);
-  padding: 16rpx 20rpx;
-  background: rgba(74, 144, 217, 0.06);
-  border-radius: 12rpx;
-}
-
-.auto-tags-label {
-  font-size: 24rpx;
-  color: var(--text-placeholder);
-  margin-bottom: 12rpx;
-  display: block;
-}
-
-.auto-tags-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-}
-
-.auto-tag {
-  font-size: 26rpx;
-  color: #4A90D9;
-  background: rgba(74, 144, 217, 0.1);
-  padding: 8rpx 20rpx;
-  border-radius: 24rpx;
-  font-weight: 500;
-}
-
-/* 手动标签 */
-.manual-tags {
-  margin-bottom: var(--spacing-md);
-}
-
-.manual-tags-label {
-  font-size: 24rpx;
-  color: var(--text-placeholder);
-  margin-bottom: 12rpx;
-  display: block;
-}
-
-.tag-options {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
-.tag-option {
-  padding: 12rpx 32rpx;
-  background: #F5F7FA;
-  border-radius: 32rpx;
-  font-size: var(--font-base);
-  color: var(--text-secondary);
-}
-
-.tag-option.active {
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-  color: #FFFFFF;
 }
 
 /* 图片上传区 */

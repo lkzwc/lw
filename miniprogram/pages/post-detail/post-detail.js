@@ -3,9 +3,11 @@ const app = getApp()
 const api = require('../../utils/api')
 const util = require('../../utils/util')
 const config = require('../../utils/config')
+const subscribe = require('../../utils/subscribe') // 订阅消息囤票模块
 
 Page({
   data: {
+    statusBarHeight: 20,
     postId: '',
     post: null,
     comments: [],
@@ -25,7 +27,8 @@ Page({
   },
 
   onLoad: function (options) {
-    this.setData({ postId: options.id })
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight, postId: options.id })
     this.loadPostDetail()
     this.loadComments()
   },
@@ -53,8 +56,9 @@ Page({
 
       // 关键修复：帖子作者打开自己帖子 → 请求订阅授权
       // 这样后续有人评论时，作者才能收到通知
+      // 使用公共囤票模块，force=true（帖子作者打开是明确意图，不受频率控制）
       if (isOwner && app.globalData.isLoggedIn) {
-        this.requestAuthorSubscribe()
+        subscribe.requestCommentReplySubscribe(true)
       }
     } catch (err) {
       console.error('加载帖子详情失败', err)
@@ -133,72 +137,12 @@ Page({
         isLiked,
         'post.likeCount': isLiked ? this.data.post.likeCount + 1 : this.data.post.likeCount - 1
       })
-      // 移除点赞时的订阅授权请求 — 点赞不需要订阅通知
+      // Tier 2 囤票：用户点赞互动，顺带囤一张票（受频率控制）
+      subscribe.requestLowFrequencySubscribe()
     } catch (err) {
       console.error('点赞失败', err)
       util.showToast('操作失败')
     }
-  },
-
-  /**
-   * 帖子作者打开自己帖子时，请求订阅授权
-   * 这样有人评论时，作者才能收到通知
-   * requestSubscribeMessage 必须在用户点击事件或 onShow 等时机调用
-   * 这里用 loadPostDetail（页面加载时）调用，首次可能被微信拒绝
-   * 更稳妥的做法是在作者进行某次交互时再调用
-   */
-  requestAuthorSubscribe: function () {
-    const templateId = config.subscribeTemplates.commentReply
-    if (!templateId) return
-
-    wx.requestSubscribeMessage({
-      tmplIds: [templateId],
-      success: (res) => {
-        if (res[templateId] === 'accept') {
-          // 记录授权到 subscriptions 表
-          this.recordSubscription(templateId, 'reply')
-        }
-      },
-      fail: (err) => {
-        // 用户拒绝或不在用户点击事件中调用
-        // errCode 20004 = 用户不再询问，可引导去设置页
-        if (err.errCode === 20004) {
-          this.showSubscribeSettingGuide()
-        }
-      }
-    })
-  },
-
-  // 记录用户订阅授权
-  recordSubscription: async function (templateId, type) {
-    try {
-      const db = wx.cloud.database()
-      await db.collection('subscriptions').add({
-        data: {
-          templateId,
-          type,
-          acceptTime: db.serverDate(),
-          used: false
-        }
-      })
-    } catch (err) {
-      console.error('记录订阅授权失败', err)
-    }
-  },
-
-  // 用户关闭了"总是询问"，引导去设置页重新开启
-  showSubscribeSettingGuide: function () {
-    wx.showModal({
-      title: '开启消息通知',
-      content: '您已关闭通知授权，如需接收评论回复通知，请在设置中开启',
-      confirmText: '去设置',
-      cancelText: '暂不',
-      success: (res) => {
-        if (res.confirm) {
-          wx.openSetting()
-        }
-      }
-    })
   },
 
   // 点击评论
@@ -327,6 +271,11 @@ Page({
       if (this.data.replyTo && this.data.replyTo._openid && this.data.replyTo._openid !== app.globalData.openid) {
         this.sendReplyToCommentNotification(content)
       }
+
+      // Tier 1 囤票（必囤）：评论者为自己囤一张票
+      // 这样别人回复该评论时，才能发通知给评论者
+      // force=true 表示每次评论都弹授权窗（评论是用户明确意图，不受频率控制）
+      subscribe.requestCommentReplySubscribe(true)
 
       // 清空输入
       this.setData({
@@ -480,5 +429,15 @@ Page({
       path: `/pages/post-detail/post-detail?id=${this.data.postId}`,
       imageUrl: this.data.post && this.data.post.images[0]
     }
+  },
+
+  // 返回上一页
+  onBackTap: function () {
+    wx.navigateBack({
+      delta: 1,
+      fail: () => {
+        wx.switchTab({ url: '/pages/community/community' })
+      }
+    })
   }
 })

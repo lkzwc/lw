@@ -18,9 +18,7 @@ Page({
     submitting: false,
     publishForm: {
       content: '',
-      tag: '',
-      images: [],
-      detectedTags: []
+      images: []
     },
     // 评论弹窗
     showCommentDialog: false,
@@ -28,6 +26,7 @@ Page({
     currentComments: [],
     commentLoading: false,
     commentInput: '',
+    replyTo: null,
     userAvatar: ''
   },
 
@@ -201,7 +200,9 @@ Page({
         userName: item.userInfo?.nickName || '邻居',
         avatar: item.userInfo?.avatarUrl || '',
         content: item.content || '',
-        timeStr: util.formatRelativeTime(item.createTime)
+        timeStr: util.formatRelativeTime(item.createTime),
+        isReply: !!item.parentId,
+        replyToUserName: item.replyToName || item.replyToUserName || ''
       }))
 
       this.setData({
@@ -222,13 +223,26 @@ Page({
       showCommentDialog: false,
       currentPost: {},
       currentComments: [],
-      commentInput: ''
+      commentInput: '',
+      replyTo: null
     })
   },
 
   // 评论输入
   onCommentInput: function (e) {
     this.setData({ commentInput: e.detail.value })
+  },
+
+  // 回复评论
+  onReplyTap: function (e) {
+    const item = e.currentTarget.dataset.item
+    this.setData({ replyTo: item })
+  },
+
+  onCommentBlur: function () {
+    if (!this.data.commentInput.trim()) {
+      this.setData({ replyTo: null })
+    }
   },
 
   // 发送评论
@@ -256,13 +270,18 @@ Page({
     const postId = this.data.currentPost._id
     if (!postId) return
 
+    // 提取回复目标
+    const replyTo = this.data.replyTo
+
     // 乐观更新
     const newComment = {
       _id: Date.now().toString(),
       userName: app.globalData.userInfo?.nickName || '我',
       avatar: app.globalData.userInfo?.avatarUrl || '',
       content,
-      timeStr: '刚刚'
+      timeStr: '刚刚',
+      isReply: !!replyTo,
+      replyToUserName: replyTo ? replyTo.userName : ''
     }
     const postIndex = this.data.posts.findIndex(p => p._id === postId)
     const newCount = (this.data.currentPost.commentCount || 0) + 1
@@ -270,6 +289,7 @@ Page({
     const updates = {
       currentComments: [...this.data.currentComments, newComment],
       commentInput: '',
+      replyTo: null,
       'currentPost.commentCount': newCount
     }
     if (postIndex !== -1) {
@@ -278,7 +298,12 @@ Page({
     this.setData(updates)
 
     try {
-      await api.comment.create({ postId, content })
+      const commentData = { postId, content }
+      if (replyTo) {
+        commentData.parentId = replyTo._id
+        commentData.replyToName = replyTo.userName
+      }
+      await api.comment.create(commentData)
       util.showToast('评论成功')
 
       // Tier 1 囤票（必囤）：评论者为自己囤一张票
@@ -345,6 +370,8 @@ Page({
 
     try {
       await api.post.like(id, app.globalData.openid)
+      // Tier 2 囤票：用户点赞互动，顺带囤一张票（受频率控制）
+      subscribe.requestLowFrequencySubscribe()
     } catch (err) {
       // 接口失败则回滚
       console.error('点赞失败', err)
@@ -379,9 +406,7 @@ Page({
       submitting: false,
       publishForm: {
         content: '',
-        tag: '',
-        images: [],
-        detectedTags: []
+        images: []
       }
     })
   },
@@ -391,30 +416,10 @@ Page({
     this.setData({ showPublishDialog: false })
   },
 
-  // 输入内容 - 自动识别#标签
+  // 输入内容
   onContentInput: function (e) {
-    const content = e.detail.value
-    // 自动识别 #标签
-    const tagRegex = /#([^\s#]+)/g
-    const detectedTags = []
-    let match
-    while ((match = tagRegex.exec(content)) !== null) {
-      const tag = match[1]
-      if (!detectedTags.includes(tag)) {
-        detectedTags.push(tag)
-      }
-    }
     this.setData({
-      'publishForm.content': content,
-      'publishForm.detectedTags': detectedTags
-    })
-  },
-
-  // 选择标签
-  onTagSelect: function (e) {
-    const tag = e.currentTarget.dataset.tag
-    this.setData({
-      'publishForm.tag': this.data.publishForm.tag === tag ? '' : tag
+      'publishForm.content': e.detail.value
     })
   },
 
@@ -441,17 +446,11 @@ Page({
 
   // 提交帖子 - 写入云数据库
   onSubmitPost: async function () {
-    const { content, tag, images, detectedTags } = this.data.publishForm
+    const { content, images } = this.data.publishForm
 
     if (!content.trim()) {
       util.showToast('请输入帖子内容')
       return
-    }
-
-    // 合并自动识别标签和手动选择标签
-    const allTags = [...detectedTags]
-    if (tag && !allTags.includes(tag)) {
-      allTags.push(tag)
     }
 
     this.setData({ submitting: true })
@@ -478,8 +477,8 @@ Page({
 
       await api.post.create({
         content: content.trim(),
-        tag: tag || allTags[0] || '',
-        tags: allTags,
+        tag: '',
+        tags: [],
         images: uploadedImages
       })
 

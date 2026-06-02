@@ -5,13 +5,17 @@ const util = require('../../../utils/util')
 
 Page({
   data: {
+    statusBarHeight: 20,
     posts: [],
     totalCount: 0,
     todayCount: 0,
-    loading: true
+    loading: true,
+    slideButtons: [{ text: '删除', type: 'warn' }]
   },
 
   onLoad: function () {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
     this.loadPosts()
   },
 
@@ -60,10 +64,10 @@ Page({
     })
   },
 
-  // 删除帖子
-  onDeletePost: function (e) {
-    const id = e.currentTarget.dataset.id
-    
+  // 左滑删除帖子（mp-slideview）
+  onSlideButtonTap: function (e) {
+    const { index, id } = e.currentTarget.dataset
+
     wx.showModal({
       title: '确认删除',
       content: '删除后无法恢复，确定要删除吗？',
@@ -73,12 +77,25 @@ Page({
           try {
             await api.post.delete(id)
             util.showToast('删除成功')
-            this.loadPosts()
+
+            // 从列表移除
+            const posts = this.data.posts.filter((_, i) => i !== index)
+            this.setData({ posts })
           } catch (err) {
             console.error('删除失败', err)
             util.showToast('删除失败')
           }
         }
+      }
+    })
+  },
+
+  // 返回上一页
+  onBackTap: function () {
+    wx.navigateBack({
+      delta: 1,
+      fail: () => {
+        wx.switchTab({ url: '/pages/index/index' })
       }
     })
   }

@@ -1,50 +1,39 @@
 <!--pages/mine/mine.wxml-->
 <view class="page">
-  <!-- 顶部渐变背景 -->
-  <view class="header-bg">
-    <view class="header-wave"></view>
-  </view>
-
-  <!-- 顶部占位 -->
-  <view class="status-bar"></view>
-
-  <!-- 用户区域（覆盖在渐变上） -->
-  <view class="user-section">
-    <!-- 未登录 -->
-    <view class="user-row" wx:if="{{!isLoggedIn}}">
-      <view class="avatar-wrap">
+  <!-- ========== 区域一：背景 + 头像 + 登录 ========== -->
+  <view class="hero-zone {{isLoggedIn ? '' : 'hero-zone-guest'}}">
+    <view class="hero-bg"></view>
+    <!-- 内容 -->
+    <view class="hero-content">
+      <!-- 未登录 -->
+      <block wx:if="{{!isLoggedIn}}">
         <view class="avatar-guest">
-          <text class="iconfont icon-wode avatar-icon-font"></text>
+          <text class="iconfont icon-wode icon-xxxl"></text>
+        </view>
+        <view class="particle p1"></view>
+        <view class="particle p2"></view>
+        <view class="brand-row">
+          <text class="welcome-text">Hi，欢迎回家</text>
+          <text class="brand-name">麓家</text>
+        </view>
+        <button class="hero-login-btn" bindtap="onLogin">开启邻里生活</button>
+      </block>
+
+      <!-- 已登录 -->
+      <view class="user-row-logged" wx:else>
+        <view class="avatar-wrap" bindtap="onEditTap">
+          <image class="avatar-img" src="{{userInfo.avatarUrl || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
+          <view class="avatar-badge">编辑</view>
+        </view>
+        <view class="user-info">
+          <text class="user-name">{{userInfo.nickName || '设置昵称'}}</text>
+          <view class="user-tags" wx:if="{{userInfo.phase || userInfo.building}}">
+            <text class="u-tag" wx:if="{{userInfo.phase}}">{{userInfo.phase}}</text>
+            <text class="u-tag" wx:if="{{userInfo.building}}">{{userInfo.building}}</text>
+          </view>
         </view>
       </view>
-      <view class="user-detail">
-        <text class="user-name">新朋友</text>
-        <text class="user-sub">登录后解锁更多功能</text>
-      </view>
     </view>
-
-    <!-- 已登录 -->
-    <view class="user-row" wx:else bindtap="onEditTap">
-      <view class="avatar-wrap">
-        <image class="avatar-img" src="{{userInfo.avatarUrl || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
-        <view class="avatar-badge">编辑</view>
-      </view>
-      <view class="user-detail">
-        <text class="user-name">{{userInfo.nickName || '设置昵称'}}</text>
-        <view class="user-tags" wx:if="{{userInfo.phase || userInfo.building}}">
-          <text class="u-tag" wx:if="{{userInfo.phase}}">{{userInfo.phase}}</text>
-          <text class="u-tag" wx:if="{{userInfo.building}}">{{userInfo.building}}</text>
-        </view>
-      </view>
-      <text class="edit-arrow">›</text>
-    </view>
-  </view>
-
-  <!-- 登录按钮（未登录时突出显示） -->
-  <view class="login-area" wx:if="{{!isLoggedIn}}">
-    <button class="login-btn" bindtap="onLogin">
-      <text class="login-label">微信一键登录</text>
-    </button>
   </view>
 
   <!-- 数据统计（已登录） -->
@@ -67,20 +56,20 @@
     </view>
   </view>
 
-  <!-- 功能菜单 -->
+  <!-- ========== 区域二：功能菜单 ========== -->
   <view class="menu-card">
     <view class="menu-item" bindtap="onContactTap">
-      <view class="menu-icon-wrap"><text class="iconfont icon-kefu"></text></view>
+      <view class="menu-icon-wrap"><text class="iconfont icon-kefu icon-md icon-lg"></text></view>
       <text class="menu-name">联系开发者</text>
       <text class="menu-arrow">›</text>
     </view>
     <view class="menu-item" bindtap="onAboutTap">
-      <view class="menu-icon-wrap"><text class="iconfont icon-bangzhuzhongxin"></text></view>
+      <view class="menu-icon-wrap"><text class="iconfont icon-bangzhuzhongxin icon-md icon-lg"></text></view>
       <text class="menu-name">关于我们</text>
       <text class="menu-arrow">›</text>
     </view>
     <view class="menu-item" wx:if="{{isAdmin}}" bindtap="onAdminTap">
-      <view class="menu-icon-wrap admin"><text class="iconfont icon-shouye"></text></view>
+      <view class="menu-icon-wrap admin"><text class="iconfont icon-shouye icon-md icon-lg"></text></view>
       <text class="menu-name">管理后台</text>
       <text class="menu-arrow">›</text>
     </view>
@@ -117,7 +106,7 @@
       <input class="form-input" type="nickname" placeholder="昵称" value="{{editForm.nickName}}" bindinput="onNickNameInput" maxlength="20" />
     </view>
     <view class="form-row">
-      <picker mode="multiSelector" range="{{phaseBuildingRange}}" value="{{phaseBuildingValue}}" bindchange="onPhaseBuildingChange">
+      <picker mode="multiSelector" range="{{phaseBuildingRange}}" value="{{phaseBuildingValue}}" bindchange="onPhaseBuildingChange" bindcolumnchange="onPhaseColumnChange">
         <view class="form-picker">
           <text class="{{editForm.phase && editForm.building ? '' : 'placeholder'}}">{{editForm.phase && editForm.building ? editForm.phase + ' ' + editForm.building : '房号'}}</text>
           <text class="picker-arrow">›</text>

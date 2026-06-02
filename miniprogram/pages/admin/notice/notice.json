@@ -1,8 +1,9 @@
 {
-  "navigationBarTitleText": "公告管理",
+  "navigationStyle": "custom",
   "enablePullDownRefresh": true,
   "usingComponents": {
     "loading": "/components/loading/loading",
-    "mp-half-screen-dialog": "weui-miniprogram/half-screen-dialog/half-screen-dialog"
+    "mp-half-screen-dialog": "weui-miniprogram/half-screen-dialog/half-screen-dialog",
+    "mp-slideview": "weui-miniprogram/slideview/slideview"
   }
 }

@@ -1,5 +1,18 @@
 <!--pages/post-detail/post-detail.wxml-->
 <view class="post-detail-page">
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">帖子详情</text>
+      <view class="nav-right"></view>
+    </view>
+  </view>
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
+
   <!-- 帖子内容 -->
   <view class="post-card" wx:if="{{post}}">
     <!-- 用户信息 -->
@@ -50,15 +63,15 @@
     <!-- 互动栏 -->
     <view class="post-actions">
       <view class="action-item {{isLiked ? 'liked' : ''}}" bindtap="onLikeTap">
-        <text class="iconfont {{isLiked ? 'icon-dianzan1' : 'icon-dianzan'}} action-icon-font"></text>
+        <text class="iconfont {{isLiked ? 'icon-dianzan1' : 'icon-dianzan'}} icon-lg"></text>
         <text class="action-count">{{post.likeCount || 0}}</text>
       </view>
       <view class="action-item" bindtap="onCommentTap">
-        <text class="iconfont icon-pinglun action-icon-font"></text>
+        <text class="iconfont icon-pinglun icon-lg"></text>
         <text class="action-count">{{post.commentCount || 0}}</text>
       </view>
       <button class="action-item share-btn" open-type="share">
-        <text class="iconfont icon-zhuanfa action-icon-font"></text>
+        <text class="iconfont icon-zhuanfa icon-lg"></text>
         <text class="action-count">分享</text>
       </button>
     </view>
@@ -115,7 +128,7 @@
       adjust-position="{{true}}"
     />
     <button class="send-btn" bindtap="onSubmitComment">
-      <text class="iconfont icon-send send-icon-font"></text>
+      <text class="iconfont icon-send icon-md"></text>
       <text class="send-text">发送</text>
     </button>
   </view>

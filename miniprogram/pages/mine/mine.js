@@ -1,17 +1,10 @@
 // pages/mine/mine.js - 我的页面
 const app = getApp()
 const util = require('../../utils/util')
+const config = require('../../utils/config')
 
-// 期数列表
-const PHASE_LIST = ['一期', '二期', '三期', '四期']
-
-// 各期对应的楼号列表
-const BUILDING_MAP = {
-  '一期': ['1号楼', '2号楼', '3号楼', '4号楼', '5号楼'],
-  '二期': ['1号楼', '2号楼', '3号楼', '4号楼', '5号楼', '6号楼', '7号楼'],
-  '三期': ['1号楼', '2号楼', '3号楼', '4号楼', '5号楼', '6号楼', '7号楼', '8号楼'],
-  '四期': ['1号楼', '2号楼', '3号楼', '4号楼', '5号楼', '6号楼', '7号楼', '8号楼', '9号楼', '10号楼']
-}
+const PHASE_LIST = config.phases
+const BUILDING_MAP = config.phaseBuildings
 
 Page({
   data: {
@@ -46,19 +39,32 @@ Page({
     this.loadStats()
 
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({
-        selected: 2
-      })
+      this.getTabBar().setData({ selected: 2 })
     }
   },
 
-  // 检查登录状态
+  // 检查登录状态（支持云端异步恢复延迟刷新）
   checkLoginStatus: function () {
-    this.setData({
-      isLoggedIn: app.globalData.isLoggedIn,
-      userInfo: app.globalData.userInfo,
-      isAdmin: app.globalData.isAdmin
-    })
+    const update = () => {
+      this.setData({
+        isLoggedIn: app.globalData.isLoggedIn,
+        userInfo: app.globalData.userInfo,
+        isAdmin: app.globalData.isAdmin
+      })
+      if (app.globalData.isLoggedIn) {
+        this.loadStats()
+      }
+    }
+    update()
+
+    // 如果启动时没登录，等待云端异步恢复（app.js restoreFromCloud）
+    if (!app.globalData.isLoggedIn) {
+      setTimeout(() => {
+        if (app.globalData.isLoggedIn !== this.data.isLoggedIn) {
+          update()
+        }
+      }, 1500)
+    }
   },
 
   // 加载统计数据
@@ -105,107 +111,66 @@ Page({
     }
   },
 
-  // 登录 - 使用微信授权
-  onLogin: function () {
-    wx.showLoading({ title: '登录中...' })
-    
-    // 使用 wx.getUserProfile 获取用户信息
-    wx.getUserProfile({
-      desc: '用于完善用户资料',
-      success: async (res) => {
-        const userInfo = res.userInfo
-        
-        try {
-          // 获取 openid
-          const app = getApp()
-          if (!app.globalData.openid) {
-            await this._getOpenId()
-          }
-          
-          // 尝试获取已有用户信息
-          const db = wx.cloud.database()
-          const userRes = await db.collection('users')
-            .where({ _openid: app.globalData.openid })
-            .get()
-          
-          if (userRes.data.length > 0) {
-            // 将头像上传到云存储（永久存储）
-            const avatarUrl = await app.uploadAvatar(userInfo.avatarUrl, app.globalData.openid)
+  // 登录 - 纯云端方案，无需授权弹窗
+  onLogin: async function () {
+    wx.showLoading({ title: '进入中...' })
 
-            // 更新已有用户
-            await db.collection('users').doc(userRes.data[0]._id).update({
-              data: {
-                nickName: userInfo.nickName,
-                avatarUrl,
-                updateTime: db.serverDate()
-              }
-            })
-            
-            app.globalData.userInfo = {
-              ...userRes.data[0],
-              nickName: userInfo.nickName,
-              avatarUrl
-            }
-            // 保存到本地存储
-            wx.setStorageSync('userInfo', app.globalData.userInfo)
+    try {
+      // 获取 openid
+      const openidRes = await wx.cloud.callFunction({ name: 'getOpenId' })
+      const openid = openidRes.result.openid
+      if (!openid) throw new Error('获取 openid 失败')
 
-            app.globalData.isAdmin = !!userRes.data[0].isAdmin
-          } else {
-            // 将头像上传到云存储（永久存储）
-            const avatarUrl = await app.uploadAvatar(userInfo.avatarUrl, app.globalData.openid)
+      const db = wx.cloud.database()
+      const userRes = await db.collection('users')
+        .where({ _openid: openid })
+        .get()
 
-            // 创建新用户
-            const newUser = {
-              nickName: userInfo.nickName,
-              avatarUrl,
-              phase: '',
-              building: '',
-              createTime: db.serverDate(),
-              updateTime: db.serverDate()
-            }
-            
-            await db.collection('users').add({ data: newUser })
-            app.globalData.userInfo = newUser
-            wx.setStorageSync('userInfo', app.globalData.userInfo)
-            app.globalData.isAdmin = false
-          }
-          
-          app.checkAdminStatus(app.globalData.openid)
-          app.globalData.isLoggedIn = true
-          
-          wx.hideLoading()
-          util.showToast('登录成功')
-          
-          this.checkLoginStatus()
-          this.loadStats()
-        } catch (err) {
-          wx.hideLoading()
-          console.error('登录失败:', err)
-          util.showToast('登录失败，请重试')
+      if (userRes.data.length > 0) {
+        // 老用户：从云端恢复全部信息
+        const u = userRes.data[0]
+        app.globalData.userInfo = {
+          nickName: u.nickName || '邻居',
+          avatarUrl: u.avatarUrl || '',
+          phase: u.phase || '',
+          building: u.building || ''
         }
-      },
-      fail: (err) => {
-        wx.hideLoading()
-        app.logout()
-        this.checkLoginStatus()
-        util.showToast('登录已取消')
+        app.globalData.isAdmin = !!u.isAdmin
+      } else {
+        // 新用户：创建基础记录
+        const newUser = {
+          nickName: '邻居',
+          avatarUrl: '',
+          phase: '',
+          building: '',
+          createTime: db.serverDate(),
+          updateTime: db.serverDate(),
+          _openid: openid
+        }
+        await db.collection('users').add({ data: newUser })
+        app.globalData.userInfo = {
+          nickName: '邻居',
+          avatarUrl: '',
+          phase: '',
+          building: ''
+        }
+        app.globalData.isAdmin = false
       }
-    })
-  },
-  
-  // 获取 openid
-  _getOpenId: function () {
-    return new Promise((resolve, reject) => {
-      wx.cloud.callFunction({
-        name: 'getOpenId',
-        success: (res) => {
-          getApp().globalData.openid = res.result.openid
-          wx.setStorageSync('openid', res.result.openid)
-          resolve(res.result.openid)
-        },
-        fail: reject
-      })
-    })
+
+      app.globalData.openid = openid
+      app.globalData.isLoggedIn = true
+      wx.setStorageSync('userInfo', app.globalData.userInfo)
+      wx.setStorageSync('openid', openid)
+      app.checkAdminStatus(openid)
+
+      wx.hideLoading()
+      this.checkLoginStatus()
+      this.loadStats()
+    } catch (err) {
+      wx.hideLoading()
+      console.error('登录失败:', err)
+      util.showToast('登录失败，请重试')
+    }
   },
 
   // 打开编辑弹窗
@@ -257,6 +222,20 @@ Page({
   onNickNameInput: function (e) {
     this.setData({
       'editForm.nickName': e.detail.value
+    })
+  },
+
+  // 期数列变化时，联动更新楼号列
+  onPhaseColumnChange: function (e) {
+    const { column, value } = e.detail
+    if (column !== 0) return  // 只有期数列变化才处理
+
+    const phase = PHASE_LIST[value]
+    const buildings = BUILDING_MAP[phase] || BUILDING_MAP['一期']
+
+    this.setData({
+      'phaseBuildingRange[1]': buildings,
+      phaseBuildingValue: [value, 0]
     })
   },
 
@@ -378,7 +357,10 @@ Page({
   // 我的拼车
   onMyCarpoolsTap: function () {
     wx.navigateTo({
-      url: '/pages/carpool/carpool'
+      url: '/pages/my-posts/my-posts?type=carpool',
+      fail: function (err) {
+        console.error('[mine] navigateTo failed:', err)
+      }
     })
   },
 

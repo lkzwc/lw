@@ -18,7 +18,7 @@
   <!-- 搜索栏 -->
   <view class="search-bar">
     <view class="search-input-wrap">
-      <text class="iconfont icon-sousuo search-icon-font"></text>
+      <text class="iconfont icon-sousuo icon-md"></text>
       <input class="search-input" placeholder="搜索技能" value="{{keyword}}" bindinput="onSearchInput" bindconfirm="onSearch" />
     </view>
   </view>
@@ -41,7 +41,7 @@
 
   <!-- 空状态 -->
   <view class="empty-state" wx:if="{{skills.length === 0 && !loading}}">
-    <text class="iconfont icon-gongju empty-icon-font"></text>
+    <text class="iconfont icon-gongju icon-huge"></text>
     <text class="empty-text">暂无技能</text>
     <button class="btn-primary mt-24" bindtap="onPublishTap">发布第一个技能</button>
   </view>
@@ -54,7 +54,7 @@
 
 <!-- 发布按钮 -->
 <view class="publish-btn" bindtap="onPublishTap">
-  <text class="iconfont icon-tianjia publish-icon-font"></text>
+  <text class="iconfont icon-tianjia icon-xxxl"></text>
 </view>
 
 <!-- 发布技能半屏弹窗 -->

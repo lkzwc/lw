@@ -5,6 +5,7 @@
   border-radius: 16rpx;
   padding: 24rpx;
   margin-bottom: 20rpx;
+  border: 1rpx solid #E8F0F8;
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
 }
 

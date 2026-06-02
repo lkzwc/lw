@@ -4,6 +4,7 @@ const api = require('../../utils/api')
 
 Page({
   data: {
+    statusBarHeight: 20,
     totalPosts: 0,
     totalSkills: 0,
     totalComments: 0,
@@ -12,6 +13,8 @@ Page({
   },
 
   onLoad: function () {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
     this.loadStats()
   },
 
@@ -81,6 +84,16 @@ Page({
       content: '功能即将上线，届时可查看和管理社区用户',
       confirmText: '知道了',
       showCancel: false
+    })
+  },
+
+  // 返回上一页
+  onBackTap: function () {
+    wx.navigateBack({
+      delta: 1,
+      fail: () => {
+        wx.switchTab({ url: '/pages/index/index' })
+      }
     })
   }
 })

@@ -1,10 +1,22 @@
 <!--pages/activity-detail/activity-detail.wxml-->
 <view class="detail-page">
-  
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">活动详情</text>
+      <view class="nav-right"></view>
+    </view>
+  </view>
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
+
   <!-- 活动封面 -->
   <image class="detail-cover" src="{{activity.cover}}" mode="aspectFill" wx:if="{{activity.cover}}"></image>
   <view class="detail-cover-placeholder" wx:else>
-    <text class="iconfont icon-rili detail-placeholder-icon"></text>
+    <text class="iconfont icon-rili icon-huge"></text>
   </view>
   
   <!-- 活动信息 -->
@@ -21,14 +33,14 @@
     <!-- 信息卡片 -->
     <view class="info-card card">
       <view class="info-row">
-        <view class="info-icon"><text class="iconfont icon-dingwei info-location-icon"></text></view>
+        <view class="info-icon"><text class="iconfont icon-dingwei icon-md"></text></view>
         <view class="info-text">
           <text class="info-label">活动地点</text>
           <text class="info-value">{{activity.location}}</text>
         </view>
       </view>
       <view class="info-row">
-        <view class="info-icon"><text class="iconfont icon-naozhong_huaban1 info-time-icon"></text></view>
+        <view class="info-icon"><text class="iconfont icon-naozhong_huaban1 icon-md"></text></view>
         <view class="info-text">
           <text class="info-label">活动时间</text>
           <text class="info-value">{{activity.timeStr || activity.time || activity.date}}</text>
@@ -62,7 +74,7 @@
   <!-- 底部操作栏 -->
   <view class="action-bar">
     <button class="share-btn" open-type="share">
-      <text class="iconfont icon-zhuanfa share-icon"></text>
+      <text class="iconfont icon-zhuanfa icon-lg"></text>
       <text>转发</text>
     </button>
     <button class="join-btn {{activity.isJoined ? 'joined' : ''}}" bindtap="onJoinTap">

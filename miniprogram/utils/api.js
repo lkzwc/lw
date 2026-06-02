@@ -581,6 +581,44 @@ const userApi = {
     return res.data
   },
 
+  // 获取我的技能
+  getMySkills: async (openid, page = 1, pageSize = 10) => {
+    const skip = (page - 1) * pageSize
+
+    const res = await db.collection('skills')
+      .where({
+        _openid: openid,
+        status: _.neq('deleted')
+      })
+      .orderBy('createTime', 'desc')
+      .skip(skip)
+      .limit(pageSize)
+      .get()
+
+    // 获取用户最新信息
+    const userRes = await db.collection('users')
+      .where({ _openid: openid })
+      .field({
+        _openid: true,
+        nickName: true,
+        avatarUrl: true
+      })
+      .get()
+
+    const userInfo = userRes.data.length > 0 ? {
+      nickName: userRes.data[0].nickName,
+      avatarUrl: userRes.data[0].avatarUrl
+    } : {}
+
+    // 将最新的用户信息附加到技能
+    res.data = res.data.map(skill => ({
+      ...skill,
+      userInfo
+    }))
+
+    return res.data
+  },
+
   // 获取我的点赞（从 posts 的 likedBy 数组查找）
   getMyLikes: async (openid, page = 1, pageSize = 10) => {
     const skip = (page - 1) * pageSize
@@ -588,6 +626,23 @@ const userApi = {
     const res = await db.collection('posts')
       .where({
         likedBy: openid,
+        status: _.neq('deleted')
+      })
+      .orderBy('createTime', 'desc')
+      .skip(skip)
+      .limit(pageSize)
+      .get()
+
+    return res.data
+  },
+
+  // 获取我的拼车
+  getMyCarpools: async (openid, page = 1, pageSize = 10) => {
+    const skip = (page - 1) * pageSize
+
+    const res = await db.collection('carpools')
+      .where({
+        _openid: openid,
         status: _.neq('deleted')
       })
       .orderBy('createTime', 'desc')

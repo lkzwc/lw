@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "技能详情",
+  "navigationStyle": "custom",
   "usingComponents": {
     "loading": "/components/loading/loading"
   }

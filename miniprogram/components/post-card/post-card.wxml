@@ -27,15 +27,15 @@
   <!-- 操作栏 -->
   <view class="post-actions" catchtap="stopPropagation">
     <view class="action-item {{isLiked ? 'liked' : ''}}" catchtap="onLike">
-      <text class="iconfont {{isLiked ? 'icon-dianzan1' : 'icon-dianzan'}} action-icon-font"></text>
+      <text class="iconfont {{isLiked ? 'icon-dianzan1' : 'icon-dianzan'}} icon-lg"></text>
       <text class="action-text">{{post.likeCount || 0}}</text>
     </view>
     <view class="action-item" catchtap="onComment">
-      <text class="iconfont icon-pinglun action-icon-font"></text>
+      <text class="iconfont icon-pinglun icon-lg"></text>
       <text class="action-text">{{post.commentCount || 0}}</text>
     </view>
     <button class="action-item share-btn" open-type="share" data-id="{{post._id}}" catchtap="stopPropagation">
-      <text class="iconfont icon-zhuanfa action-icon-font"></text>
+      <text class="iconfont icon-zhuanfa icon-lg"></text>
       <text class="action-text">分享</text>
     </button>
   </view>

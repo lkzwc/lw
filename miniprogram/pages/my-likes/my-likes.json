@@ -1,8 +1,8 @@
 {
-  "navigationBarTitleText": "我的点赞",
+  "navigationStyle": "custom",
   "usingComponents": {
-    "post-card": "/components/post-card/post-card",
-    "loading": "/components/loading/loading"
+    "loading": "/components/loading/loading",
+    "mp-slideview": "weui-miniprogram/slideview/slideview"
   },
   "enablePullDownRefresh": true,
   "backgroundColor": "#F5F7FA"

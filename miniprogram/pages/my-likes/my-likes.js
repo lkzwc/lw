@@ -5,15 +5,21 @@ const util = require('../../utils/util')
 
 Page({
   data: {
+    statusBarHeight: 20,
+    navTitle: '我的点赞',
     posts: [],
     page: 1,
     pageSize: 10,
     hasMore: true,
     loading: true,
-    loadingMore: false
+    loadingMore: false,
+    slideButtons: [{ text: '取消点赞', type: 'warn' }]
   },
 
   onLoad: function () {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
+
     if (!app.globalData.isLoggedIn) {
       util.showToast('请先登录')
       wx.switchTab({ url: '/pages/mine/mine' })
@@ -70,11 +76,86 @@ Page({
   formatPosts: function (posts) {
     return posts.map(item => ({
       ...item,
-      createTimeStr: util.formatRelativeTime(item.createTime)
+      createTimeStr: util.formatRelativeTime(item.createTime),
+      isLiked: true // 我的点赞列表中的帖子肯定是已点赞状态
     }))
   },
 
+  // ========== 取消点赞 ==========
+
+  // 点击点赞按钮（在"我的点赞"列表中点击即取消点赞）
+  onUnlike: async function (e) {
+    const { index, id } = e.currentTarget.dataset
+
+    wx.showModal({
+      title: '取消点赞',
+      content: '确定要取消点赞吗？',
+      confirmText: '取消点赞',
+      confirmColor: '#FF4D4F',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            await api.post.like(id, app.globalData.openid)
+            util.showToast('已取消点赞')
+
+            // 从列表中移除
+            const posts = this.data.posts.filter((_, i) => i !== index)
+            this.setData({ posts })
+          } catch (err) {
+            console.error('取消点赞失败', err)
+            util.showToast('操作失败')
+          }
+        }
+      }
+    })
+  },
+
+  // ========== 左滑取消点赞（mp-slideview） ==========
+
+  onSlideButtonTap: function (e) {
+    const { index, id } = e.currentTarget.dataset
+
+    wx.showModal({
+      title: '取消点赞',
+      content: '确定要取消点赞吗？',
+      confirmText: '取消点赞',
+      confirmColor: '#FF4D4F',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            await api.post.like(id, app.globalData.openid)
+            util.showToast('已取消点赞')
+
+            const posts = this.data.posts.filter((_, i) => i !== index)
+            this.setData({ posts })
+          } catch (err) {
+            console.error('取消点赞失败', err)
+            util.showToast('操作失败')
+          }
+        }
+      }
+    })
+  },
+
+  // 点击卡片 → 跳转详情
+  onItemTap: function (e) {
+    const id = e.currentTarget.dataset.id
+    wx.navigateTo({
+      url: `/pages/post-detail/post-detail?id=${id}`
+    })
+  },
+
   onShareAppMessage: function () {
-    return { title: '我的点赞 - 邻里圈', path: '/pages/my-likes/my-likes' }
+    return { title: '我的点赞 - 邻里圈', path: '/pages/index/index' }
+  },
+
+  // 返回上一页
+  onBackTap: function () {
+    wx.navigateBack({
+      delta: 1,
+      fail: () => {
+        wx.switchTab({ url: '/pages/mine/mine' })
+      }
+    })
   }
 })

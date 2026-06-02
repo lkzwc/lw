@@ -6,6 +6,7 @@ const config = require('../../utils/config')
 
 Page({
   data: {
+    statusBarHeight: 20,
     skillId: '',
     skill: null,
     categoryIcon: 'icon-pingjia',
@@ -15,6 +16,9 @@ Page({
   },
 
   onLoad: function (options) {
+    const sysInfo = wx.getSystemInfoSync()
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
+
     if (options.id) {
       this.setData({ skillId: options.id })
       this.loadSkillDetail(options.id)
@@ -130,5 +134,15 @@ Page({
       path: `/pages/skill-detail/skill-detail?id=${this.data.skillId}`,
       imageUrl: skill && skill.images && skill.images.length > 0 ? skill.images[0] : ''
     }
+  },
+
+  // 返回上一页
+  onBackTap: function () {
+    wx.navigateBack({
+      delta: 1,
+      fail: () => {
+        wx.switchTab({ url: '/pages/index/index' })
+      }
+    })
   }
 })

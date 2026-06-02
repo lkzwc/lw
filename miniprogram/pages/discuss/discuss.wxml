@@ -3,17 +3,18 @@
 
   <!-- 自定义导航栏 -->
   <view class="custom-nav">
-    <view class="nav-placeholder" style="height: {{statusBarHeight}}px;"></view>
-    <view class="nav-bar nav-bar-simple">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
       <view class="nav-back" bindtap="onBackTap">
         <text class="nav-back-icon">‹</text>
       </view>
+      <text class="nav-title">业主议事厅</text>
       <view class="nav-right"></view>
     </view>
   </view>
 
   <!-- 自定义导航栏占位 -->
-  <view style="height: {{statusBarHeight + 44}}px;"></view>
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
 
   <!-- 页面标题区 -->
   <view class="page-header">
@@ -23,39 +24,39 @@
   <!-- 议题列表 -->
   <view class="topic-list">
     <view class="topic-card" wx:for="{{topics}}" wx:key="_id" bindtap="onTopicTap" data-id="{{item._id}}">
-      <view class="topic-top">
-        <view class="topic-title-wrap">
-          <text class="topic-title">{{item.title}}</text>
-          <text class="topic-status status-{{item.status}}">{{item.statusText}}</text>
+        <view class="topic-top">
+          <view class="topic-title-wrap">
+            <text class="topic-title">{{item.title}}</text>
+            <text class="topic-status status-{{item.status}}">{{item.statusText}}</text>
+          </view>
+          <text class="topic-desc">{{item.description}}</text>
         </view>
-        <text class="topic-desc">{{item.description}}</text>
-      </view>
-      <view class="topic-bottom">
-        <view class="topic-author">
-          <image class="author-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
-          <view class="author-info">
-            <text class="author-name">{{item.author}}</text>
-            <text class="topic-time">{{item.createTime}}</text>
+        <view class="topic-bottom">
+          <view class="topic-author">
+            <image class="author-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
+            <view class="author-info">
+              <text class="author-name">{{item.author}}</text>
+              <text class="topic-time">{{item.createTime}}</text>
+            </view>
+          </view>
+          <view class="topic-stats">
+            <text class="iconfont icon-pinglun stat-icon"></text>
+            <text class="stat-num">{{item.commentCount || 0}}</text>
           </view>
         </view>
-        <view class="topic-stats">
-          <text class="iconfont icon-pinglun stat-icon"></text>
-          <text class="stat-num">{{item.commentCount || 0}}</text>
-        </view>
       </view>
-    </view>
   </view>
 
   <!-- 空状态 -->
   <view class="empty-state" wx:if="{{topics.length === 0}}">
-    <text class="iconfont icon-pinglun empty-icon-font"></text>
+    <text class="iconfont icon-pinglun icon-xxxl"></text>
     <text class="empty-text">暂无议事议题</text>
     <text class="empty-hint">点击右下角发起第一个议题吧</text>
   </view>
 
   <!-- 发布按钮 -->
   <view class="publish-btn" bindtap="onPublishTap">
-    <text class="iconfont icon-tianjia publish-icon-font"></text>
+    <text class="iconfont icon-tianjia icon-xl"></text>
   </view>
 
 </view>
@@ -75,15 +76,10 @@
     </view>
   </view>
   <view slot="desc" class="dialog-body">
-    <!-- 议题标题 -->
+    <!-- 议题内容 -->
     <view class="form-section">
-      <input class="form-input" placeholder="请输入议题标题（必填）" value="{{publishForm.title}}" bindinput="onTitleInput" maxlength="50" />
-    </view>
-
-    <!-- 议题描述 -->
-    <view class="form-section">
-      <textarea class="form-textarea" placeholder="请描述议题内容..." value="{{publishForm.desc}}" bindinput="onDescInput" maxlength="500" auto-height></textarea>
-      <text class="form-count">{{publishForm.desc.length || 0}}/500</text>
+      <textarea class="form-textarea" placeholder="请输入议题内容..." value="{{publishForm.content}}" bindinput="onContentInput" maxlength="500" auto-height></textarea>
+      <text class="form-count">{{publishForm.content.length || 0}}/500</text>
     </view>
   </view>
 </mp-half-screen-dialog>

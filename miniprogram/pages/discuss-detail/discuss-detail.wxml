@@ -56,7 +56,7 @@
 
   <!-- 发起投票按钮 -->
   <view class="start-vote-btn" wx:if="{{topic && topic.isAuthor && !vote}}" bindtap="onStartVote">
-    <text class="btn-icon iconfont icon-pinglun"></text>
+    <text class="iconfont icon-pinglun icon-md"></text>
     <text class="btn-text">发起投票</text>
   </view>
 
@@ -65,13 +65,14 @@
     <view class="chat-messages">
       <view class="message-item {{item.isMine ? 'mine' : 'other'}}" wx:for="{{messages}}" wx:key="_id" id="msg-{{item._id}}">
         <view class="time-divider" wx:if="{{item.showTime}}">
-          <text>{{item.timeStr}}</text>
+          <text>{{item.dateStr}}</text>
         </view>
-        <view class="message-content">
+        <view class="message-content" catchtap="onReplyTap" data-item="{{item}}">
           <image class="message-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
           <view class="message-body">
             <text class="message-name" wx:if="{{!item.isMine}}">{{item.nickName}}</text>
             <view class="message-bubble">
+              <text class="reply-to-name" wx:if="{{item.replyToName}}">回复 @{{item.replyToName}}：</text>
               <text class="message-text">{{item.content}}</text>
             </view>
             <text class="message-time">{{item.displayTime}}</text>
@@ -87,9 +88,9 @@
   <!-- 输入区域 -->
   <view class="input-area">
     <view class="input-bar">
-      <input class="message-input" placeholder="发表您的看法..." value="{{inputContent}}" bindinput="onInput" bindconfirm="onSend" />
+      <input class="message-input" placeholder="{{replyTo ? '回复 @' + replyTo.nickName : '发表您的看法...'}}" value="{{inputContent}}" bindinput="onInput" bindblur="onInputBlur" bindconfirm="onSend" />
       <view class="send-btn {{inputContent ? 'active' : ''}}" bindtap="onSend">
-        <text class="iconfont icon-send send-icon-font"></text>
+        <text class="iconfont icon-send icon-md"></text>
       </view>
     </view>
   </view>

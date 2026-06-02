@@ -217,11 +217,6 @@
   justify-content: center;
 }
 
-.placeholder-icon {
-  font-size: 80rpx;
-  color: #B0C4DE;
-}
-
 .activity-content {
   padding: var(--spacing-md);
 }
@@ -275,13 +270,6 @@
   margin-right: 8rpx;
 }
 
-.empty-icon-font {
-  font-size: 64rpx;
-  color: var(--text-placeholder);
-  margin-bottom: var(--spacing-sm);
-  opacity: 0.5;
-}
-
 .meta-text {
   font-size: var(--font-sm);
   color: var(--text-secondary);
@@ -322,12 +310,6 @@
   flex-direction: column;
   align-items: center;
   padding: 60rpx var(--spacing-lg);
-}
-
-.empty-icon {
-  font-size: 64rpx;
-  margin-bottom: var(--spacing-sm);
-  opacity: 0.5;
 }
 
 .empty-text {

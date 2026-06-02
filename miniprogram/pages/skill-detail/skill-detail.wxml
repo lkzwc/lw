@@ -1,5 +1,18 @@
 <!--pages/skill-detail/skill-detail.wxml-->
 <view class="skill-detail-page">
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-placeholder" style="height: {{statusBarHeight || 0}}px;"></view>
+    <view class="nav-bar">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <text class="nav-title">技能详情</text>
+      <view class="nav-right"></view>
+    </view>
+  </view>
+  <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
+
   <!-- 技能信息 -->
   <view class="skill-card" wx:if="{{skill}}">
     <!-- 头部：左标题 右报价 -->
@@ -50,11 +63,11 @@
   <view class="bottom-bar">
     <!-- 点赞按钮 -->
     <view class="like-btn {{isLiked ? 'liked' : ''}}" bindtap="onLike">
-      <text class="like-icon iconfont {{isLiked ? 'icon-aixin iconfont-liked' : 'icon-aixin'}}"></text>
+      <text class="iconfont {{isLiked ? 'icon-aixin icon-lg' : 'icon-aixin icon-lg'}}"></text>
       <text class="like-count">{{skill.likeCount || 0}}</text>
     </view>
     <button class="contact-btn" bindtap="onCallPhone">
-      <text class="iconfont icon-dianhua phone-icon-font"></text>
+      <text class="iconfont icon-dianhua icon-lg"></text>
       <text>拨打电话</text>
     </button>
   </view>
