@@ -3,6 +3,8 @@
 @import './theme/theme.wxss';
 /* 引入 iconfont 字体图标 */
 @import './styles/iconfont.wxss';
+/* 引入公共组件样式 */
+@import './styles/nav.wxss';
 
 /* ========== 页面基础 ========== */
 page {
@@ -14,7 +16,7 @@ page {
 .btn-primary {
   width: 100%;
   height: 88rpx;
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  background: var(--gradient-primary);
   color: #FFFFFF;
   font-size: var(--font-base);
   font-weight: 500;
@@ -179,7 +181,7 @@ page {
   padding: 0 28rpx !important;
   border-radius: 30rpx !important;
   border: none !important;
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%) !important;
+  background: var(--gradient-primary) !important;
   color: #FFFFFF !important;
   font-size: 26rpx !important;
   font-weight: 600 !important;

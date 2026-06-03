@@ -1,6 +1,8 @@
 // pages/admin/admin.js
 const app = getApp()
 const api = require('../../utils/api')
+const db = wx.cloud.database()
+const _ = db.command
 
 Page({
   data: {
@@ -30,27 +32,30 @@ Page({
       today.setHours(0, 0, 0, 0)
       
       // 并行查询全部数据
-      const [postsRes, skillsRes, commentsRes, usersRes, todayUsersRes] = await Promise.all([
+      const [postsRes, skillsRes, usersRes, todayUsersRes] = await Promise.all([
         db.collection('posts').where({
           status: _.neq('deleted')
         }).count(),
         db.collection('skills').where({
           status: _.neq('deleted')
         }).count(),
-        db.collection('comments').where({
-          status: _.neq('deleted')
-        }).count(),
         db.collection('users').count(),
-        // 今日活跃用户
         db.collection('users').where({
           updateTime: _.gte(today)
         }).count()
       ])
       
+      // 评论总数：汇总所有帖子的 commentCount
+      const postsWithComments = await db.collection('posts')
+        .where({ status: _.neq('deleted') })
+        .field({ commentCount: true })
+        .get()
+      const totalComments = postsWithComments.data.reduce((sum, p) => sum + (p.commentCount || 0), 0)
+
       this.setData({
         totalPosts: postsRes.total || 0,
         totalSkills: skillsRes.total || 0,
-        totalComments: commentsRes.total || 0,
+        totalComments,
         totalUsers: usersRes.total || 0,
         todayOnline: todayUsersRes.total || 0
       })

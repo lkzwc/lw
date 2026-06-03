@@ -190,19 +190,19 @@ Page({
     subscribe.requestLowFrequencySubscribe()
   },
 
-  // 加载帖子评论（通过 api.comment 使用 comments 集合）
+  // 加载帖子评论（内嵌在 posts.comments 数组中）
   loadComments: async function (postId) {
     try {
       const list = await api.comment.getList(postId)
 
       const comments = list.map(item => ({
         _id: item._id,
-        userName: item.userInfo?.nickName || '邻居',
-        avatar: item.userInfo?.avatarUrl || '',
+        nickName: item.nickName || '邻居',
+        avatar: item.avatar || '',
         content: item.content || '',
-        timeStr: util.formatRelativeTime(item.createTime),
+        timeStr: item.time ? util.formatRelativeTime(new Date(item.time)) : '',
         isReply: !!item.parentId,
-        replyToUserName: item.replyToName || item.replyToUserName || ''
+        replyToName: item.replyToName || ''
       }))
 
       this.setData({
@@ -276,12 +276,13 @@ Page({
     // 乐观更新
     const newComment = {
       _id: Date.now().toString(),
-      userName: app.globalData.userInfo?.nickName || '我',
+      nickName: app.globalData.userInfo?.nickName || '我',
       avatar: app.globalData.userInfo?.avatarUrl || '',
       content,
       timeStr: '刚刚',
       isReply: !!replyTo,
-      replyToUserName: replyTo ? replyTo.userName : ''
+      replyToName: replyTo ? replyTo.nickName : '',
+      parentId: replyTo ? replyTo._id : null
     }
     const postIndex = this.data.posts.findIndex(p => p._id === postId)
     const newCount = (this.data.currentPost.commentCount || 0) + 1

@@ -67,15 +67,14 @@ Page({
     }
   },
 
-  // 加载评论
+  // 加载评论（内嵌在 posts.comments）
   loadComments: async function () {
     try {
       const comments = await api.comment.getList(this.data.postId)
       
-      // 格式化时间
       const formattedComments = comments.map(item => ({
         ...item,
-        createTimeStr: util.formatRelativeTime(item.createTime)
+        createTimeStr: item.time ? util.formatRelativeTime(new Date(item.time)) : ''
       }))
       
       this.setData({ comments: formattedComments })
@@ -242,22 +241,17 @@ Page({
     util.showLoading('发送中...')
     
     try {
-      const commentData = {
-        postId: this.data.postId,
-        content,
-        userInfo: {
-          nickName: app.globalData.userInfo?.nickName || '邻居',
-          avatarUrl: app.globalData.userInfo?.avatarUrl || ''
-        }
-      }
-
-      // 如果是回复
+      const options = {}
       if (this.data.replyTo) {
-        commentData.parentId = this.data.replyTo._id
-        commentData.replyToName = this.data.replyTo.userInfo.nickName
+        options.parentId = this.data.replyTo._id
+        options.replyToName = this.data.replyTo.nickName || (this.data.replyTo.userInfo && this.data.replyTo.userInfo.nickName)
       }
 
-      await api.comment.create(commentData)
+      await api.comment.create({ 
+        postId: this.data.postId, 
+        content,
+        ...options
+      })
 
       util.hideLoading()
       util.showToast('发送成功')

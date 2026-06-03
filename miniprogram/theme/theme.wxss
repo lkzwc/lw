@@ -12,6 +12,9 @@ page {
   --color-primary-dark: #3A7BC8;
   --color-primary-bg: rgba(74, 144, 217, 0.1);
   
+  /* 主题渐变 */
+  --gradient-primary: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  
   --color-secondary: #FF6B35;
   --color-secondary-light: #FF8B5A;
   --color-secondary-dark: #E55A25;
@@ -227,7 +230,7 @@ page {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  background: var(--gradient-primary);
   color: var(--text-white);
   box-shadow: 0 4rpx 16rpx rgba(74, 144, 217, 0.3);
 }
@@ -385,6 +388,62 @@ page {
   margin-bottom: var(--spacing-lg);
 }
 
+/* 通用空状态文字 */
+.empty-text {
+  font-size: var(--font-md);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-hint {
+  font-size: var(--font-sm);
+  color: var(--text-placeholder);
+}
+
+/* ========== 帖子卡片通用子元素 ========== */
+.post-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.post-footer {
+  display: flex;
+  justify-content: space-around;
+  padding-top: var(--spacing-sm);
+  border-top: 1rpx solid #F0F0F0;
+}
+
+.post-stat {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+}
+
+.post-content {
+  display: block;
+  font-size: var(--font-base);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-sm);
+}
+
+.post-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.post-image {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 12rpx;
+  object-fit: cover;
+}
+
 /* ========== 加载状态 ========== */
 .loading {
   display: flex;
@@ -441,6 +500,29 @@ page {
   height: 16rpx;
   padding: 0;
   min-width: auto;
+}
+
+/* ========== FAB 浮动按钮 ========== */
+.fab-btn {
+  position: fixed;
+  right: var(--spacing-md);
+  bottom: calc(40rpx + env(safe-area-inset-bottom));
+  width: 100rpx;
+  height: 100rpx;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 150;
+}
+
+.fab-btn:active {
+  transform: scale(0.94);
+}
+
+/* 有底部 TabBar 时，需抬高避开遮挡 */
+.fab-btn--tabbar {
+  bottom: calc(120rpx + env(safe-area-inset-bottom));
 }
 
 /* ========== 安全区域 ========== */

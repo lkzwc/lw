@@ -6,61 +6,9 @@
   background: #F5F7FA;
 }
 
-/* ========== 自定义导航栏 ========== */
-.custom-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 200;
-  overflow: hidden;
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-  box-shadow: none;
-  border-bottom: none;
-}
-
-.nav-placeholder {
-  width: 100%;
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-}
-
-.nav-bar {
-  display: flex;
-  align-items: center;
-  height: 88rpx;
-  padding: 0 var(--spacing-md);
-}
-
-.nav-back {
-  width: 72rpx;
-  height: 72rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-back-icon {
-  font-size: 52rpx;
-  color: #FFFFFF;
-  font-weight: 300;
-  line-height: 1;
-}
-
-.nav-title {
-  flex: 1;
-  text-align: center;
-  font-size: var(--font-lg);
-  font-weight: 600;
-  color: #FFFFFF;
-}
-
-.nav-right {
-  width: 72rpx;
-}
-
 /* 搜索栏 */
 .search-bar {
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  background: var(--gradient-primary);
   padding: 0 24rpx var(--spacing-md);
 }
 
@@ -105,7 +53,7 @@
 }
 
 .category-item.active {
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  background: var(--gradient-primary);
   color: #FFFFFF;
   box-shadow: 0 4rpx 12rpx rgba(74, 144, 217, 0.3);
 }
@@ -126,11 +74,6 @@
   text-align: center;
 }
 
-.empty-text {
-  color: #999;
-  font-size: 28rpx;
-}
-
 /* 加载更多 */
 .load-more {
   text-align: center;
@@ -143,15 +86,14 @@
 .publish-btn {
   position: fixed;
   right: 32rpx;
-  bottom: 200rpx;
+  bottom: calc(40rpx + env(safe-area-inset-bottom));
   width: 112rpx;
   height: 112rpx;
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  background: transparent;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 32rpx rgba(74, 144, 217, 0.4);
   z-index: 100;
 }
 
@@ -239,7 +181,7 @@
 }
 
 .category-option.selected {
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  background: var(--gradient-primary);
   color: #FFFFFF;
 }
 

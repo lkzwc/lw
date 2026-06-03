@@ -85,29 +85,15 @@
 
     <!-- 评论列表 -->
     <view class="comments-list" wx:if="{{comments.length > 0}}">
-      <view class="comment-item" wx:for="{{comments}}" wx:key="_id">
-        <image class="comment-avatar" src="{{item.userInfo.avatarUrl || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
+      <view class="comment-item {{item.parentId ? 'reply' : ''}}" wx:for="{{comments}}" wx:key="_id" catchtap="onReplyTap" data-comment="{{item}}">
+        <image class="comment-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
         <view class="comment-body">
           <view class="comment-header">
-            <text class="comment-nickname">{{item.userInfo.nickName || '邻居'}}</text>
+            <text class="comment-nickname">{{item.nickName || '邻居'}}</text>
+            <text wx:if="{{item.parentId && item.replyToName}}" class="reply-to">回复 @{{item.replyToName}}</text>
             <text class="comment-time">{{item.createTimeStr}}</text>
           </view>
           <text class="comment-content">{{item.content}}</text>
-          
-          <!-- 回复列表 -->
-          <view class="replies" wx:if="{{item.replies && item.replies.length > 0}}">
-            <view class="reply-item" wx:for="{{item.replies}}" wx:for-item="reply" wx:key="_id">
-              <text class="reply-nickname">{{reply.userInfo.nickName || '邻居'}}</text>
-              <text class="reply-arrow">→</text>
-              <text class="reply-to" wx:if="{{reply.replyToName}}">@{{reply.replyToName}}</text>
-              <text class="reply-content">{{reply.content}}</text>
-            </view>
-          </view>
-          
-          <!-- 回复按钮 -->
-          <view class="comment-actions">
-            <text class="reply-btn" bindtap="onReplyTap" data-comment="{{item}}">回复</text>
-          </view>
         </view>
       </view>
     </view>

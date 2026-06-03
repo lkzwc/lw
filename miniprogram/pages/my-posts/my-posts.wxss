@@ -5,58 +5,6 @@
   background: #F5F7FA;
 }
 
-/* ========== 自定义导航栏 ========== */
-.custom-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 200;
-  overflow: hidden;
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-  box-shadow: none;
-  border-bottom: none;
-}
-
-.nav-placeholder {
-  width: 100%;
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-}
-
-.nav-bar {
-  display: flex;
-  align-items: center;
-  height: 88rpx;
-  padding: 0 var(--spacing-md);
-}
-
-.nav-back {
-  width: 72rpx;
-  height: 72rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-back-icon {
-  font-size: 52rpx;
-  color: #FFFFFF;
-  font-weight: 300;
-  line-height: 1;
-}
-
-.nav-title {
-  flex: 1;
-  text-align: center;
-  font-size: var(--font-lg);
-  font-weight: 600;
-  color: #FFFFFF;
-}
-
-.nav-right {
-  width: 72rpx;
-}
-
 .items-list {
   padding: var(--spacing-md);
 }
@@ -87,12 +35,6 @@ mp-slideview {
   background-color: var(--bg-card);
   border: 1rpx solid var(--border-color);
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
-}
-
-.post-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20rpx;
 }
 
 .avatar {
@@ -159,18 +101,6 @@ mp-slideview {
   align-items: center;
   padding: 160rpx var(--spacing-lg);
 }
-
-.empty-text {
-  font-size: var(--font-md);
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-sm);
-}
-
-.empty-hint {
-  font-size: var(--font-sm);
-  color: var(--text-placeholder);
-}
-
 /* ========== 拼车卡片 ========== */
 .carpool-card {
   padding: 28rpx;

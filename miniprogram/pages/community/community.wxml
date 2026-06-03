@@ -87,8 +87,8 @@
 </view>
 
 <!-- 发布按钮 -->
-<view class="publish-btn" bindtap="onPublishTap">
-  <text class="iconfont icon-tianjia icon-xl"></text>
+<view class="fab-btn fab-btn--tabbar" bindtap="onPublishTap">
+  <text class="iconfont icon-fabuxiangmu icon-xxxl"></text>
 </view>
 
 <!-- 发布帖子半屏弹窗 - Twitter风格 -->
@@ -148,15 +148,6 @@
 
   <view slot="desc" class="comment-dialog-body">
 
-    <!-- 帖子摘要区 -->
-    <view class="comment-post-summary" wx:if="{{currentPost._id}}">
-      <image class="summary-avatar" src="{{currentPost.userInfo.avatarUrl || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
-      <view class="summary-info">
-        <text class="summary-name">{{currentPost.userInfo.nickName || '邻居'}}</text>
-        <text class="summary-content">{{currentPost.content}}</text>
-      </view>
-    </view>
-
     <!-- 评论列表区 — 使用 scroll-view 确保可滚动，不溢出到输入区 -->
     <scroll-view class="comment-scroll-area" scroll-y enhanced show-scrollbar="{{false}}">
       <!-- 加载中 -->
@@ -165,13 +156,13 @@
       </view>
 
       <!-- 评论条目 — 点击评论即可回复 -->
-      <view class="comment-item {{item.isReply ? 'reply' : ''}}" wx:for="{{currentComments}}" wx:key="_id" wx:if="{{!commentLoading}}" catchtap="onReplyTap" data-item="{{item}}">
-        <image class="comment-user-avatar {{item.isReply ? 'reply-avatar' : ''}}" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
+      <view class="comment-item {{item.parentId ? 'reply' : ''}}" wx:for="{{currentComments}}" wx:key="_id" wx:if="{{!commentLoading}}" catchtap="onReplyTap" data-item="{{item}}">
+        <image class="comment-user-avatar {{item.parentId ? 'reply-avatar' : ''}}" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
         <view class="comment-user-info">
           <view class="comment-user-row">
-            <text class="comment-user-name">{{item.userName}}</text>
+            <text class="comment-user-name">{{item.nickName}}</text>
           </view>
-          <text class="comment-user-content"><text wx:if="{{item.isReply && item.replyToUserName}}" class="reply-to">回复 @{{item.replyToUserName}} </text>{{item.content}}</text>
+          <text class="comment-user-content"><text wx:if="{{item.parentId && item.replyToName}}" class="reply-to">回复 @{{item.replyToName}} </text>{{item.content}}</text>
           <text class="comment-user-time">{{item.timeStr}}</text>
         </view>
       </view>

@@ -111,12 +111,6 @@
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
 }
 
-.post-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: var(--spacing-sm);
-}
-
 .post-avatar {
   width: 64rpx;
   height: 64rpx;
@@ -149,22 +143,7 @@
   border-radius: 20rpx;
 }
 
-.post-content {
-  display: block;
-  font-size: var(--font-base);
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: var(--spacing-sm);
-}
-
 /* 图片 */
-.post-images {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
-}
-
 .post-image {
   width: 160rpx;
   height: 160rpx;
@@ -177,21 +156,6 @@
 }
 
 /* 互动区 */
-.post-footer {
-  display: flex;
-  justify-content: space-around;
-  padding-top: var(--spacing-sm);
-  border-top: 1rpx solid #F0F0F0;
-}
-
-.post-stat {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8rpx;
-}
-
 
 .stat-num {
   font-size: var(--font-sm);
@@ -217,18 +181,6 @@
   padding: 100rpx var(--spacing-lg);
 }
 
-
-.empty-text {
-  font-size: var(--font-md);
-  color: var(--text-secondary);
-  margin-bottom: 8rpx;
-}
-
-.empty-hint {
-  font-size: var(--font-sm);
-  color: var(--text-placeholder);
-}
-
 /* 加载更多 */
 .load-more,
 .no-more {
@@ -236,25 +188,6 @@
   padding: var(--spacing-lg);
   font-size: var(--font-sm);
   color: var(--text-placeholder);
-}
-
-/* 发布按钮 */
-.publish-btn {
-  position: fixed;
-  right: var(--spacing-md);
-  bottom: calc(120rpx + env(safe-area-inset-bottom));
-  width: 100rpx;
-  height: 100rpx;
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(74, 144, 217, 0.4);
-}
-
-.publish-btn:active {
-  transform: scale(0.94);
 }
 
 

@@ -54,7 +54,7 @@
 
 <!-- 发布按钮 -->
 <view class="publish-btn" bindtap="onPublishTap">
-  <text class="iconfont icon-tianjia icon-xxxl"></text>
+  <text class="iconfont icon-fabuxiangmu icon-xxxl"></text>
 </view>
 
 <!-- 发布技能半屏弹窗 -->

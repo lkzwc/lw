@@ -437,7 +437,7 @@ page {
 }
 
 .join-btn {
-  background: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%);
+  background: var(--gradient-primary);
   color: #FFFFFF;
   font-size: 24rpx;
   padding: 12rpx 28rpx;

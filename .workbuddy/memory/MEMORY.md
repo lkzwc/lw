@@ -6,18 +6,19 @@
 - **云环境:** home-d1g4f2kcnf409bde5
 - **技术栈:** 微信小程序原生 + WeUI + 微信云开发
 - **品牌名:** 高科麓湾
-- **主题色:** #4A90D9 (主色) / #6BA8E8 (浅色)
+- **主题渐变:** `--gradient-primary: linear-gradient(135deg, #4A90D9 0%, #6BA8E8 100%)`，所有页面必须使用此变量，禁止硬编码渐变串
+- **共享样式:** `styles/nav.wxss` 导航栏全局样式；theme.wxss 包含全局 `.fab-btn` / `.empty-text` / `.empty-hint` / `.post-header` / `.post-footer` / `.post-stat` 等。新增页面优先使用全局样式，需要覆盖的在页面级 WXSS 只写差异属性
 - **TabBar:** 首页/社区/我的 (3 Tab)
 
 ## UI 规范
 
 - **卡片圆角:** 20rpx
-- **导航栏:** 所有页面统一使用 `"navigationStyle": "custom"`，自定义蓝色渐变导航栏（activity-detail 用绿色渐变）。排除 news/webview（纯 web-view 页面不需要）
+- **导航栏:** 所有页面统一使用 `"navigationStyle": "custom"`。全局样式在 `styles/nav.wxss`（蓝色渐变 + 白色文字），activity-detail 页面级覆盖绿色渐变，notice-detail 页面级覆盖白色背景 + 暗色文字。排除 news/webview（纯 web-view 页面不需要）
 - **导航栏防分割线:** `.custom-nav` 需设 `overflow: hidden; box-shadow: none; border-bottom: none;`
 - **page-header:** 底部圆角 `40rpx`，padding `0 var(--spacing-lg) var(--spacing-md)`
 - **图标体系:** iconfont 字体图标，禁止使用 Emoji
 - **字体加载:** iconfont.wxss 中 @font-face 使用 base64 data URL 内联加载（不再依赖本地文件路径），同时 app.js 中 wx.loadFontFace 也使用同样 base64 做双重保障。真机不显示图标时优先检查字体 base64 是否正确。
-- **FAB 按钮:** 圆形 100rpx，icon-tianjia 图标
+- **FAB 按钮:** 圆形 100rpx，icon-tianjia 图标。全局 `.fab-btn` 类（theme.wxss），`.fab-btn--tabbar` 修饰符用于有 TabBar 页面。使用 `var(--gradient-primary)` 渐变。无 TabBar 页面需页面级覆盖 `bottom: calc(40rpx + env(safe-area-inset-bottom))`
 - **左滑删除:** 统一使用 WeUI `mp-slideview` 组件，不再手写 touch 事件。buttons 配置 `[{ text: '删除', type: 'warn' }]`，通过 `bindbuttontap` 绑定事件，用 `e.currentTarget.dataset` 获取 index/id。添加 `ext-class="slideview-item"` 确保删除按钮高度匹配列表项
 - **评论层级:** 数据库 comments 集合二级评论用 `parentId`（非 `isReply`）标识，`replyToName`（非 `replyToUserName`）存回复目标用户名。判断逻辑：`isReply: !!item.parentId`
 - **半屏弹窗按钮:** 继承 app.wxss 全局 `.dialog-submit-btn`，不再页面级重复定义
@@ -114,3 +115,4 @@
 - 自定义导航栏标准模板：custom-nav + nav-placeholder(statusBarHeight) + nav-bar(返回+标题+右侧占位) + 占位 view
 - 左滑删除重构：拼车(carpool)从手写 touch 事件改为 WeUI mp-slideview 组件；议事厅(discuss)新增 mp-slideview 左滑删除
 - iconfont 字体包全链路更新：替换 woff2/ttf 字体文件 + iconfont.wxss base64 + app.js 硬编码 base64，新增 icon-tieziguanli 等图标，修复 dingwei/yonghu unicode 变更
+- 设计重构：提取 `--gradient-primary` CSS 变量替换 20 个文件中 58 处硬编码渐变；提取全局 `.fab-btn` + `.fab-btn--tabbar` 统一 community/carpool/discuss 三页 FAB 按钮

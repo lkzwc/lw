@@ -77,7 +77,7 @@ Page({
   // 加载技能
   loadSkills: async function () {
     try {
-      const res = await api.skill.getList({ showHome: true, pageSize: 6 })
+      const res = await api.skill.getList({ pageSize: 6 })
       const skills = res.list.map(item => ({
         ...item,
         // 取第一张图片，没有则用兜底图

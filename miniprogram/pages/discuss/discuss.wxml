@@ -55,8 +55,8 @@
   </view>
 
   <!-- 发布按钮 -->
-  <view class="publish-btn" bindtap="onPublishTap">
-    <text class="iconfont icon-tianjia icon-xl"></text>
+  <view class="fab-btn" bindtap="onPublishTap">
+    <text class="iconfont icon-fabuxiangmu icon-xxxl"></text>
   </view>
 
 </view>

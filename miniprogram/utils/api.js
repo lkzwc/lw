@@ -217,112 +217,81 @@ const postApi = {
     }
 
     return res.data
+  },
+
+  // ===== 内嵌评论（posts 文档内 comments 数组） =====
+
+  // 获取帖子的评论列表
+  getComments: async (postId) => {
+    const res = await db.collection('posts').doc(postId).field({ comments: true }).get()
+    return (res.data && res.data.comments) || []
+  },
+
+  // 添加评论
+  addComment: async (postId, content, options = {}) => {
+    const app = getApp()
+    const userInfo = app.globalData.userInfo || {}
+    const now = Date.now()
+    const _id = now.toString() + '_' + Math.random().toString(36).substr(2, 6)
+
+    const newComment = {
+      _id,
+      userId: app.globalData.openid || '',
+      nickName: userInfo.nickName || '邻居',
+      avatar: userInfo.avatarUrl || '',
+      content,
+      parentId: options.parentId || null,
+      replyToName: options.replyToName || '',
+      time: now
+    }
+
+    await db.collection('posts').doc(postId).update({
+      data: {
+        comments: _.push([newComment]),
+        commentCount: _.inc(1),
+        updateTime: db.serverDate()
+      }
+    })
+    return newComment
+  },
+
+  // 删除评论
+  deleteComment: async (postId, commentId) => {
+    const post = await db.collection('posts').doc(postId).field({ comments: true }).get()
+    const comments = (post.data.comments || []).filter(c => c._id !== commentId)
+    await db.collection('posts').doc(postId).update({
+      data: { comments, commentCount: _.inc(-1), updateTime: db.serverDate() }
+    })
   }
 }
 
 /**
- * 评论相关操作
+ * 评论操作（已迁移到内嵌方案，此模块保留兼容）
+ */
+/**
+ * 评论操作（内嵌方案，委托给 postApi）
  */
 const commentApi = {
-  // 获取评论列表
-  getList: async (postId, page = 1, pageSize = 20) => {
-    const skip = (page - 1) * pageSize
-
-    const res = await db.collection('comments')
-      .where({
-        postId,
-        status: _.neq('deleted')
-      })
-      .orderBy('createTime', 'desc')
-      .skip(skip)
-      .limit(pageSize)
-      .get()
-
-    // 获取所有评论者的 openid
-    const openids = [...new Set(res.data.map(comment => comment._openid))]
-
-    // 批量查询用户信息
-    if (openids.length > 0) {
-      const usersRes = await db.collection('users')
-        .where({
-          _openid: _.in(openids)
-        })
-        .field({
-          _openid: true,
-          nickName: true,
-          avatarUrl: true
-        })
-        .get()
-
-      // 构建 openid -> userInfo 的映射
-      const userMap = {}
-      usersRes.data.forEach(user => {
-        userMap[user._openid] = {
-          nickName: user.nickName,
-          avatarUrl: user.avatarUrl
-        }
-      })
-
-      // 将最新的用户信息附加到评论
-      res.data = res.data.map(comment => ({
-        ...comment,
-        userInfo: userMap[comment._openid] || comment.userInfo || {}
-      }))
-    }
-
-    return res.data
+  getList: async (postId) => {
+    return await postApi.getComments(postId)
   },
 
-  // 发表评论
   create: async (data) => {
-    // 获取当前用户信息
-    const app = getApp()
-    const userInfo = app.globalData.userInfo || {}
-
-    const res = await db.collection('comments').add({
-      data: {
-        ...data,
-        userInfo: {
-          nickName: userInfo.nickName || '邻居',
-          avatarUrl: userInfo.avatarUrl || ''
-        },
-        status: 'active',
-        likeCount: 0,
-        createTime: db.serverDate()
-      }
+    return await postApi.addComment(data.postId, data.content, {
+      parentId: data.parentId || null,
+      replyToName: data.replyToName || ''
     })
-
-    // 更新帖子评论数
-    await db.collection('posts').doc(data.postId).update({
-      data: {
-        commentCount: _.inc(1)
-      }
-    })
-
-    return res._id
   },
 
-  // 删除评论
   delete: async (commentId, postId) => {
-    await db.collection('comments').doc(commentId).update({
-      data: {
-        status: 'deleted'
-      }
-    })
-
-    // 更新帖子评论数
-    await db.collection('posts').doc(postId).update({
-      data: {
-        commentCount: _.inc(-1)
-      }
-    })
+    return await postApi.deleteComment(postId, commentId)
   },
 
-  // 回复评论
   reply: async (data) => {
     return await commentApi.create({
       ...data,
-      isReply: true
+      parentId: data.parentId,
+      replyToName: data.replyToName
     })
   }
 }
