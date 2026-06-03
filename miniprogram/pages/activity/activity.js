@@ -200,23 +200,32 @@ Page({
 
   // 格式化活动展示字段
   formatActivities: function (activities) {
-    const statusMap = {
-      upcoming: '未开始',
-      ongoing: '进行中',
-      ended: '已结束',
-      active: '未开始',
-      published: '未开始'
-    }
+    const today = this.data.today || util.formatDate(new Date(), 'YYYY-MM-DD')
 
-    return activities.map(item => ({
-      ...item,
-      status: item.status === 'active' || item.status === 'published' ? 'upcoming' : item.status,
-      statusLabel: item.statusLabel || statusMap[item.status] || '未开始',
-      time: item.time || item.date || '',
-      joinCount: item.joinCount || 0,
-      joinAvatars: item.joinAvatars || [],
-      cover: item.cover || (item.images && item.images.length > 0 ? item.images[0] : '')
-    }))
+    return activities.map(item => {
+      // 根据活动日期自动判断状态
+      let status, statusLabel
+      if (item.date === today) {
+        status = 'ongoing'
+        statusLabel = '进行中'
+      } else if (item.date < today) {
+        status = 'ended'
+        statusLabel = '已结束'
+      } else {
+        status = 'upcoming'
+        statusLabel = '未开始'
+      }
+
+      return {
+        ...item,
+        status,
+        statusLabel,
+        time: item.time || item.date || '',
+        joinCount: item.joinCount || 0,
+        joinAvatars: item.joinAvatars || [],
+        cover: (item.images && item.images.length > 0) ? item.images[0] : ''
+      }
+    })
   },
 
   // 点击活动

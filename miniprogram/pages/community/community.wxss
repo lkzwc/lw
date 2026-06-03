@@ -318,18 +318,12 @@
 }
 
 .comment-user-name {
-  flex: 1;
   font-size: 26rpx;
   font-weight: 500;
   color: #1A191E;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.comment-user-row {
-  display: flex;
-  align-items: center;
   margin-bottom: 4rpx;
 }
 
@@ -349,10 +343,9 @@
 }
 
 .comment-user-time {
-  display: block;
   font-size: 22rpx;
-  color: #999;
-  margin-top: 8rpx;
+  color: #BBB;
+  margin-left: 12rpx;
 }
 
 /* 空评论 */

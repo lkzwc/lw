@@ -317,19 +317,19 @@ page {
 .skill-title-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14rpx;
+  margin-bottom: 8rpx;
 }
 
 .skill-title {
   flex: 1;
+  min-width: 0;
   font-size: 26rpx;
   color: #333;
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-right: 10rpx;
+  margin-right: 8rpx;
 }
 
 .skill-likes {
@@ -341,19 +341,32 @@ page {
 .skill-meta {
   display: flex;
   align-items: center;
+  gap: 8rpx;
 }
 
 .skill-avatar {
   width: 32rpx;
   height: 32rpx;
   border-radius: 50%;
-  margin-right: 8rpx;
   background: #EEE;
 }
 
 .skill-author {
   font-size: 22rpx;
   color: #999;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skill-category {
+  font-size: 20rpx;
+  color: #4A90D9;
+  background: rgba(74, 144, 217, 0.08);
+  padding: 2rpx 10rpx;
+  border-radius: 10rpx;
+  flex-shrink: 0;
 }
 
 /* ========== 活动日历（Apple风格） ========== */
@@ -419,16 +432,22 @@ page {
   color: #333;
   font-weight: 500;
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.activity-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
 }
 
 .activity-location,
 .activity-time {
   font-size: 22rpx;
   color: #999;
-  margin-bottom: 4rpx;
 }
 
 .activity-action {

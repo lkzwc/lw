@@ -63,8 +63,10 @@
           <text class="iconfont icon-rili icon-xxxl"></text>
         </view>
         <view class="activity-content">
-          <view class="activity-status status-{{item.status}}">{{item.statusLabel}}</view>
-          <text class="activity-title">{{item.title}}</text>
+          <view class="activity-title-row">
+            <view class="activity-status status-{{item.status}}">{{item.statusLabel}}</view>
+            <text class="activity-title">{{item.title}}</text>
+          </view>
           <view class="activity-meta">
             <view class="meta-item">
               <text class="meta-icon iconfont icon-dingwei"></text>

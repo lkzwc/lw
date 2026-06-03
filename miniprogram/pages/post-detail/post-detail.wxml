@@ -88,12 +88,8 @@
       <view class="comment-item {{item.parentId ? 'reply' : ''}}" wx:for="{{comments}}" wx:key="_id" catchtap="onReplyTap" data-comment="{{item}}">
         <image class="comment-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
         <view class="comment-body">
-          <view class="comment-header">
-            <text class="comment-nickname">{{item.nickName || '邻居'}}</text>
-            <text wx:if="{{item.parentId && item.replyToName}}" class="reply-to">回复 @{{item.replyToName}}</text>
-            <text class="comment-time">{{item.createTimeStr}}</text>
-          </view>
-          <text class="comment-content">{{item.content}}</text>
+          <text class="comment-nickname">{{item.nickName || '邻居'}}</text>
+          <text class="comment-content"><text wx:if="{{item.parentId && item.replyToName}}" class="reply-to">回复 @{{item.replyToName}} </text>{{item.content}}<text class="comment-time-inline"> {{item.createTimeStr}}</text></text>
         </view>
       </view>
     </view>
@@ -114,7 +110,7 @@
       adjust-position="{{true}}"
     />
     <button class="send-btn" bindtap="onSubmitComment">
-      <text class="iconfont icon-send icon-md"></text>
+      <text class="iconfont icon-fasong icon-md"></text>
       <text class="send-text">发送</text>
     </button>
   </view>

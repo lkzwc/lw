@@ -159,11 +159,8 @@
       <view class="comment-item {{item.parentId ? 'reply' : ''}}" wx:for="{{currentComments}}" wx:key="_id" wx:if="{{!commentLoading}}" catchtap="onReplyTap" data-item="{{item}}">
         <image class="comment-user-avatar {{item.parentId ? 'reply-avatar' : ''}}" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
         <view class="comment-user-info">
-          <view class="comment-user-row">
-            <text class="comment-user-name">{{item.nickName}}</text>
-          </view>
-          <text class="comment-user-content"><text wx:if="{{item.parentId && item.replyToName}}" class="reply-to">回复 @{{item.replyToName}} </text>{{item.content}}</text>
-          <text class="comment-user-time">{{item.timeStr}}</text>
+          <text class="comment-user-name">{{item.nickName}}</text>
+          <text class="comment-user-content"><text wx:if="{{item.parentId && item.replyToName}}" class="reply-to">回复 @{{item.replyToName}} </text>{{item.content}}<text class="comment-user-time"> {{item.timeStr}}</text></text>
         </view>
       </view>
 
@@ -181,7 +178,7 @@
       <image class="comment-input-avatar" src="{{userAvatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
       <input
         class="comment-input-box"
-        placeholder="{{replyTo ? '回复 @' + replyTo.userName : '说点什么...'}}"
+        placeholder="{{replyTo ? '回复 @' + replyTo.nickName : '说点什么...'}}"
         value="{{commentInput}}"
         bindinput="onCommentInput"
         bindblur="onCommentBlur"

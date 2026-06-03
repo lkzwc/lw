@@ -78,8 +78,8 @@
   <view slot="desc" class="dialog-body">
     <!-- 议题内容 -->
     <view class="form-section">
-      <textarea class="form-textarea" placeholder="请输入议题内容..." value="{{publishForm.content}}" bindinput="onContentInput" maxlength="500" auto-height></textarea>
-      <text class="form-count">{{publishForm.content.length || 0}}/500</text>
+      <textarea class="form-textarea" placeholder="请输入议题内容..." value="{{publishForm.content}}" bindinput="onContentInput" maxlength="200" auto-height></textarea>
+      <text class="form-count">{{publishForm.content.length || 0}}/200</text>
     </view>
   </view>
 </mp-half-screen-dialog>

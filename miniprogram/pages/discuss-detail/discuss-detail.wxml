@@ -30,22 +30,42 @@
     </view>
   </view>
 
-  <!-- 投票区域 -->
-  <view class="vote-section" wx:if="{{topic.vote}}">
-    <view class="vote-header">
-      <text class="vote-title">🗳 {{topic.vote.title}}</text>
-      <text class="vote-deadline">截止：{{topic.vote.deadline}}</text>
+  <!-- 投票横幅 -->
+  <view class="vote-banner" wx:if="{{topic.vote}}">
+    <!-- 标题区 -->
+    <view class="vote-banner-header">
+      <text class="vote-banner-tag">{{voteEnded ? '投票结果' : '投票中'}}</text>
+      <text class="vote-banner-title">{{topic.vote.title}}</text>
     </view>
-    <view class="vote-stats">
-      <text class="vote-count approve">👍 {{topic.voteApprove || 0}}</text>
-      <text class="vote-count reject">👎 {{topic.voteReject || 0}}</text>
+
+    <!-- 进度条 -->
+    <view class="vote-bar-wrap">
+      <view class="vote-bar-track">
+        <view class="vote-bar-approve" style="width: {{voteApprovePercent}}%;"></view>
+      </view>
+      <view class="vote-bar-labels">
+        <text class="vote-bar-label approve">赞成 {{topic.voteApprove || 0}}票</text>
+        <text class="vote-bar-label reject">反对 {{topic.voteReject || 0}}票</text>
+      </view>
     </view>
-    <view class="vote-actions" wx:if="{{!topic.myVote}}">
-      <button class="vote-btn approve" bindtap="onVoteApprove">赞成</button>
-      <button class="vote-btn reject" bindtap="onVoteReject">反对</button>
-    </view>
-    <view class="vote-result" wx:if="{{topic.myVote}}">
-      <text class="result-text">✓ 您已投票</text>
+
+    <!-- 底部状态区 -->
+    <view class="vote-banner-footer">
+      <!-- 未截止 + 未投票 → 按钮 -->
+      <block wx:if="{{!voteEnded}}">
+        <view class="vote-btns" wx:if="{{!topic.myVote}}">
+          <view class="vote-opt-btn approve" bindtap="onVoteApprove">👍 赞成</view>
+          <view class="vote-opt-btn reject" bindtap="onVoteReject">👎 反对</view>
+        </view>
+        <view class="vote-voted-tip" wx:else>
+          <text>✓ 已投票 · </text>
+          <text class="vote-remain">{{remainingTime}}</text>
+        </view>
+      </block>
+      <!-- 已截止 → 仅展示结果 -->
+      <block wx:else>
+        <text class="vote-ended-tip">投票已截止</text>
+      </block>
     </view>
   </view>
 
@@ -59,9 +79,6 @@
   <scroll-view class="chat-area" scroll-y scroll-into-view="{{scrollToView}}" bindscrolltoupper="onScrollToUpper">
     <view class="chat-messages">
       <view class="message-item {{item.isMine ? 'mine' : 'other'}}" wx:for="{{messages}}" wx:key="_id" id="msg-{{item._id}}">
-        <view class="time-divider" wx:if="{{item.showTime}}">
-          <text>{{item.dateStr}}</text>
-        </view>
         <view class="message-content" catchtap="onReplyTap" data-item="{{item}}">
           <image class="message-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
           <view class="message-body">
@@ -82,7 +99,7 @@
     <view class="input-bar">
       <input class="message-input" placeholder="{{replyTo ? '回复 @' + replyTo.nickName : '发表您的看法...'}}" value="{{inputContent}}" bindinput="onInput" bindblur="onInputBlur" bindconfirm="onSend" />
       <view class="send-btn {{inputContent ? 'active' : ''}}" bindtap="onSend">
-        <text class="iconfont icon-send icon-md"></text>
+        <text class="iconfont icon-fasong icon-md"></text>
       </view>
     </view>
   </view>

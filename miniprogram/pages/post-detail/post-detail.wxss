@@ -188,6 +188,14 @@
   border-bottom: 1rpx solid var(--border-color);
 }
 
+/* 二级评论（回复）— 缩进 + 浅色背景 */
+.comment-item.reply {
+  padding-left: 48rpx;
+  background: #F8FAFB;
+  margin: 0 -32rpx;
+  padding-right: 32rpx;
+}
+
 .comment-item:last-child {
   border-bottom: none;
 }
@@ -204,29 +212,25 @@
   flex: 1;
 }
 
-.comment-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8rpx;
-}
-
 .comment-nickname {
-  font-size: 28rpx;
+  display: block;
+  font-size: 26rpx;
   font-weight: 500;
-  color: var(--text-primary);
-  margin-right: 16rpx;
-}
-
-.comment-time {
-  font-size: 22rpx;
-  color: var(--text-placeholder);
+  color: #1A191E;
+  margin-bottom: 4rpx;
 }
 
 .comment-content {
   font-size: 28rpx;
   line-height: 1.6;
-  color: var(--text-primary);
+  color: #333;
   word-break: break-all;
+}
+
+.comment-time-inline {
+  font-size: 22rpx;
+  color: #BBB;
+  margin-left: 12rpx;
 }
 
 /* 回复列表 */

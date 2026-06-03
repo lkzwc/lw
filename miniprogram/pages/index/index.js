@@ -78,13 +78,18 @@ Page({
   loadSkills: async function () {
     try {
       const res = await api.skill.getList({ pageSize: 6 })
+      const config = require('../../utils/config')
+      const categoryMap = {}
+      config.skillCategories.forEach(c => { categoryMap[c.id] = c.name })
+
       const skills = res.list.map(item => ({
         ...item,
         // 取第一张图片，没有则用兜底图
         cover: (item.images && item.images.length > 0) ? item.images[0] : '',
         avatar: (item.userInfo && item.userInfo.avatarUrl) ? item.userInfo.avatarUrl : '/assets/icons/avatar.png',
         author: (item.userInfo && item.userInfo.nickName) ? item.userInfo.nickName : '邻居',
-        likes: item.likeCount || 0
+        likes: item.likeCount || 0,
+        categoryLabel: categoryMap[item.category] || ''
       }))
       this.setData({ skills })
     } catch (err) {
@@ -99,7 +104,7 @@ Page({
       const activities = res.list.map(item => ({
         ...item,
         timeStr: item.time || item.date || this.formatDate(item.createTime),
-        cover: item.cover || item.images && item.images.length > 0 ? item.images[0] : ''
+        cover: (item.images && item.images.length > 0) ? item.images[0] : ''
       }))
       this.setData({ activities })
     } catch (err) {

@@ -35,10 +35,22 @@ Page({
       const data = await api.activity.getDetail(id)
       const openid = app.globalData.openid || ''
       
+      // 根据活动日期自动判断状态
+      const today = util.formatDate(new Date(), 'YYYY-MM-DD')
+      let status
+      if (data.date === today) {
+        status = 'ongoing'
+      } else if (data.date < today) {
+        status = 'ended'
+      } else {
+        status = 'upcoming'
+      }
+      
       const activity = {
         ...data,
+        status,
         timeStr: data.time || data.date || '',
-        isJoined: data.joinedBy ? data.joinedBy.includes(openid) : false
+        isJoined: (data.joinedBy || data.joinedUsers || []).includes(openid)
       }
       
       this.setData({
@@ -115,7 +127,7 @@ Page({
     return {
       title: activity ? activity.title : '邻里圈活动',
       path: `/pages/activity-detail/activity-detail?id=${this.data.id}`,
-      imageUrl: activity ? activity.cover : ''
+      imageUrl: activity ? (activity.images && activity.images.length > 0 ? activity.images[0] : '') : ''
     }
   },
 

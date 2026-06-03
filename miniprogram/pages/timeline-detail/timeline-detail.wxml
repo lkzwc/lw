@@ -79,7 +79,7 @@
   <view class="action-bar">
     <input class="comment-input" placeholder="发表评论..." value="{{commentInput}}" bindinput="onCommentInput" bindconfirm="onSendComment" />
     <view class="send-btn" bindtap="onSendComment">
-      <text class="iconfont icon-send icon-md"></text>
+      <text class="iconfont icon-fasong icon-md"></text>
     </view>
   </view>
   

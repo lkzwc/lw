@@ -146,21 +146,7 @@ Page({
 
   // 打开发布弹窗
   onPublishTap: function () {
-    if (!app.globalData.isLoggedIn || !app.globalData.openid) {
-      wx.showModal({
-        title: '提示',
-        content: '请先登录后再发布',
-        confirmText: '去登录',
-        success: (res) => {
-          if (res.confirm) {
-            wx.switchTab({
-              url: '/pages/mine/mine'
-            })
-          }
-        }
-      })
-      return
-    }
+    if (!util.requireLogin('发布')) return
 
     this.setData({
       showPublishDialog: true,

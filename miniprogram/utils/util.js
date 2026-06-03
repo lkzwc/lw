@@ -213,12 +213,40 @@ const previewImage = (urls, current = '') => {
   })
 }
 
+/**
+ * 检查登录状态，未登录则弹窗引导
+ * 统一替代各页面重复的 "检查登录 → 弹窗 → 跳转" 逻辑
+ *
+ * @param {string} [action=''] - 操作名称，用于提示文案，如 '点赞'、'评论'
+ * @returns {boolean} 是否已登录
+ */
+const requireLogin = (action = '') => {
+  const app = getApp()
+  if (app.globalData.isLoggedIn && app.globalData.openid) {
+    return true
+  }
+
+  const content = action ? `请先登录后再${action}` : '请先登录'
+  wx.showModal({
+    title: '提示',
+    content,
+    confirmText: '去登录',
+    success: (res) => {
+      if (res.confirm) {
+        wx.switchTab({ url: '/pages/mine/mine' })
+      }
+    }
+  })
+  return false
+}
+
 module.exports = {
   formatTime,
   formatDate,
   formatRelativeTime,
   debounce,
   checkContentSecurity,
+  requireLogin,
   showLoading,
   hideLoading,
   showToast,

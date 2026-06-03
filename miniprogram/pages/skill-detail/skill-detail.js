@@ -64,17 +64,7 @@ Page({
 
   // 点赞
   onLike: async function () {
-    if (!app.globalData.isLoggedIn || !app.globalData.openid) {
-      wx.showModal({
-        title: '提示',
-        content: '请先登录后再点赞',
-        confirmText: '去登录',
-        success: (res) => {
-          if (res.confirm) wx.switchTab({ url: '/pages/mine/mine' })
-        }
-      })
-      return
-    }
+    if (!util.requireLogin('点赞')) return
 
     if (this.data.liking) return
     this.setData({ liking: true })

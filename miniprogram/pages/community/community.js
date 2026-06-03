@@ -201,6 +201,7 @@ Page({
         avatar: item.avatar || '',
         content: item.content || '',
         timeStr: item.time ? util.formatRelativeTime(new Date(item.time)) : '',
+        parentId: item.parentId || null,
         isReply: !!item.parentId,
         replyToName: item.replyToName || ''
       }))
@@ -302,7 +303,7 @@ Page({
       const commentData = { postId, content }
       if (replyTo) {
         commentData.parentId = replyTo._id
-        commentData.replyToName = replyTo.userName
+        commentData.replyToName = replyTo.nickName
       }
       await api.comment.create(commentData)
       util.showToast('评论成功')

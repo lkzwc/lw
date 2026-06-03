@@ -706,7 +706,6 @@ const discussApi = {
         statusText: '讨论中',
         commentCount: 0,
         messages: [],
-        vote: null,
         voteApprove: 0,
         voteReject: 0,
         votedUsers: [],
@@ -733,9 +732,9 @@ const discussApi = {
   },
 
   // 投票
-  createVote: async (discussId, vote) => {
+  createVote: async (discussId, voteData) => {
     await db.collection('discussions').doc(discussId).update({
-      data: { vote, voteApprove: 0, voteReject: 0, votedUsers: [], updateTime: db.serverDate() }
+      data: { vote: _.set(voteData), voteApprove: 0, voteReject: 0, votedUsers: [], updateTime: db.serverDate() }
     })
   },
 
@@ -800,20 +799,20 @@ const activityApi = {
 
   create: async (data) => {
     const res = await db.collection('activities').add({
-      data: { ...data, status: 'active', joinCount: 0, joinedUsers: [], createTime: db.serverDate(), updateTime: db.serverDate() }
+      data: { ...data, status: 'active', joinCount: 0, joinedBy: [], createTime: db.serverDate(), updateTime: db.serverDate() }
     })
     return res._id
   },
 
   join: async (activityId, openid) => {
     await db.collection('activities').doc(activityId).update({
-      data: { joinedUsers: _.push([openid]), joinCount: _.inc(1), updateTime: db.serverDate() }
+      data: { joinedBy: _.push([openid]), joinCount: _.inc(1), updateTime: db.serverDate() }
     })
   },
 
   cancelJoin: async (activityId, openid) => {
     await db.collection('activities').doc(activityId).update({
-      data: { joinedUsers: _.pull(openid), joinCount: _.inc(-1), updateTime: db.serverDate() }
+      data: { joinedBy: _.pull(openid), joinCount: _.inc(-1), updateTime: db.serverDate() }
     })
   }
 }

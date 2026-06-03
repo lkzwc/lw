@@ -101,6 +101,7 @@
             <view class="skill-meta">
               <image class="skill-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
               <text class="skill-author">{{item.author}}</text>
+              <text class="skill-category" wx:if="{{item.categoryLabel}}">{{item.categoryLabel}}</text>
             </view>
           </view>
         </view>
@@ -132,8 +133,10 @@
               <text class="iconfont icon-jiduhuodong icon-xs activity-icon"></text>
               <text class="activity-title">{{item.title}}</text>
             </view>
-            <text class="activity-location"><text class="iconfont icon-dingwei icon-xs"></text> {{item.location}}</text>
-            <text class="activity-time"><text class="iconfont icon-naozhong_huaban1 icon-xs"></text> {{item.timeStr}}</text>
+            <view class="activity-meta-row">
+              <text class="activity-location"><text class="iconfont icon-dingwei icon-xs"></text> {{item.location}}</text>
+              <text class="activity-time"><text class="iconfont icon-naozhong_huaban1 icon-xs"></text> {{item.timeStr}}</text>
+            </view>
           </view>
           <view class="activity-action">
             <view class="join-btn {{item.isJoined ? 'joined' : ''}}">

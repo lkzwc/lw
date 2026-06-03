@@ -13,27 +13,24 @@
   </view>
   <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
 
-  <!-- 活动图片 -->
-  <view class="detail-images" wx:if="{{activity.images && activity.images.length > 0}}">
-    <image
-      class="detail-image"
-      wx:for="{{activity.images}}"
-      wx:key="*this"
-      src="{{item}}"
-      mode="aspectFill"
-      bindtap="onImageTap"
-      data-images="{{activity.images}}"
-      data-current="{{item}}"
-    ></image>
-  </view>
-  <image class="detail-cover" src="{{activity.cover}}" mode="aspectFill" wx:elif="{{activity.cover}}"></image>
-  <view class="detail-cover-placeholder" wx:else>
-    <text class="iconfont icon-rili icon-huge"></text>
-  </view>
-  
   <!-- 活动信息 -->
   <view class="detail-content">
     
+    <!-- 活动图片（在详情内容区内展示） -->
+    <view class="detail-images" wx:if="{{activity.images && activity.images.length > 0}}">
+      <image
+        class="detail-image"
+        wx:for="{{activity.images}}"
+        wx:key="*this"
+        src="{{item}}"
+        mode="aspectFill"
+        bindtap="onImageTap"
+        data-images="{{activity.images}}"
+        data-current="{{item}}"
+      ></image>
+    </view>
+    <image class="detail-cover-single" src="{{activity.cover}}" mode="aspectFill" wx:elif="{{activity.cover}}" bindtap="onImageTap" data-images="{{[activity.cover]}}" data-current="{{activity.cover}}"></image>
+
     <!-- 标题区 -->
     <view class="detail-header">
       <text class="detail-title">{{activity.title}}</text>
