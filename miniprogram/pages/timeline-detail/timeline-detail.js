@@ -3,6 +3,9 @@ const app = getApp()
 const util = require('../../utils/util')
 const api = require('../../utils/api')
 
+// 期号映射
+const PHASE_MAP = { '一期': 'phase1', '二期': 'phase2', '三期': 'phase3', '四期': 'phase4' }
+
 Page({
   data: {
     statusBarHeight: 20,
@@ -59,11 +62,11 @@ Page({
 
       const comments = (commentList || []).map(item => ({
         _id: item._id,
-        userName: item.userName || '邻居',
+        nickName: item.nickName || '邻居',
         avatar: item.avatar || '',
         content: item.content || '',
-        timeStr: util.formatRelativeTime(item.createTime)
-      })).reverse()
+        timeStr: item.time ? util.formatRelativeTime(new Date(item.time)) : ''
+      }))
 
       this.setData({
         detail,
@@ -115,29 +118,32 @@ Page({
         content: '请先登录后再评论',
         confirmText: '去登录',
         success: (res) => {
-          if (res.confirm) {
-            wx.switchTab({ url: '/pages/mine/mine' })
-          }
+          if (res.confirm) { wx.switchTab({ url: '/pages/mine/mine' }) }
         }
       })
       return
     }
 
-    try {
-      await api.timeline.addComment({
-        timelineId: this.data.id,
-        userName: app.globalData.userInfo?.nickName || '邻居',
-        avatar: app.globalData.userInfo?.avatarUrl || '',
-        content,
-        status: 'active'
-      })
+    // 检查期数匹配
+    const userPhase = app.globalData.userInfo?.phase
+    const timelinePhase = this.data.detail?.phase
+    if (userPhase && timelinePhase && PHASE_MAP[userPhase] !== timelinePhase) {
+      util.showToast('仅可参与所在期的讨论')
+      return
+    }
+    if (!userPhase) {
+      util.showToast('请先在"我的"设置期号')
+      return
+    }
 
-      // 添加到本地列表（不用重新加载）
+    try {
+      await api.timeline.addComment(this.data.id, content)
+
       const newComment = {
         _id: Date.now().toString(),
-        userName: app.globalData.userInfo?.nickName || '我',
+        nickName: app.globalData.userInfo?.nickName || '我',
         avatar: app.globalData.userInfo?.avatarUrl || '',
-        content: content,
+        content,
         timeStr: '刚刚'
       }
       

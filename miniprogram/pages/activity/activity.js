@@ -23,7 +23,8 @@ Page({
       date: '',
       location: '',
       desc: '',
-      maxCount: 20
+      maxCount: 20,
+      images: []
     }
   },
 
@@ -213,7 +214,8 @@ Page({
       statusLabel: item.statusLabel || statusMap[item.status] || '未开始',
       time: item.time || item.date || '',
       joinCount: item.joinCount || 0,
-      joinAvatars: item.joinAvatars || []
+      joinAvatars: item.joinAvatars || [],
+      cover: item.cover || (item.images && item.images.length > 0 ? item.images[0] : '')
     }))
   },
 
@@ -350,6 +352,34 @@ Page({
     }
   },
 
+  // 选择图片（最多3张）
+  onChooseImage: function () {
+    const count = 3 - this.data.publishForm.images.length
+    if (count <= 0) {
+      util.showToast('最多上传3张图片')
+      return
+    }
+
+    wx.chooseMedia({
+      count: count,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const tempFiles = res.tempFiles.map(file => file.tempFilePath)
+        this.setData({
+          'publishForm.images': [...this.data.publishForm.images, ...tempFiles]
+        })
+      }
+    })
+  },
+
+  // 删除图片
+  onDeleteImage: function (e) {
+    const index = e.currentTarget.dataset.index
+    const images = this.data.publishForm.images.filter((_, i) => i !== index)
+    this.setData({ 'publishForm.images': images })
+  },
+
   // 提交发布
   onSubmit: async function () {
     if (!this.data.canSubmit || this.data.submitting) return
@@ -358,6 +388,26 @@ Page({
 
     try {
       const { publishForm } = this.data
+      const userPhase = app.globalData.userInfo?.phase
+      const userBuilding = app.globalData.userInfo?.building
+
+      // 上传图片到云存储
+      const uploadedImages = []
+      for (let i = 0; i < publishForm.images.length; i++) {
+        const filePath = publishForm.images[i]
+        if (filePath.startsWith('cloud://')) {
+          uploadedImages.push(filePath)
+        } else {
+          const ext = filePath.split('.').pop() || 'jpg'
+          const cloudPath = `activities/${Date.now()}_${i}_${Math.random().toString(36).substr(2, 6)}.${ext}`
+          try {
+            const uploadRes = await wx.cloud.uploadFile({ cloudPath, filePath })
+            uploadedImages.push(uploadRes.fileID)
+          } catch (uploadErr) {
+            console.error('上传活动图片失败', uploadErr)
+          }
+        }
+      }
 
       await api.activity.create({
         title: publishForm.title.trim(),
@@ -366,6 +416,7 @@ Page({
         location: publishForm.location.trim(),
         desc: publishForm.desc.trim(),
         maxCount: publishForm.maxCount,
+        images: uploadedImages,
         joinCount: 0,
         joinAvatars: [],
         joinedBy: [],
@@ -387,7 +438,8 @@ Page({
           date: '',
           location: '',
           desc: '',
-          maxCount: 20
+          maxCount: 20,
+          images: []
         }
       })
       this.loadWeek(weekStartDate)

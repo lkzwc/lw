@@ -3,13 +3,12 @@
 .page {
   min-height: 100vh;
   background: #F5F5F5;
-  padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
+  /* padding-bottom: calc(100rpx + env(safe-area-inset-bottom)); */
 }
 
 /* ========== 区域一：背景区（头像 + 文字 + 按钮） ========== */
 .hero-zone {
   position: relative;
-  /* max-height: 300rpx; */
   overflow: hidden;
 }
 
@@ -21,19 +20,11 @@
   position: absolute;
   inset: 0;
   border-radius: 0rpx 0rpx 110rpx 110rpx;
-  background:
-    radial-gradient(ellipse 70% 50% at 30% 30%, rgba(138, 79, 255, 0.35) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 75% 65%, rgba(255, 107, 53, 0.2) 0%, transparent 50%),
-    linear-gradient(160deg, #0d0d24 0%, #16123a 30%, #1f1454 60%, #2b1666 100%);
+  background: linear-gradient(160deg, #4A90D9 0%, #6BA8E8 40%, #8EC5F5 70%, #B8DFFF 100%);
   z-index: 0;
 }
 
 
-.status-bar {
-  height: calc(88rpx + env(safe-area-inset-top));
-  position: relative;
-  z-index: 2;
-}
 
 .hero-content {
   position: relative;
@@ -42,6 +33,10 @@
   flex-direction: column;
   align-items: center;
   padding: 80rpx;
+}
+
+.hero-content-login{
+  padding: 80rpx 40rpx 10rpx 100rpx;
 }
 
 /* 头像（未登录） */
@@ -77,15 +72,6 @@
   50% { transform: translateY(-16rpx); opacity: 0.8; }
 }
 
-/* 品牌文字行 */
-.brand-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 16rpx;
-  margin-top: 24rpx;
-}
-
 .welcome-text {
   font-size: 28rpx;
   color: rgba(255, 255, 255, 0.55);
@@ -105,8 +91,8 @@
   width: calc(100% - 96rpx);
   height: 96rpx;
   margin-top: 48rpx;
-  background: rgba(255, 255, 255, 0.15);
-  border: 2rpx solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.2);
+  border: 2rpx solid rgba(255, 255, 255, 0.35);
   border-radius: 48rpx;
   font-size: 32rpx;
   font-weight: 600;
@@ -115,6 +101,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: btnGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes btnGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+    background: rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40rpx rgba(255, 255, 255, 0.35), inset 0 0 20rpx rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.35);
+  }
 }
 
 .hero-login-btn::after {
@@ -126,7 +124,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 48rpx 0 100rpx;
+  padding: 50rpx;
 }
 
 .avatar-wrap {
@@ -156,7 +154,7 @@
 
 .user-info {
   flex: 1;
-  margin-bottom: :20rpx;
+  margin-bottom: 20rpx;
 }
 
 .user-name {

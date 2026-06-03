@@ -97,6 +97,8 @@
 - .btn-primary/.btn-secondary 在 app.wxss 和 theme.wxss 重复定义冲突
 - carpools 集合权限需改为"所有用户可读写"（左滑删除需跨用户写操作）
 - discussions 集合权限需改为"所有用户可读写"（左滑删除需跨用户写操作）
+- users 集合权限需改为"所有用户可读，仅创建者可写"（他人头像不可见问题）
+- activities 集合权限需确认是否为"所有用户可读写"
 
 ## 已完成（2025-05-24）
 
@@ -116,3 +118,10 @@
 - 左滑删除重构：拼车(carpool)从手写 touch 事件改为 WeUI mp-slideview 组件；议事厅(discuss)新增 mp-slideview 左滑删除
 - iconfont 字体包全链路更新：替换 woff2/ttf 字体文件 + iconfont.wxss base64 + app.js 硬编码 base64，新增 icon-tieziguanli 等图标，修复 dingwei/yonghu unicode 变更
 - 设计重构：提取 `--gradient-primary` CSS 变量替换 20 个文件中 58 处硬编码渐变；提取全局 `.fab-btn` + `.fab-btn--tabbar` 统一 community/carpool/discuss 三页 FAB 按钮
+
+## 已完成（2026-06-03）
+
+- 活动图片上传：发布弹窗支持最多3张图片，上传到云存储 `activities/` 路径
+- 活动详情多图展示：优先展示 images 数组（横排），fallback cover/placeholder
+- 活动列表封面：formatActivities 中 cover 取 images[0] 兜底
+- 图片预览：activity-detail 添加 onImageTap 点击放大

@@ -62,7 +62,7 @@
       <view class="comment-item" wx:for="{{comments}}" wx:key="_id">
         <image class="comment-avatar" src="{{item.avatar || '/assets/icons/avatar.png'}}" mode="aspectFill"></image>
         <view class="comment-body">
-          <text class="comment-name">{{item.userName}}</text>
+          <text class="comment-name">{{item.nickName}}</text>
           <text class="comment-text">{{item.content}}</text>
           <text class="comment-time">{{item.timeStr}}</text>
         </view>

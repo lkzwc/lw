@@ -101,6 +101,15 @@ Page({
     }
   },
 
+  // 预览图片
+  onImageTap: function (e) {
+    const { images, current } = e.currentTarget.dataset
+    wx.previewImage({
+      current,
+      urls: images
+    })
+  },
+
   onShareAppMessage: function () {
     const activity = this.data.activity
     return {

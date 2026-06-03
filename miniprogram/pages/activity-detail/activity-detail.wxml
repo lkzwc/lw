@@ -13,8 +13,20 @@
   </view>
   <view style="height: {{(statusBarHeight || 0) + 44}}px;"></view>
 
-  <!-- 活动封面 -->
-  <image class="detail-cover" src="{{activity.cover}}" mode="aspectFill" wx:if="{{activity.cover}}"></image>
+  <!-- 活动图片 -->
+  <view class="detail-images" wx:if="{{activity.images && activity.images.length > 0}}">
+    <image
+      class="detail-image"
+      wx:for="{{activity.images}}"
+      wx:key="*this"
+      src="{{item}}"
+      mode="aspectFill"
+      bindtap="onImageTap"
+      data-images="{{activity.images}}"
+      data-current="{{item}}"
+    ></image>
+  </view>
+  <image class="detail-cover" src="{{activity.cover}}" mode="aspectFill" wx:elif="{{activity.cover}}"></image>
   <view class="detail-cover-placeholder" wx:else>
     <text class="iconfont icon-rili icon-huge"></text>
   </view>

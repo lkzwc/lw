@@ -4,7 +4,7 @@
   <view class="hero-zone {{isLoggedIn ? '' : 'hero-zone-guest'}}">
     <view class="hero-bg"></view>
     <!-- 内容 -->
-    <view class="hero-content">
+    <view class="hero-content {{isLoggedIn ? 'hero-content-login' : ''}}">
       <!-- 未登录 -->
       <block wx:if="{{!isLoggedIn}}">
         <view class="avatar-guest">

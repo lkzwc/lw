@@ -3,6 +3,9 @@ const app = getApp()
 const util = require('../../utils/util')
 const api = require('../../utils/api')
 
+// 用户期号 → 数据库 phase 值映射
+const PHASE_MAP = { '一期': 'phase1', '二期': 'phase2', '三期': 'phase3', '四期': 'phase4' }
+
 Page({
   data: {
     timelines: [],
@@ -93,7 +96,7 @@ Page({
     })
   },
 
-  // 打开发布弹窗
+  // 打开发布弹窗（需登录 + 设置期号 + 匹配当前期）
   onPublishTap: function () {
     if (!app.globalData.isLoggedIn || !app.globalData.openid) {
       wx.showModal({
@@ -101,11 +104,20 @@ Page({
         content: '上报问题需要先登录',
         confirmText: '去登录',
         success: (res) => {
-          if (res.confirm) {
-            wx.switchTab({
-              url: '/pages/mine/mine'
-            })
-          }
+          if (res.confirm) { wx.switchTab({ url: '/pages/mine/mine' }) }
+        }
+      })
+      return
+    }
+
+    const userPhase = app.globalData.userInfo?.phase
+    if (!userPhase) {
+      wx.showModal({
+        title: '提示',
+        content: '请先在"我的"页面设置您的期号和楼号',
+        confirmText: '去设置',
+        success: (res) => {
+          if (res.confirm) { wx.switchTab({ url: '/pages/mine/mine' }) }
         }
       })
       return
@@ -179,7 +191,9 @@ Page({
     this.setData({ submitting: true })
 
     try {
-      const { publishForm, currentPhase } = this.data
+      const { publishForm } = this.data
+      const userPhase = app.globalData.userInfo?.phase
+      const phase = PHASE_MAP[userPhase] || 'phase1'
 
       // 上传图片
       const uploadedImages = []
@@ -196,7 +210,7 @@ Page({
 
       await api.timeline.create({
         type: publishForm.type,
-        phase: currentPhase,
+        phase,
         desc: publishForm.desc.trim(),
         images: uploadedImages,
         status: 'pending'

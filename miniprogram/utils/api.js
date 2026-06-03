@@ -843,6 +843,8 @@ const timelineApi = {
         ...data,
         userInfo: { nickName: userInfo.nickName || '邻居', avatarUrl: userInfo.avatarUrl || '' },
         status: 'active',
+        comments: [],
+        commentCount: 0,
         createTime: db.serverDate(),
         updateTime: db.serverDate()
       }
@@ -850,22 +852,32 @@ const timelineApi = {
     return res._id
   },
 
+  // 内嵌评论
   getComments: async (timelineId) => {
-    const res = await db.collection('timeline_comments').where({ timelineId }).orderBy('createTime', 'asc').get()
-    return res.data
+    const res = await db.collection('timeline').doc(timelineId).field({ comments: true }).get()
+    return (res.data && res.data.comments) || []
   },
 
-  addComment: async (data) => {
+  addComment: async (timelineId, content) => {
     const app = getApp()
     const userInfo = app.globalData.userInfo || {}
-    const res = await db.collection('timeline_comments').add({
+    const now = Date.now()
+    const newComment = {
+      _id: now.toString() + '_' + Math.random().toString(36).substr(2, 6),
+      userId: app.globalData.openid || '',
+      nickName: userInfo.nickName || '邻居',
+      avatar: userInfo.avatarUrl || '',
+      content,
+      time: now
+    }
+    await db.collection('timeline').doc(timelineId).update({
       data: {
-        ...data,
-        userInfo: { nickName: userInfo.nickName || '邻居', avatarUrl: userInfo.avatarUrl || '' },
-        createTime: db.serverDate()
+        comments: _.push([newComment]),
+        commentCount: _.inc(1),
+        updateTime: db.serverDate()
       }
     })
-    return res._id
+    return newComment
   }
 }
 

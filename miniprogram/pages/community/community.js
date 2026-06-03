@@ -476,10 +476,28 @@ Page({
         }
       }
 
+      // 自动识别标签
+      const keyTags = [
+        { tag: '求助', keys: ['求助', '帮忙', '请问', '谁知道', '帮帮忙', '求助'] },
+        { tag: '分享', keys: ['分享', '推荐', '安利', '好物'] },
+        { tag: '活动', keys: ['活动', '聚会', '报名', '组织', '一起'] },
+        { tag: '拼车', keys: ['拼车', '顺风车', '捎一段', '顺路'] },
+        { tag: '闲置', keys: ['闲置', '转让', '二手', '出售', '免费送'] },
+        { tag: '邻里', keys: ['邻居', '小区', '物业', '楼道', '电梯'] }
+      ]
+      let autoTag = '闲聊'
+      const trimmed = content.trim()
+      for (const item of keyTags) {
+        if (item.keys.some(k => trimmed.includes(k))) {
+          autoTag = item.tag
+          break
+        }
+      }
+
       await api.post.create({
-        content: content.trim(),
-        tag: '',
-        tags: [],
+        content: trimmed,
+        tag: autoTag,
+        tags: [autoTag],
         images: uploadedImages
       })
 

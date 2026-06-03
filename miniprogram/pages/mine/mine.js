@@ -109,15 +109,14 @@ Page({
         }
         app.globalData.isAdmin = !!u.isAdmin
       } else {
-        // 新用户：创建基础记录
+        // 新用户：创建基础记录（_openid 由系统自动设置，不显式传入）
         const newUser = {
           nickName: '邻居',
           avatarUrl: '',
           phase: '',
           building: '',
           createTime: db.serverDate(),
-          updateTime: db.serverDate(),
-          _openid: openid
+          updateTime: db.serverDate()
         }
         await db.collection('users').add({ data: newUser })
         app.globalData.userInfo = {
@@ -140,8 +139,9 @@ Page({
       this.loadStats()
     } catch (err) {
       wx.hideLoading()
-      console.error('登录失败:', err)
-      util.showToast('登录失败，请重试')
+      const msg = err.errMsg || err.message || String(err)
+      console.error('登录失败:', msg, err)
+      util.showToast(msg.includes('cloud function') ? '云函数未部署，请在云开发控制台上传' : msg.includes('permission') ? '数据库权限不足，请检查 users 集合权限' : '登录失败，请重试')
     }
   },
 
